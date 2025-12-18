@@ -1,0 +1,147 @@
+<?php
+namespace PW\OfertasAvanzadas\Admin;
+
+use PW\OfertasAvanzadas\Repositories\CampaignRepository;
+use PW\OfertasAvanzadas\Repositories\StatsRepository;
+
+class AdminController {
+
+    public function __construct() {
+        add_action('admin_menu', [$this, 'addMenuPages']);
+        add_action('wp_ajax_pwoa_get_strategies', [$this, 'ajaxGetStrategies']);
+        add_action('wp_ajax_pwoa_save_campaign', [$this, 'ajaxSaveCampaign']);
+        add_action('wp_ajax_pwoa_toggle_campaign', [$this, 'ajaxToggleCampaign']);
+    }
+
+    public function addMenuPages(): void {
+        add_menu_page(
+            'Ofertas Avanzadas',
+            'Ofertas',
+            'manage_woocommerce',
+            'pwoa-dashboard',
+            [$this, 'renderDashboard'],
+            'dashicons-megaphone',
+            56
+        );
+
+        add_submenu_page(
+            'pwoa-dashboard',
+            'Nueva Campaña',
+            'Nueva Campaña',
+            'manage_woocommerce',
+            'pwoa-new-campaign',
+            [$this, 'renderWizard']
+        );
+
+        add_submenu_page(
+            'pwoa-dashboard',
+            'Analíticas',
+            'Analíticas',
+            'manage_woocommerce',
+            'pwoa-analytics',
+            [$this, 'renderAnalytics']
+        );
+    }
+
+    public function renderDashboard(): void {
+        $campaigns = CampaignRepository::getAll();
+        include PWOA_PATH . 'src/Admin/Views/dashboard.php';
+    }
+
+    public function renderWizard(): void {
+        include PWOA_PATH . 'src/Admin/Views/wizard.php';
+    }
+
+    public function renderAnalytics(): void {
+        $stats = StatsRepository::getSummary();
+        include PWOA_PATH . 'src/Admin/Views/analytics.php';
+    }
+
+    public function ajaxGetStrategies(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $objective = sanitize_text_field($_POST['objective'] ?? '');
+        $strategies = $this->getStrategiesByObjective($objective);
+
+        wp_send_json_success($strategies);
+    }
+
+    public function ajaxSaveCampaign(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $data = [
+            'name' => sanitize_text_field($_POST['name'] ?? ''),
+            'objective' => sanitize_text_field($_POST['objective'] ?? ''),
+            'strategy' => sanitize_text_field($_POST['strategy'] ?? ''),
+            'discount_type' => sanitize_text_field($_POST['discount_type'] ?? ''),
+            'config' => json_decode(stripslashes($_POST['config'] ?? '{}'), true),
+            'conditions' => json_decode(stripslashes($_POST['conditions'] ?? '{}'), true),
+            'priority' => intval($_POST['priority'] ?? 10),
+            'start_date' => sanitize_text_field($_POST['start_date'] ?? ''),
+            'end_date' => sanitize_text_field($_POST['end_date'] ?? '')
+        ];
+
+        $campaign_id = CampaignRepository::create($data);
+
+        wp_send_json_success([
+            'message' => 'Campaña creada correctamente',
+            'campaign_id' => $campaign_id
+        ]);
+    }
+
+    public function ajaxToggleCampaign(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $campaign_id = intval($_POST['campaign_id'] ?? 0);
+        $active = intval($_POST['active'] ?? 0);
+
+        CampaignRepository::updateStatus($campaign_id, $active);
+
+        wp_send_json_success(['message' => 'Estado actualizado']);
+    }
+
+    private function getStrategiesByObjective(string $objective): array {
+        $strategies_map = [
+            'aov' => [
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\MinAmountStrategy',
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy'
+            ],
+            'liquidation' => [
+                'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\ExpiryBasedStrategy',
+                'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\LowStockStrategy'
+            ],
+            'loyalty' => [
+                'PW\\OfertasAvanzadas\\Strategies\\Loyalty\\RecurringPurchaseStrategy'
+            ],
+            'urgency' => [
+                'PW\\OfertasAvanzadas\\Strategies\\Urgency\\FlashSaleStrategy'
+            ]
+        ];
+
+        $classes = $strategies_map[$objective] ?? [];
+        $result = [];
+
+        foreach ($classes as $class) {
+            if (class_exists($class)) {
+                $meta = $class::getMeta();
+                $meta['config_fields'] = $class::getConfigFields();
+                $result[] = $meta;
+            }
+        }
+
+        return $result;
+    }
+}
