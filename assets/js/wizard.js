@@ -1,12 +1,15 @@
 const PWOAWizard = {
 
     currentObjective: null,
+    currentObjectiveTitle: null,
     currentStrategy: null,
+    currentStrategyTitle: null,
     strategyData: null,
 
     init() {
         this.bindObjectiveButtons();
         this.bindBackButtons();
+        this.bindBreadcrumb();
         this.bindForm();
     },
 
@@ -14,7 +17,8 @@ const PWOAWizard = {
         document.querySelectorAll('.objective-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const objective = e.currentTarget.dataset.objective;
-                this.selectObjective(objective);
+                const title = e.currentTarget.dataset.title;
+                this.selectObjective(objective, title);
             });
         });
     },
@@ -41,6 +45,19 @@ const PWOAWizard = {
         }
     },
 
+    bindBreadcrumb() {
+        const crumbObjective = document.getElementById('crumb-objective');
+        const crumbStrategy = document.getElementById('crumb-strategy');
+
+        if (crumbObjective) {
+            crumbObjective.addEventListener('click', () => this.goToStep('objective'));
+        }
+
+        if (crumbStrategy) {
+            crumbStrategy.addEventListener('click', () => this.goToStep('strategy'));
+        }
+    },
+
     bindForm() {
         const form = document.getElementById('campaign-form');
         if (form) {
@@ -54,10 +71,61 @@ const PWOAWizard = {
         document.getElementById('step-config').classList.add('hidden');
 
         document.getElementById('step-' + step).classList.remove('hidden');
+
+        this.updateBreadcrumb(step);
     },
 
-    async selectObjective(objective) {
+    updateBreadcrumb(step) {
+        const breadcrumb = document.getElementById('breadcrumb');
+        const crumbObjective = document.getElementById('crumb-objective');
+        const crumbStrategyWrapper = document.getElementById('crumb-strategy-wrapper');
+        const crumbStrategy = document.getElementById('crumb-strategy');
+        const crumbConfigWrapper = document.getElementById('crumb-config-wrapper');
+        const crumbConfig = document.getElementById('crumb-config');
+
+        if (step === 'objective') {
+            breadcrumb.classList.add('hidden');
+            return;
+        }
+
+        breadcrumb.classList.remove('hidden');
+
+        // Reset all to inactive state
+        crumbObjective.classList.remove('text-blue-600', 'font-semibold');
+        crumbObjective.classList.add('text-gray-500');
+        crumbStrategy.classList.remove('text-blue-600', 'font-semibold');
+        crumbStrategy.classList.add('text-gray-500');
+        crumbConfig.classList.remove('text-gray-900', 'font-medium');
+        crumbConfig.classList.add('text-gray-500');
+
+        if (step === 'strategy') {
+            crumbObjective.textContent = this.currentObjectiveTitle || 'Objetivo';
+            crumbObjective.classList.remove('text-gray-500');
+            crumbObjective.classList.add('text-blue-600', 'font-semibold');
+            crumbStrategyWrapper.classList.add('hidden');
+            crumbConfigWrapper.classList.add('hidden');
+        }
+
+        if (step === 'config') {
+            crumbObjective.textContent = this.currentObjectiveTitle || 'Objetivo';
+            crumbStrategy.textContent = this.currentStrategyTitle || 'Estrategia';
+            crumbConfig.textContent = 'Configuración';
+
+            crumbObjective.classList.remove('text-gray-500');
+            crumbObjective.classList.add('text-gray-500');
+            crumbStrategy.classList.remove('text-gray-500');
+            crumbStrategy.classList.add('text-gray-500');
+            crumbConfig.classList.remove('text-gray-500');
+            crumbConfig.classList.add('text-gray-900', 'font-medium');
+
+            crumbStrategyWrapper.classList.remove('hidden');
+            crumbConfigWrapper.classList.remove('hidden');
+        }
+    },
+
+    async selectObjective(objective, title) {
         this.currentObjective = objective;
+        this.currentObjectiveTitle = title;
 
         const response = await fetch(pwoaData.ajaxUrl, {
             method: 'POST',
@@ -71,6 +139,7 @@ const PWOAWizard = {
         const data = await response.json();
 
         if (data.success) {
+            document.getElementById('selected-objective-title').textContent = title;
             this.renderStrategies(data.data);
             this.goToStep('strategy');
         } else {
@@ -96,7 +165,6 @@ const PWOAWizard = {
 
         document.getElementById('strategies-list').innerHTML = html;
 
-        // Bind click events
         document.querySelectorAll('.strategy-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 const strategyData = JSON.parse(e.currentTarget.dataset.strategy);
@@ -108,6 +176,9 @@ const PWOAWizard = {
     selectStrategy(strategyData) {
         this.strategyData = strategyData;
         this.currentStrategy = this.getStrategyKey(strategyData.name);
+        this.currentStrategyTitle = strategyData.name;
+
+        document.getElementById('selected-strategy-title').textContent = strategyData.name;
 
         this.renderConfigFields(strategyData.config_fields || []);
 
@@ -145,7 +216,6 @@ const PWOAWizard = {
 
         document.getElementById('dynamic-fields').innerHTML = html;
 
-        // Bind repeater events
         this.bindRepeaterButtons();
     },
 
@@ -202,17 +272,19 @@ const PWOAWizard = {
     renderRepeaterRow(field, index) {
         const fields = field.fields.map(subField => {
             const required = subField.required ? 'required' : '';
+            const desc = subField.description ? `<p class="text-xs text-gray-500 mt-1">${subField.description}</p>` : '';
             return `
                 <div>
                     <label class="block text-xs font-bold mb-1">${subField.label}</label>
                     <input type="number" name="config[${field.key}][${index}][${subField.key}]" ${required}
                            class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500">
+                    ${desc}
                 </div>
             `;
         }).join('');
 
         return `
-            <div class="repeater-row bg-gray-50 p-4 rounded border grid grid-cols-${field.fields.length} gap-4">
+            <div class="repeater-row bg-gray-50 p-4 rounded border grid grid-cols-${field.fields.length + 1} gap-4">
                 ${fields}
                 <div class="flex items-end">
                     <button type="button" class="remove-repeater bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 text-sm">
@@ -249,13 +321,11 @@ const PWOAWizard = {
         const form = e.target;
         const formData = new FormData(form);
 
-        // Procesar repeaters manualmente
         const config = {};
         const repeaters = {};
 
         formData.forEach((value, key) => {
             if (key.includes('config[') && key.includes('][')) {
-                // Es un repeater
                 const matches = key.match(/config\[(\w+)\]\[(\d+)\]\[(\w+)\]/);
                 if (matches) {
                     const [, fieldKey, index, subKey] = matches;
@@ -269,7 +339,6 @@ const PWOAWizard = {
             }
         });
 
-        // Merge repeaters into config
         Object.assign(config, repeaters);
 
         const data = {
