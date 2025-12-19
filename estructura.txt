@@ -1,0 +1,45 @@
+.
+├── README.md
+├── assets
+│   └── js
+│       ├── analytics.js
+│       └── wizard.js
+├── composer.json
+├── composer.lock
+├── estructura.txt
+├── flatten.sh
+├── pw-ofertas-avanzadas.php
+└── src
+    ├── Admin
+    │   ├── AdminController.php
+    │   └── Views
+    │       ├── analytics.php
+    │       ├── dashboard.php
+    │       └── wizard.php
+    ├── Core
+    │   ├── Activator.php
+    │   ├── Deactivator.php
+    │   └── Plugin.php
+    ├── Handlers
+    │   └── CartHandler.php
+    ├── Repositories
+    │   ├── CampaignRepository.php
+    │   └── StatsRepository.php
+    ├── Services
+    │   ├── AnalyticsService.php
+    │   └── DiscountEngine.php
+    └── Strategies
+        ├── AOV
+        │   ├── FreeShippingStrategy.php
+        │   ├── MinAmountStrategy.php
+        │   └── TieredDiscountStrategy.php
+        ├── DiscountStrategy.php
+        ├── Liquidation
+        │   ├── ExpiryBasedStrategy.php
+        │   └── LowStockStrategy.php
+        ├── Loyalty
+        │   └── RecurringPurchaseStrategy.php
+        └── Urgency
+            └── FlashSaleStrategy.php
+
+15 directories, 28 files
