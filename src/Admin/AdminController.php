@@ -77,19 +77,44 @@ class AdminController {
             wp_send_json_error('Permisos insuficientes');
         }
 
+        $config = json_decode(stripslashes($_POST['config'] ?? '{}'), true);
+        $strategy = sanitize_text_field($_POST['strategy'] ?? '');
+
+        // Determinar discount_type según la estrategia
+        $discount_type = sanitize_text_field($_POST['discount_type'] ?? '');
+
+        if (empty($discount_type)) {
+            $discount_type = $config['discount_type'] ?? '';
+
+            if (empty($discount_type)) {
+                $discount_type = match($strategy) {
+                    'free_shipping' => 'free_shipping',
+                    'flash_sale', 'min_amount', 'low_stock', 'recurring_purchase' => 'percentage',
+                    'tiered_discount', 'expiry_based' => 'percentage',
+                    default => 'percentage'
+                };
+            }
+        }
+
         $data = [
             'name' => sanitize_text_field($_POST['name'] ?? ''),
             'objective' => sanitize_text_field($_POST['objective'] ?? ''),
-            'strategy' => sanitize_text_field($_POST['strategy'] ?? ''),
-            'discount_type' => sanitize_text_field($_POST['discount_type'] ?? ''),
-            'config' => json_decode(stripslashes($_POST['config'] ?? '{}'), true),
+            'strategy' => $strategy,
+            'discount_type' => $discount_type,
+            'config' => $config,
             'conditions' => json_decode(stripslashes($_POST['conditions'] ?? '{}'), true),
+            'stacking_mode' => sanitize_text_field($_POST['stacking_mode'] ?? 'priority'),
             'priority' => intval($_POST['priority'] ?? 10),
             'start_date' => sanitize_text_field($_POST['start_date'] ?? ''),
             'end_date' => sanitize_text_field($_POST['end_date'] ?? '')
         ];
 
         $campaign_id = CampaignRepository::create($data);
+
+        if (!$campaign_id) {
+            global $wpdb;
+            wp_send_json_error('Error al crear campaña: ' . $wpdb->last_error);
+        }
 
         wp_send_json_success([
             'message' => 'Campaña creada correctamente',

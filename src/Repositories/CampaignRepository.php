@@ -24,7 +24,8 @@ class CampaignRepository {
 
     public static function create(array $data): int {
         global $wpdb;
-        $wpdb->insert("{$wpdb->prefix}pwoa_campaigns", [
+
+        $insert_data = [
             'name' => sanitize_text_field($data['name']),
             'objective' => sanitize_text_field($data['objective']),
             'strategy' => sanitize_text_field($data['strategy']),
@@ -32,10 +33,26 @@ class CampaignRepository {
             'config' => wp_json_encode($data['config']),
             'conditions' => wp_json_encode($data['conditions'] ?? []),
             'stacking_mode' => sanitize_text_field($data['stacking_mode'] ?? 'priority'),
-            'priority' => intval($data['priority'] ?? 10),
-            'start_date' => $data['start_date'] ?: null,
-            'end_date' => $data['end_date'] ?: null
-        ]);
+            'priority' => intval($data['priority'] ?? 10)
+        ];
+
+        // Solo agregar fechas si no están vacías
+        if (!empty($data['start_date'])) {
+            $insert_data['start_date'] = sanitize_text_field($data['start_date']);
+        }
+
+        if (!empty($data['end_date'])) {
+            $insert_data['end_date'] = sanitize_text_field($data['end_date']);
+        }
+
+        $result = $wpdb->insert("{$wpdb->prefix}pwoa_campaigns", $insert_data);
+
+        if ($result === false) {
+            error_log('PWOA Campaign Insert Error: ' . $wpdb->last_error);
+            error_log('PWOA Campaign Data: ' . print_r($insert_data, true));
+            return 0;
+        }
+
         return $wpdb->insert_id;
     }
 
