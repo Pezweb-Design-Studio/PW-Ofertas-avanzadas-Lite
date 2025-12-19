@@ -20,15 +20,18 @@ class Activator {
             active TINYINT(1) DEFAULT 1,
             start_date DATETIME,
             end_date DATETIME,
+            deleted_at TIMESTAMP NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            INDEX idx_active (active, start_date, end_date)
+            INDEX idx_active (active, start_date, end_date),
+            INDEX idx_deleted (deleted_at)
         ) $charset;";
 
         // Tabla de estadísticas
         $sql_stats = "CREATE TABLE {$wpdb->prefix}pwoa_stats (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             campaign_id BIGINT UNSIGNED NOT NULL,
+            campaign_snapshot JSON,
             order_id BIGINT UNSIGNED NOT NULL,
             discount_amount DECIMAL(10,2) NOT NULL,
             original_total DECIMAL(10,2) NOT NULL,

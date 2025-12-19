@@ -5,12 +5,107 @@ const PWOAWizard = {
     currentStrategy: null,
     currentStrategyTitle: null,
     strategyData: null,
+    editMode: false,
+    editCampaignId: null,
 
     init() {
-        this.bindObjectiveButtons();
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('edit');
+
+        if (editId) {
+            this.editMode = true;
+            this.editCampaignId = editId;
+            this.loadCampaignForEdit(editId);
+        } else {
+            this.bindObjectiveButtons();
+        }
+
         this.bindBackButtons();
         this.bindBreadcrumb();
         this.bindForm();
+    },
+
+    async loadCampaignForEdit(campaignId) {
+        try {
+            const response = await fetch(pwoaData.ajaxUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'pwoa_get_campaign',
+                    campaign_id: campaignId,
+                    nonce: pwoaData.nonce
+                })
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.data || 'Error al cargar campaña');
+            }
+
+            const campaign = result.data;
+
+            this.currentObjective = campaign.objective;
+            this.currentStrategy = campaign.strategy;
+
+            const response2 = await fetch(pwoaData.ajaxUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'pwoa_get_strategies',
+                    objective: campaign.objective,
+                    nonce: pwoaData.nonce
+                })
+            });
+
+            const strategies = await response2.json();
+
+            if (strategies.success) {
+                const strategyData = strategies.data.find(s => this.getStrategyKey(s.name) === campaign.strategy);
+
+                if (strategyData) {
+                    this.strategyData = strategyData;
+                    this.currentStrategyTitle = strategyData.name;
+
+                    document.getElementById('selected-strategy-title').textContent = strategyData.name;
+                    this.renderConfigFields(strategyData.config_fields || []);
+
+                    document.getElementById('form-objective').value = campaign.objective;
+                    document.getElementById('form-strategy').value = campaign.strategy;
+
+                    document.getElementById('step-objective').classList.add('hidden');
+                    document.getElementById('step-strategy').classList.add('hidden');
+                    document.getElementById('step-config').classList.remove('hidden');
+
+                    setTimeout(() => {
+                        document.getElementById('form-name').value = campaign.name;
+                        document.getElementById('form-priority').value = campaign.priority;
+                        document.getElementById('form-stacking-mode').value = campaign.stacking_mode;
+
+                        if (campaign.start_date && campaign.start_date !== '0000-00-00 00:00:00') {
+                            const startFormatted = campaign.start_date.replace(' ', 'T').substring(0, 16);
+                            document.getElementById('form-start-date').value = startFormatted;
+                        }
+
+                        if (campaign.end_date && campaign.end_date !== '0000-00-00 00:00:00') {
+                            const endFormatted = campaign.end_date.replace(' ', 'T').substring(0, 16);
+                            document.getElementById('form-end-date').value = endFormatted;
+                        }
+
+                        for (let key in campaign.config) {
+                            const input = document.querySelector(`[name="config[${key}]"]`);
+                            if (input) {
+                                input.value = campaign.config[key];
+                            }
+                        }
+
+                        document.getElementById('submit-btn').textContent = 'Actualizar Campaña';
+                    }, 100);
+                }
+            }
+
+        } catch (error) {
+            alert('Error al cargar campaña: ' + error.message);
+            window.location.href = '?page=pwoa-dashboard';
+        }
     },
 
     bindObjectiveButtons() {
@@ -39,7 +134,7 @@ const PWOAWizard = {
         if (btnCancel) {
             btnCancel.addEventListener('click', () => {
                 if (confirm('¿Descartar cambios?')) {
-                    this.goToStep('objective');
+                    window.location.href = '?page=pwoa-dashboard';
                 }
             });
         }
@@ -90,7 +185,6 @@ const PWOAWizard = {
 
         breadcrumb.classList.remove('hidden');
 
-        // Reset all to inactive state
         crumbObjective.classList.remove('text-blue-600', 'font-semibold');
         crumbObjective.classList.add('text-gray-500');
         crumbStrategy.classList.remove('text-blue-600', 'font-semibold');
@@ -342,7 +436,7 @@ const PWOAWizard = {
         Object.assign(config, repeaters);
 
         const data = {
-            action: 'pwoa_save_campaign',
+            action: this.editMode ? 'pwoa_update_campaign' : 'pwoa_save_campaign',
             nonce: pwoaData.nonce,
             name: formData.get('name'),
             objective: formData.get('objective'),
@@ -355,6 +449,10 @@ const PWOAWizard = {
             start_date: formData.get('start_date'),
             end_date: formData.get('end_date')
         };
+
+        if (this.editMode) {
+            data.campaign_id = this.editCampaignId;
+        }
 
         try {
             const response = await fetch(pwoaData.ajaxUrl, {

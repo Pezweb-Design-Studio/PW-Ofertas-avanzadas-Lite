@@ -1,6 +1,8 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
+use PW\OfertasAvanzadas\Repositories\CampaignRepository;
+
 // Mapeo de estrategias a etiquetas legibles
 $strategy_labels = [
         'min_amount' => 'Monto Mínimo',
@@ -40,7 +42,7 @@ $objective_config = [
 
         <!-- Empty State -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-16 text-center">
-            <div class="text-6xl mb-4">📊</div>
+
             <h3 class="text-xl font-semibold text-gray-900 mb-2">No hay campañas activas</h3>
             <p class="text-gray-500 mb-8 max-w-md mx-auto">
                 Crea tu primera campaña de descuentos para aumentar ventas y optimizar tu inventario
@@ -62,7 +64,7 @@ $objective_config = [
                         <p class="text-sm text-gray-600">Total Campañas</p>
                         <p class="text-2xl font-bold text-gray-900 mt-1"><?php echo count($campaigns); ?></p>
                     </div>
-                    <div class="text-3xl">📊</div>
+
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -73,7 +75,7 @@ $objective_config = [
                             <?php echo count(array_filter($campaigns, fn($c) => $c->active == 1)); ?>
                         </p>
                     </div>
-                    <div class="text-3xl">✅</div>
+
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -84,7 +86,7 @@ $objective_config = [
                             <?php echo count(array_filter($campaigns, fn($c) => $c->active == 0)); ?>
                         </p>
                     </div>
-                    <div class="text-3xl">⏸️</div>
+
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -100,7 +102,7 @@ $objective_config = [
                             ?>
                         </p>
                     </div>
-                    <div class="text-3xl">📅</div>
+
                 </div>
             </div>
         </div>
@@ -215,10 +217,24 @@ $objective_config = [
 
                             <!-- Actions -->
                             <div class="col-span-1 text-right">
-                                <button class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                                        title="Más opciones">
-                                    <span class="text-xl">⋮</span>
-                                </button>
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="btn-edit text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                                            data-campaign-id="<?php echo esc_attr($campaign->id); ?>"
+                                            title="Editar campaña">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="btn-delete text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                                            data-campaign-id="<?php echo esc_attr($campaign->id); ?>"
+                                            data-campaign-name="<?php echo esc_attr($campaign->name); ?>"
+                                            data-has-stats="<?php echo CampaignRepository::hasStats($campaign->id) ? '1' : '0'; ?>"
+                                            title="Eliminar campaña">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
 
                         </div>
@@ -240,7 +256,6 @@ $objective_config = [
             const active = this.checked ? 1 : 0;
             const statusText = this.nextElementSibling?.nextElementSibling;
 
-            // Optimistic UI update
             if (statusText) {
                 statusText.textContent = active ? 'Activa' : 'Pausada';
                 statusText.classList.toggle('text-green-700', active);
@@ -264,19 +279,75 @@ $objective_config = [
                     throw new Error(data.data || 'Error desconocido');
                 }
 
-                // Success feedback (opcional: implementar toast)
-                console.log(`✓ Campaña "${campaignName}" ${active ? 'activada' : 'pausada'}`);
-
             } catch (error) {
-                // Revertir en caso de error
                 this.checked = !this.checked;
                 if (statusText) {
                     statusText.textContent = !active ? 'Activa' : 'Pausada';
                     statusText.classList.toggle('text-green-700', !active);
                     statusText.classList.toggle('text-gray-700', active);
                 }
-                console.error('Error:', error.message);
                 alert('Error al actualizar campaña: ' + error.message);
+            }
+        });
+    });
+
+    // Botones de Editar
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const campaignId = this.dataset.campaignId;
+            window.location.href = '<?php echo admin_url('admin.php?page=pwoa-new-campaign'); ?>&edit=' + campaignId;
+        });
+    });
+
+    // Botones de Eliminar
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const campaignId = this.dataset.campaignId;
+            const campaignName = this.dataset.campaignName;
+            const hasStats = this.dataset.hasStats === '1';
+
+            let confirmMessage = `¿Estás seguro de eliminar la campaña "${campaignName}"?`;
+
+            if (hasStats) {
+                confirmMessage += '\n\n⚠️ Esta campaña tiene estadísticas asociadas. Los datos históricos se mantendrán para reportes.';
+            }
+
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            this.disabled = true;
+            this.style.opacity = '0.5';
+
+            try {
+                const response = await fetch(ajaxurl, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'pwoa_delete_campaign',
+                        campaign_id: campaignId,
+                        nonce: '<?php echo wp_create_nonce('pwoa_nonce'); ?>'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.data || 'Error al eliminar');
+                }
+
+                const row = this.closest('.px-6');
+                row.style.transition = 'opacity 0.3s, transform 0.3s';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 300);
+
+            } catch (error) {
+                this.disabled = false;
+                this.style.opacity = '1';
+                alert('Error: ' + error.message);
             }
         });
     });
