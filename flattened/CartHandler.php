@@ -2,6 +2,7 @@
 namespace PW\OfertasAvanzadas\Handlers;
 
 use PW\OfertasAvanzadas\Services\DiscountEngine;
+use PW\OfertasAvanzadas\Repositories\CampaignRepository;
 
 class CartHandler {
 
@@ -35,10 +36,21 @@ class CartHandler {
         if (!$campaign_id) return;
 
         $order = wc_get_order($order_id);
+        $campaign = CampaignRepository::getById($campaign_id);
+
+        if (!$campaign) return;
 
         global $wpdb;
         $wpdb->insert("{$wpdb->prefix}pwoa_stats", [
             'campaign_id' => $campaign_id,
+            'campaign_snapshot' => wp_json_encode([
+                'name' => $campaign->name,
+                'objective' => $campaign->objective,
+                'strategy' => $campaign->strategy,
+                'discount_type' => $campaign->discount_type,
+                'config' => json_decode($campaign->config, true),
+                'priority' => $campaign->priority
+            ]),
             'order_id' => $order_id,
             'discount_amount' => abs($order->get_total_discount()),
             'original_total' => $order->get_total() + abs($order->get_total_discount())

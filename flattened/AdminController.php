@@ -10,6 +10,9 @@ class AdminController {
         add_action('admin_menu', [$this, 'addMenuPages']);
         add_action('wp_ajax_pwoa_get_strategies', [$this, 'ajaxGetStrategies']);
         add_action('wp_ajax_pwoa_save_campaign', [$this, 'ajaxSaveCampaign']);
+        add_action('wp_ajax_pwoa_update_campaign', [$this, 'ajaxUpdateCampaign']);
+        add_action('wp_ajax_pwoa_delete_campaign', [$this, 'ajaxDeleteCampaign']);
+        add_action('wp_ajax_pwoa_get_campaign', [$this, 'ajaxGetCampaign']);
         add_action('wp_ajax_pwoa_toggle_campaign', [$this, 'ajaxToggleCampaign']);
     }
 
@@ -77,19 +80,44 @@ class AdminController {
             wp_send_json_error('Permisos insuficientes');
         }
 
+        $config = json_decode(stripslashes($_POST['config'] ?? '{}'), true);
+        $strategy = sanitize_text_field($_POST['strategy'] ?? '');
+
+        // Determinar discount_type según la estrategia
+        $discount_type = sanitize_text_field($_POST['discount_type'] ?? '');
+
+        if (empty($discount_type)) {
+            $discount_type = $config['discount_type'] ?? '';
+
+            if (empty($discount_type)) {
+                $discount_type = match($strategy) {
+                    'free_shipping' => 'free_shipping',
+                    'flash_sale', 'min_amount', 'low_stock', 'recurring_purchase' => 'percentage',
+                    'tiered_discount', 'expiry_based' => 'percentage',
+                    default => 'percentage'
+                };
+            }
+        }
+
         $data = [
             'name' => sanitize_text_field($_POST['name'] ?? ''),
             'objective' => sanitize_text_field($_POST['objective'] ?? ''),
-            'strategy' => sanitize_text_field($_POST['strategy'] ?? ''),
-            'discount_type' => sanitize_text_field($_POST['discount_type'] ?? ''),
-            'config' => json_decode(stripslashes($_POST['config'] ?? '{}'), true),
+            'strategy' => $strategy,
+            'discount_type' => $discount_type,
+            'config' => $config,
             'conditions' => json_decode(stripslashes($_POST['conditions'] ?? '{}'), true),
+            'stacking_mode' => sanitize_text_field($_POST['stacking_mode'] ?? 'priority'),
             'priority' => intval($_POST['priority'] ?? 10),
             'start_date' => sanitize_text_field($_POST['start_date'] ?? ''),
             'end_date' => sanitize_text_field($_POST['end_date'] ?? '')
         ];
 
         $campaign_id = CampaignRepository::create($data);
+
+        if (!$campaign_id) {
+            global $wpdb;
+            wp_send_json_error('Error al crear campaña: ' . $wpdb->last_error);
+        }
 
         wp_send_json_success([
             'message' => 'Campaña creada correctamente',
@@ -110,6 +138,97 @@ class AdminController {
         CampaignRepository::updateStatus($campaign_id, $active);
 
         wp_send_json_success(['message' => 'Estado actualizado']);
+    }
+
+    public function ajaxGetCampaign(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $campaign_id = intval($_POST['campaign_id'] ?? 0);
+        $campaign = CampaignRepository::getById($campaign_id);
+
+        if (!$campaign) {
+            wp_send_json_error('Campaña no encontrada');
+        }
+
+        // Decodificar JSON para enviar al frontend
+        $campaign->config = json_decode($campaign->config, true);
+        $campaign->conditions = json_decode($campaign->conditions, true);
+
+        wp_send_json_success($campaign);
+    }
+
+    public function ajaxUpdateCampaign(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $campaign_id = intval($_POST['campaign_id'] ?? 0);
+        $config = json_decode(stripslashes($_POST['config'] ?? '{}'), true);
+        $strategy = sanitize_text_field($_POST['strategy'] ?? '');
+
+        $discount_type = sanitize_text_field($_POST['discount_type'] ?? '');
+
+        if (empty($discount_type)) {
+            $discount_type = $config['discount_type'] ?? '';
+
+            if (empty($discount_type)) {
+                $discount_type = match($strategy) {
+                    'free_shipping' => 'free_shipping',
+                    'flash_sale', 'min_amount', 'low_stock', 'recurring_purchase' => 'percentage',
+                    'tiered_discount', 'expiry_based' => 'percentage',
+                    default => 'percentage'
+                };
+            }
+        }
+
+        $data = [
+            'name' => sanitize_text_field($_POST['name'] ?? ''),
+            'objective' => sanitize_text_field($_POST['objective'] ?? ''),
+            'strategy' => $strategy,
+            'discount_type' => $discount_type,
+            'config' => $config,
+            'conditions' => json_decode(stripslashes($_POST['conditions'] ?? '{}'), true),
+            'stacking_mode' => sanitize_text_field($_POST['stacking_mode'] ?? 'priority'),
+            'priority' => intval($_POST['priority'] ?? 10),
+            'start_date' => sanitize_text_field($_POST['start_date'] ?? ''),
+            'end_date' => sanitize_text_field($_POST['end_date'] ?? '')
+        ];
+
+        $success = CampaignRepository::update($campaign_id, $data);
+
+        if (!$success) {
+            wp_send_json_error('Error al actualizar campaña');
+        }
+
+        wp_send_json_success([
+            'message' => 'Campaña actualizada correctamente',
+            'campaign_id' => $campaign_id
+        ]);
+    }
+
+    public function ajaxDeleteCampaign(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $campaign_id = intval($_POST['campaign_id'] ?? 0);
+
+        // Soft delete
+        $success = CampaignRepository::softDelete($campaign_id);
+
+        if (!$success) {
+            wp_send_json_error('Error al eliminar campaña');
+        }
+
+        wp_send_json_success(['message' => 'Campaña eliminada correctamente']);
     }
 
     private function getStrategiesByObjective(string $objective): array {

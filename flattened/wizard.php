@@ -109,7 +109,7 @@ $objectives = [
 
             <div>
                 <label class="block text-sm font-bold mb-2">Nombre de la campaña</label>
-                <input type="text" name="name" required
+                <input type="text" name="name" id="form-name" required
                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                        placeholder="Ej: Black Friday 2024 - Descuento por volumen">
             </div>
@@ -119,19 +119,19 @@ $objectives = [
             <div class="grid grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-bold mb-2">Fecha de inicio (opcional)</label>
-                    <input type="datetime-local" name="start_date"
+                    <input type="datetime-local" name="start_date" id="form-start-date"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-bold mb-2">Fecha de fin (opcional)</label>
-                    <input type="datetime-local" name="end_date"
+                    <input type="datetime-local" name="end_date" id="form-end-date"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
 
             <div>
                 <label class="block text-sm font-bold mb-2">Modo de aplicación</label>
-                <select name="stacking_mode" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <select name="stacking_mode" id="form-stacking-mode" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                     <option value="priority">Prioridad (mejor descuento)</option>
                     <option value="stack">Apilar descuentos</option>
                 </select>
@@ -140,7 +140,7 @@ $objectives = [
 
             <div>
                 <label class="block text-sm font-bold mb-2">Prioridad</label>
-                <input type="number" name="priority" value="10" min="1" max="100"
+                <input type="number" name="priority" id="form-priority" value="10" min="1" max="100"
                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 <p class="text-sm text-gray-500 mt-1">Mayor número = mayor prioridad (1-100)</p>
             </div>
@@ -150,7 +150,7 @@ $objectives = [
             <input type="hidden" name="discount_type" id="form-discount-type">
 
             <div class="flex gap-4 pt-4">
-                <button type="submit"
+                <button type="submit" id="submit-btn"
                         class="pwoa-btn-primary px-8 py-3 rounded-lg font-bold">
                     Crear Campaña
                 </button>

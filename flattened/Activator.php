@@ -6,7 +6,8 @@ class Activator {
         global $wpdb;
         $charset = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS {$wpdb->prefix}pwoa_campaigns (
+        // Tabla de campañas
+        $sql_campaigns = "CREATE TABLE {$wpdb->prefix}pwoa_campaigns (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             objective VARCHAR(50) NOT NULL,
@@ -19,14 +20,18 @@ class Activator {
             active TINYINT(1) DEFAULT 1,
             start_date DATETIME,
             end_date DATETIME,
+            deleted_at TIMESTAMP NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            INDEX idx_active (active, start_date, end_date)
-        ) $charset;
-        
-        CREATE TABLE IF NOT EXISTS {$wpdb->prefix}pwoa_stats (
+            INDEX idx_active (active, start_date, end_date),
+            INDEX idx_deleted (deleted_at)
+        ) $charset;";
+
+        // Tabla de estadísticas
+        $sql_stats = "CREATE TABLE {$wpdb->prefix}pwoa_stats (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             campaign_id BIGINT UNSIGNED NOT NULL,
+            campaign_snapshot JSON,
             order_id BIGINT UNSIGNED NOT NULL,
             discount_amount DECIMAL(10,2) NOT NULL,
             original_total DECIMAL(10,2) NOT NULL,
@@ -35,6 +40,10 @@ class Activator {
         ) $charset;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
+        dbDelta($sql_campaigns);
+        dbDelta($sql_stats);
+
+        // Guardar versión para futuras migraciones
+        update_option('pwoa_db_version', PWOA_VERSION);
     }
 }

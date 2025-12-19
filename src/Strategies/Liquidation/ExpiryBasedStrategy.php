@@ -14,6 +14,9 @@ class ExpiryBasedStrategy implements DiscountStrategy {
 
             $days_to_expiry = (strtotime($expiry_date) - time()) / DAY_IN_SECONDS;
 
+            // Ignorar productos ya vencidos
+            if ($days_to_expiry <= 0) continue;
+
             if ($days_to_expiry <= ($config['days_threshold'] ?? 30)) {
                 return true;
             }
@@ -33,6 +36,10 @@ class ExpiryBasedStrategy implements DiscountStrategy {
             if (!$expiry_date) continue;
 
             $days_to_expiry = (strtotime($expiry_date) - time()) / DAY_IN_SECONDS;
+
+            // Ignorar productos ya vencidos
+            if ($days_to_expiry <= 0) continue;
+
             $discount_value = $this->getDiscountByDays($days_to_expiry, $config);
 
             if ($discount_value > 0) {
@@ -55,9 +62,12 @@ class ExpiryBasedStrategy implements DiscountStrategy {
     private function getDiscountByDays(float $days, array $config): float {
         $tiers = $config['tiers'] ?? [];
 
+        // FIX: Ordenar tiers de menor a mayor dias
+        usort($tiers, fn($a, $b) => ($a['days'] ?? 0) <=> ($b['days'] ?? 0));
+
         foreach ($tiers as $tier) {
-            if ($days <= $tier['days']) {
-                return $tier['discount'];
+            if ($days <= ($tier['days'] ?? 0)) {
+                return $tier['discount'] ?? 0;
             }
         }
 
@@ -67,7 +77,7 @@ class ExpiryBasedStrategy implements DiscountStrategy {
     public static function getMeta(): array {
         return [
             'name' => 'Descuento por Fecha de Vencimiento',
-            'description' => 'Aplica descuentos progresivos a productos próximos a vencer',
+            'description' => 'Aplica descuentos progresivos a productos proximos a vencer',
             'effectiveness' => 5,
             'when_to_use' => 'Productos perecederos, alimentos, medicamentos. El descuento aumenta conforme se acerca la fecha de vencimiento.',
             'objective' => 'liquidation'
@@ -78,7 +88,7 @@ class ExpiryBasedStrategy implements DiscountStrategy {
         return [
             [
                 'key' => 'days_threshold',
-                'label' => 'Días para activar promoción',
+                'label' => 'Dias para activar promocion',
                 'type' => 'number',
                 'default' => 30,
                 'required' => true
@@ -95,7 +105,7 @@ class ExpiryBasedStrategy implements DiscountStrategy {
                 'label' => 'Niveles de descuento',
                 'type' => 'repeater',
                 'fields' => [
-                    ['key' => 'days', 'label' => 'Días restantes', 'type' => 'number'],
+                    ['key' => 'days', 'label' => 'Dias restantes', 'type' => 'number'],
                     ['key' => 'discount', 'label' => 'Descuento', 'type' => 'number']
                 ]
             ]
