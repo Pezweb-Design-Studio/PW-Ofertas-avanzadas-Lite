@@ -5,6 +5,7 @@ use PW\OfertasAvanzadas\Repositories\CampaignRepository;
 
 // Mapeo de estrategias a etiquetas legibles
 $strategy_labels = [
+        'basic_discount' => 'Básico',
         'min_amount' => 'Monto Mínimo',
         'free_shipping' => 'Envío Gratis',
         'tiered_discount' => 'Descuento Escalonado',
@@ -16,6 +17,7 @@ $strategy_labels = [
 
 // Mapeo de objetivos a colores y etiquetas
 $objective_config = [
+        'basic' => ['label' => 'Básico', 'color' => 'gray', 'icon' => '🎯'],
         'aov' => ['label' => 'AOV', 'color' => 'blue', 'icon' => '📈'],
         'liquidation' => ['label' => 'Liquidación', 'color' => 'orange', 'icon' => '🏷️'],
         'loyalty' => ['label' => 'Fidelización', 'color' => 'purple', 'icon' => '💎'],
@@ -57,6 +59,26 @@ $objective_config = [
     <?php else: ?>
 
         <!-- Stats Summary -->
+        <?php
+        // Calcular estadísticas reales considerando fechas
+        $now = current_time('timestamp');
+        $truly_active = array_filter($campaigns, function($c) use ($now) {
+            if ($c->active != 1) return false;
+            if ($c->start_date && strtotime($c->start_date) > $now) return false;
+            if ($c->end_date && strtotime($c->end_date) < $now) return false;
+            return true;
+        });
+        $scheduled = array_filter($campaigns, function($c) use ($now) {
+            return $c->start_date && strtotime($c->start_date) > $now;
+        });
+        $expired = array_filter($campaigns, function($c) use ($now) {
+            return $c->end_date && strtotime($c->end_date) < $now;
+        });
+        $paused = array_filter($campaigns, function($c) use ($expired) {
+            $is_expired = in_array($c->id, array_column($expired, 'id'));
+            return $c->active == 0 && !$is_expired;
+        });
+        ?>
         <div class="grid grid-cols-4 gap-4 mb-6">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div class="flex items-center justify-between">
@@ -72,7 +94,7 @@ $objective_config = [
                     <div>
                         <p class="text-sm text-gray-600">Activas</p>
                         <p class="text-2xl font-bold text-green-600 mt-1">
-                            <?php echo count(array_filter($campaigns, fn($c) => $c->active == 1)); ?>
+                            <?php echo count($truly_active); ?>
                         </p>
                     </div>
 
@@ -83,7 +105,7 @@ $objective_config = [
                     <div>
                         <p class="text-sm text-gray-600">Pausadas</p>
                         <p class="text-2xl font-bold text-gray-400 mt-1">
-                            <?php echo count(array_filter($campaigns, fn($c) => $c->active == 0)); ?>
+                            <?php echo count($paused); ?>
                         </p>
                     </div>
 
@@ -94,13 +116,7 @@ $objective_config = [
                     <div>
                         <p class="text-sm text-gray-600">Programadas</p>
                         <p class="text-2xl font-bold text-blue-600 mt-1">
-                            <?php
-                            $now = current_time('timestamp');
-                            $scheduled = count(array_filter($campaigns, function($c) use ($now) {
-                                return $c->start_date && strtotime($c->start_date) > $now;
-                            }));
-                            echo $scheduled;
-                            ?>
+                            <?php echo count($scheduled); ?>
                         </p>
                     </div>
 
