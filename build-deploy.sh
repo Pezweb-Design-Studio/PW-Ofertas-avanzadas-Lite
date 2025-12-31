@@ -134,6 +134,9 @@ cp "$main_file" "$plugin_dir/"
 # Copy README
 cp README.md "$plugin_dir/"
 
+# Copy LICENCE
+cp LICENCE.txt "$plugin_dir/"
+
 # Copy directories (estructura exacta del proyecto)
 cp -r src "$plugin_dir/"
 cp -r assets "$plugin_dir/"
