@@ -31,18 +31,18 @@ if (!defined('ABSPATH')) exit;
     </div>
 
     <div class="bg-white p-8 rounded-lg shadow">
-        <h2 class="text-2xl font-bold mb-8">Top CampaÃ±as</h2>
+        <h2 class="text-2xl font-bold mb-8">Top Campañas</h2>
 
         <?php
         $top_campaigns = \PW\OfertasAvanzadas\Repositories\StatsRepository::getTopCampaigns();
         if (empty($top_campaigns)):
             ?>
-            <p class="text-gray-500 text-center py-8">Sin datos de campaÃ±as aÃºn</p>
+            <p class="text-gray-500 text-center py-8">Sin datos de campañas aún</p>
         <?php else: ?>
             <table class="w-full">
                 <thead>
                 <tr class="border-b">
-                    <th class="text-left py-4">CampaÃ±a</th>
+                    <th class="text-left py-4">Campaña</th>
                     <th class="text-right py-4">Usos</th>
                     <th class="text-right py-4">Total Descontado</th>
                 </tr>

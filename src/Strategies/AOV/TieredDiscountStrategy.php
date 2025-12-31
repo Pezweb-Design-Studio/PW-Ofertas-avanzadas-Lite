@@ -6,7 +6,11 @@ use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 class TieredDiscountStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
-        $total_items = array_sum(array_column($cart, 'quantity'));
+        $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
+
+        if (empty($filtered_cart)) return false;
+
+        $total_items = array_sum(array_column($filtered_cart, 'quantity'));
         $tiers = $config['tiers'] ?? [];
 
         if (empty($tiers)) return false;

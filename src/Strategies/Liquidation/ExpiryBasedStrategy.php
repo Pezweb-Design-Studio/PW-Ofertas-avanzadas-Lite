@@ -6,13 +6,16 @@ use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 class ExpiryBasedStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
+        $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
+
+        if (empty($filtered_cart)) return false;
+
         $tiers = $config['tiers'] ?? [];
         if (empty($tiers)) return false;
 
-        // Obtener el tier más alto (máximo días) como umbral automático
         $max_days = max(array_column($tiers, 'days'));
 
-        foreach ($cart as $item) {
+        foreach ($filtered_cart as $item) {
             $product = wc_get_product($item['product_id']);
             $expiry_date = get_post_meta($product->get_id(), '_expiry_date', true);
 
@@ -20,7 +23,6 @@ class ExpiryBasedStrategy implements DiscountStrategy {
 
             $days_to_expiry = (strtotime($expiry_date) - time()) / DAY_IN_SECONDS;
 
-            // Activar si el producto cae dentro del rango del tier más alto y no ha vencido
             if ($days_to_expiry <= $max_days && $days_to_expiry >= 0) {
                 return true;
             }
@@ -81,7 +83,7 @@ class ExpiryBasedStrategy implements DiscountStrategy {
     public static function getMeta(): array {
         return [
             'name' => 'Descuento por Fecha de Vencimiento',
-            'description' => 'Aplica descuentos progresivos a productos prÃ³ximos a vencer',
+            'description' => 'Aplica descuentos progresivos a productos próximos a vencer',
             'effectiveness' => 5,
             'when_to_use' => 'Productos perecederos, alimentos, medicamentos. El descuento aumenta conforme se acerca la fecha de vencimiento.',
             'objective' => 'liquidation'

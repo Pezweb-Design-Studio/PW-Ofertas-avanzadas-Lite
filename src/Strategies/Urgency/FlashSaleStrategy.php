@@ -6,7 +6,6 @@ use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 class FlashSaleStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
-        // Verificar si estamos dentro del tiempo de flash sale
         $current_time = current_time('timestamp');
         $start = strtotime($config['start_time'] ?? '');
         $end = strtotime($config['end_time'] ?? '');
@@ -15,20 +14,9 @@ class FlashSaleStrategy implements DiscountStrategy {
             return false;
         }
 
-        // Verificar categorías/productos específicos si existen
-        if (!empty($conditions['categories'])) {
-            foreach ($cart as $item) {
-                $product = wc_get_product($item['product_id']);
-                $product_cats = $product->get_category_ids();
+        $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
 
-                if (array_intersect($product_cats, $conditions['categories'])) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        return true;
+        return !empty($filtered_cart);
     }
 
     public function calculate(array $cart, array $config): array {

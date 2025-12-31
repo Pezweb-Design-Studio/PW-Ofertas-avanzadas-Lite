@@ -98,6 +98,11 @@ const PWOAWizard = {
                         }
 
                         document.getElementById('submit-btn').textContent = 'Actualizar Campaña';
+
+                        // Cargar repeaters después de un pequeño delay para asegurar que el DOM esté listo
+                        setTimeout(() => {
+                            this.loadRepeaters(campaign.config);
+                        }, 50);
                     }, 100);
                 }
             }
@@ -106,6 +111,43 @@ const PWOAWizard = {
             alert('Error al cargar campaña: ' + error.message);
             window.location.href = '?page=pwoa-dashboard';
         }
+    },
+
+    loadRepeaters(config) {
+        // Buscar todos los repeaters en la estrategia actual
+        if (!this.strategyData || !this.strategyData.config_fields) return;
+
+        this.strategyData.config_fields.forEach(field => {
+            if (field.type === 'repeater' && config[field.key]) {
+                const repeaterData = config[field.key];
+
+                // Verificar que sea un array con datos
+                if (!Array.isArray(repeaterData) || repeaterData.length === 0) return;
+
+                const container = document.getElementById(`repeater-${field.key}`);
+                if (!container) return;
+
+                // Limpiar el repeater (remover la fila vacía inicial)
+                container.innerHTML = '';
+
+                // Renderizar cada fila con sus datos
+                repeaterData.forEach((rowData, index) => {
+                    const row = this.renderRepeaterRow(field, index);
+                    container.insertAdjacentHTML('beforeend', row);
+
+                    // Rellenar los valores de cada campo en la fila
+                    field.fields.forEach(subField => {
+                        const input = document.querySelector(`[name="config[${field.key}][${index}][${subField.key}]"]`);
+                        if (input && rowData[subField.key] !== undefined) {
+                            input.value = rowData[subField.key];
+                        }
+                    });
+                });
+
+                // Re-bind de los botones de eliminar
+                this.bindRepeaterButtons();
+            }
+        });
     },
 
     bindObjectiveButtons() {

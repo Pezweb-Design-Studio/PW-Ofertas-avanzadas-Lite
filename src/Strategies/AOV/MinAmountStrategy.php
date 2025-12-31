@@ -6,7 +6,11 @@ use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 class MinAmountStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
-        $total = array_sum(array_column($cart, 'line_total'));
+        $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
+
+        if (empty($filtered_cart)) return false;
+
+        $total = array_sum(array_column($filtered_cart, 'line_total'));
         return $total >= ($config['min_amount'] ?? 0);
     }
 

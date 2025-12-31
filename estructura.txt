@@ -4,6 +4,7 @@
 │   └── js
 │       ├── analytics.js
 │       └── wizard.js
+├── build-deploy.sh
 ├── composer.json
 ├── composer.lock
 ├── estructura.txt
@@ -21,7 +22,8 @@
     │   ├── Deactivator.php
     │   └── Plugin.php
     ├── Handlers
-    │   └── CartHandler.php
+    │   ├── CartHandler.php
+    │   └── ProductExpiryHandler.php
     ├── Repositories
     │   ├── CampaignRepository.php
     │   └── StatsRepository.php
@@ -42,4 +44,4 @@
         └── Urgency
             └── FlashSaleStrategy.php
 
-15 directories, 28 files
+15 directories, 30 files

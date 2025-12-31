@@ -3,6 +3,7 @@ namespace PW\OfertasAvanzadas\Core;
 
 use PW\OfertasAvanzadas\Admin\AdminController;
 use PW\OfertasAvanzadas\Handlers\CartHandler;
+use PW\OfertasAvanzadas\Handlers\ProductExpiryHandler;
 
 class Plugin {
     private static $instance = null;
@@ -17,6 +18,7 @@ class Plugin {
     public function init(): void {
         if (is_admin()) {
             new AdminController();
+            new ProductExpiryHandler();
         }
 
         new CartHandler();

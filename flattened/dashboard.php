@@ -95,8 +95,9 @@ $objective_config = [
                         <p class="text-sm text-gray-600">Programadas</p>
                         <p class="text-2xl font-bold text-blue-600 mt-1">
                             <?php
-                            $scheduled = count(array_filter($campaigns, function($c) {
-                                return $c->start_date && strtotime($c->start_date) > time();
+                            $now = current_time('timestamp');
+                            $scheduled = count(array_filter($campaigns, function($c) use ($now) {
+                                return $c->start_date && strtotime($c->start_date) > $now;
                             }));
                             echo $scheduled;
                             ?>
@@ -126,8 +127,8 @@ $objective_config = [
             <div class="divide-y divide-gray-100">
                 <?php foreach ($campaigns as $campaign):
                     $obj_config = $objective_config[$campaign->objective] ?? ['label' => 'N/A', 'color' => 'gray', 'icon' => '📌'];
-                    $is_scheduled = $campaign->start_date && strtotime($campaign->start_date) > time();
-                    $is_expired = $campaign->end_date && strtotime($campaign->end_date) < time();
+                    $is_scheduled = $campaign->start_date && strtotime($campaign->start_date) > current_time('timestamp');
+                    $is_expired = $campaign->end_date && strtotime($campaign->end_date) < current_time('timestamp');
                     ?>
                     <div class="px-6 py-5 hover:bg-gray-50 transition-colors">
                         <div class="grid grid-cols-12 gap-4 items-center">

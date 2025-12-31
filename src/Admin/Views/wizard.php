@@ -138,11 +138,83 @@ $objectives = [
                 <p class="text-sm text-gray-500 mt-1">Si hay múltiples campañas activas, ¿aplicar solo la mejor o sumarlas?</p>
             </div>
 
+            <!-- FILTRADO DE PRODUCTOS -->
+            <div class="border-t pt-6 mt-6">
+                <h3 class="text-lg font-bold mb-4">Filtrar productos (opcional)</h3>
+                <p class="text-sm text-gray-600 mb-6">Si no configuras filtros, el descuento se aplicará a todos los productos del carrito</p>
+
+                <!-- Búsqueda de productos -->
+                <div class="mb-4">
+                    <label class="block text-sm font-bold mb-2">Productos específicos</label>
+                    <input type="text"
+                           id="product-search"
+                           placeholder="Buscar por nombre, SKU o ID..."
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <div id="product-search-results" class="mt-2 max-h-48 overflow-y-auto border rounded-lg hidden"></div>
+                    <div id="selected-products" class="mt-3 flex flex-wrap gap-2"></div>
+                    <input type="hidden" id="form-product-ids" name="conditions[product_ids]">
+                </div>
+
+                <!-- Categorías -->
+                <div class="mb-4">
+                    <label class="block text-sm font-bold mb-2">Categorías</label>
+                    <select id="form-categories" multiple class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" style="height: 120px;">
+                        <?php
+                        $categories = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false]);
+                        foreach ($categories as $cat) {
+                            echo '<option value="' . esc_attr($cat->term_id) . '">' . esc_html($cat->name) . '</option>';
+                        }
+                        ?>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Mantén presionado Ctrl/Cmd para seleccionar múltiples</p>
+                </div>
+
+                <!-- Rango de precio -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Precio mínimo</label>
+                        <input type="number"
+                               id="form-min-price"
+                               placeholder="0"
+                               step="0.01"
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold mb-2">Precio máximo</label>
+                        <input type="number"
+                               id="form-max-price"
+                               placeholder="999999"
+                               step="0.01"
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <!-- Validación de productos -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-sm text-blue-900">
+                        <span class="font-bold">Productos que cumplen criterios:</span>
+                        <span id="matching-count" class="ml-2 font-mono">-</span>
+                    </p>
+                    <div class="flex gap-3 mt-3">
+                        <button type="button"
+                                id="btn-validate-filters"
+                                class="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                            Validar filtros
+                        </button>
+                        <button type="button"
+                                id="btn-show-products"
+                                class="text-sm bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                            Ver productos filtrados
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-bold mb-2">Prioridad</label>
                 <input type="number" name="priority" id="form-priority" value="10" min="1" max="100"
                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                <p class="text-sm text-gray-500 mt-1">Mayor número = mayor prioridad (1-100)</p>
+                <p class="text-sm text-gray-500 mt-1">Mayor nÃºmero = mayor prioridad (1-100)</p>
             </div>
 
             <input type="hidden" name="objective" id="form-objective">
@@ -161,6 +233,35 @@ $objectives = [
             </div>
 
         </form>
+    </div>
+
+
+    <!-- Modal de productos coincidentes -->
+    <div id="products-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-900">Productos que coinciden con el filtro</h3>
+                <button type="button" id="close-modal" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">×</button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 overflow-y-auto flex-1">
+                <div id="modal-products-list" class="space-y-2">
+                    <!-- Los productos se cargan aquí -->
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                <p class="text-sm text-gray-600">
+                    Total: <span id="modal-count" class="font-bold text-gray-900">0</span> productos
+                </p>
+                <button type="button" id="close-modal-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
+                    Cerrar
+                </button>
+            </div>
+        </div>
     </div>
 
 </div>
