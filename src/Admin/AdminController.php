@@ -236,6 +236,9 @@ class AdminController {
 
     private function getStrategiesByObjective(string $objective): array {
         $strategies_map = [
+            'basic' => [
+                'PW\\OfertasAvanzadas\\Strategies\\Basic\\BasicDiscountStrategy'
+            ],
             'aov' => [
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\MinAmountStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',

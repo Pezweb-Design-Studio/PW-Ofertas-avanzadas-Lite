@@ -33,7 +33,8 @@ class Plugin {
             wp_enqueue_script('pwoa-wizard', PWOA_URL . 'assets/js/wizard.js', ['jquery'], PWOA_VERSION, true);
             wp_localize_script('pwoa-wizard', 'pwoaData', [
                 'ajaxUrl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('pwoa_nonce')
+                'nonce' => wp_create_nonce('pwoa_nonce'),
+                'adminUrl' => admin_url()
             ]);
         });
     }

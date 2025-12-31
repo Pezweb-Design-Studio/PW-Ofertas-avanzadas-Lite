@@ -109,6 +109,7 @@ const PWOAWizard = {
                         // Cargar repeaters después de un pequeño delay para asegurar que el DOM esté listo
                         setTimeout(() => {
                             this.loadRepeaters(campaign.config);
+                            this.loadConditions(campaign.conditions);
                         }, 50);
                     }, 100);
                 }
@@ -155,6 +156,66 @@ const PWOAWizard = {
                 this.bindRepeaterButtons();
             }
         });
+    },
+
+    loadConditions(conditions) {
+        if (!conditions) return;
+
+        console.log('PWOA Debug - Cargando conditions:', conditions);
+
+        // Cargar productos seleccionados
+        if (conditions.product_ids && conditions.product_ids.length > 0) {
+            // Buscar los productos por sus IDs
+            conditions.product_ids.forEach(async (productId) => {
+                const response = await fetch(pwoaData.ajaxUrl, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'pwoa_search_products',
+                        search: productId.toString(),
+                        nonce: pwoaData.nonce
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success && data.data.length > 0) {
+                    const product = data.data[0];
+                    this.addSelectedProduct({
+                        id: product.id.toString(),
+                        name: product.name,
+                        sku: product.sku || ''
+                    });
+                }
+            });
+        }
+
+        // Cargar categorías seleccionadas
+        if (conditions.category_ids && conditions.category_ids.length > 0) {
+            const categoriesSelect = document.getElementById('form-categories');
+            if (categoriesSelect) {
+                conditions.category_ids.forEach(catId => {
+                    const option = categoriesSelect.querySelector(`option[value="${catId}"]`);
+                    if (option) {
+                        option.selected = true;
+                    }
+                });
+            }
+        }
+
+        // Cargar precio mínimo
+        if (conditions.min_price) {
+            const minPriceInput = document.getElementById('form-min-price');
+            if (minPriceInput) {
+                minPriceInput.value = conditions.min_price;
+            }
+        }
+
+        // Cargar precio máximo
+        if (conditions.max_price) {
+            const maxPriceInput = document.getElementById('form-max-price');
+            if (maxPriceInput) {
+                maxPriceInput.value = conditions.max_price;
+            }
+        }
     },
 
     bindObjectiveButtons() {
@@ -344,6 +405,7 @@ const PWOAWizard = {
 
     getStrategyKey(name) {
         const map = {
+            'Descuento Básico por Productos': 'basic_discount',
             'Descuento por Monto Mínimo': 'min_amount',
             'Envío Gratis sobre Monto Mínimo': 'free_shipping',
             'Descuento Escalonado por Cantidad': 'tiered_discount',

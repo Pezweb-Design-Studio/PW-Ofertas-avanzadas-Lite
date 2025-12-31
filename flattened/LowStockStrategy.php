@@ -6,9 +6,13 @@ use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 class LowStockStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
+        $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
+
+        if (empty($filtered_cart)) return false;
+
         $stock_threshold = $config['stock_threshold'] ?? 10;
 
-        foreach ($cart as $item) {
+        foreach ($filtered_cart as $item) {
             $product = wc_get_product($item['product_id']);
 
             if (!$product->managing_stock()) continue;

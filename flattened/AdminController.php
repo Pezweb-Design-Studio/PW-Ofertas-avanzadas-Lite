@@ -14,6 +14,9 @@ class AdminController {
         add_action('wp_ajax_pwoa_delete_campaign', [$this, 'ajaxDeleteCampaign']);
         add_action('wp_ajax_pwoa_get_campaign', [$this, 'ajaxGetCampaign']);
         add_action('wp_ajax_pwoa_toggle_campaign', [$this, 'ajaxToggleCampaign']);
+        add_action('wp_ajax_pwoa_search_products', [$this, 'ajaxSearchProducts']);
+        add_action('wp_ajax_pwoa_validate_conditions', [$this, 'ajaxValidateConditions']);
+        add_action('wp_ajax_pwoa_get_matching_products', [$this, 'ajaxGetMatchingProducts']);
     }
 
     public function addMenuPages(): void {
@@ -262,5 +265,187 @@ class AdminController {
         }
 
         return $result;
+    }
+    public function ajaxSearchProducts(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $search = sanitize_text_field($_POST['search'] ?? '');
+
+        if (strlen($search) < 2) {
+            wp_send_json_success([]);
+            return;
+        }
+
+        global $wpdb;
+        $results = [];
+        $found_ids = [];
+
+        // Buscar por ID exacto (si es numérico)
+        if (is_numeric($search)) {
+            $product = wc_get_product(intval($search));
+            if ($product && $product->get_status() === 'publish') {
+                $found_ids[] = $product->get_id();
+                $results[] = [
+                    'id' => $product->get_id(),
+                    'name' => $product->get_name(),
+                    'sku' => $product->get_sku() ?: '',
+                    'price' => $product->get_price(),
+                    'formatted_price' => wc_price($product->get_price())
+                ];
+            }
+        }
+
+        // Buscar por SKU
+        $sku_query = $wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta} 
+            WHERE meta_key = '_sku' 
+            AND meta_value LIKE %s",
+            '%' . $wpdb->esc_like($search) . '%'
+        );
+        $sku_ids = $wpdb->get_col($sku_query);
+
+        foreach ($sku_ids as $product_id) {
+            if (in_array($product_id, $found_ids)) continue;
+
+            $product = wc_get_product($product_id);
+            if ($product && $product->get_status() === 'publish') {
+                $found_ids[] = $product->get_id();
+                $results[] = [
+                    'id' => $product->get_id(),
+                    'name' => $product->get_name(),
+                    'sku' => $product->get_sku() ?: '',
+                    'price' => $product->get_price(),
+                    'formatted_price' => wc_price($product->get_price())
+                ];
+            }
+
+            if (count($results) >= 20) break;
+        }
+
+        // Buscar por nombre
+        if (count($results) < 20) {
+            $name_query = new \WP_Query([
+                'post_type' => 'product',
+                'post_status' => 'publish',
+                's' => $search,
+                'posts_per_page' => 20 - count($results)
+            ]);
+
+            foreach ($name_query->posts as $post) {
+                if (in_array($post->ID, $found_ids)) continue;
+
+                $product = wc_get_product($post->ID);
+                if ($product) {
+                    $found_ids[] = $product->get_id();
+                    $results[] = [
+                        'id' => $product->get_id(),
+                        'name' => $product->get_name(),
+                        'sku' => $product->get_sku() ?: '',
+                        'price' => $product->get_price(),
+                        'formatted_price' => wc_price($product->get_price())
+                    ];
+                }
+            }
+        }
+
+        wp_send_json_success($results);
+    }
+    public function ajaxValidateConditions(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $conditions = json_decode(stripslashes($_POST['conditions'] ?? '{}'), true);
+
+        $count = \PW\OfertasAvanzadas\Services\ProductMatcher::countMatchingProducts($conditions);
+
+        wp_send_json_success(['count' => $count]);
+    }
+    public function ajaxGetMatchingProducts(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $conditions = json_decode(stripslashes($_POST['conditions'] ?? '{}'), true);
+
+        // Obtener los productos que coinciden
+        $args = [
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'posts_per_page' => 100, // Máximo 100 productos en el modal
+            'fields' => 'ids'
+        ];
+
+        // Filtrar por IDs específicos
+        if (!empty($conditions['product_ids'])) {
+            $args['post__in'] = $conditions['product_ids'];
+        }
+
+        // Filtrar por categorías
+        if (!empty($conditions['category_ids'])) {
+            $args['tax_query'] = [
+                [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'term_id',
+                    'terms' => $conditions['category_ids']
+                ]
+            ];
+        }
+
+        // Filtrar por precio
+        if (!empty($conditions['min_price']) || !empty($conditions['max_price'])) {
+            $args['meta_query'] = [
+                'relation' => 'AND'
+            ];
+
+            if (!empty($conditions['min_price'])) {
+                $args['meta_query'][] = [
+                    'key' => '_price',
+                    'value' => floatval($conditions['min_price']),
+                    'type' => 'NUMERIC',
+                    'compare' => '>='
+                ];
+            }
+
+            if (!empty($conditions['max_price'])) {
+                $args['meta_query'][] = [
+                    'key' => '_price',
+                    'value' => floatval($conditions['max_price']),
+                    'type' => 'NUMERIC',
+                    'compare' => '<='
+                ];
+            }
+        }
+
+        $query = new \WP_Query($args);
+        $product_ids = $query->posts;
+        $products = [];
+
+        foreach ($product_ids as $product_id) {
+            $product = wc_get_product($product_id);
+            if ($product) {
+                $products[] = [
+                    'id' => $product->get_id(),
+                    'name' => $product->get_name(),
+                    'sku' => $product->get_sku() ?: '',
+                    'price' => $product->get_price(),
+                    'formatted_price' => wc_price($product->get_price()),
+                    'stock' => $product->get_stock_quantity()
+                ];
+            }
+        }
+
+        wp_send_json_success([
+            'count' => count($products),
+            'products' => $products
+        ]);
     }
 }

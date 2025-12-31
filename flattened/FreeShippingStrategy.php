@@ -6,7 +6,11 @@ use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 class FreeShippingStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
-        $subtotal = array_sum(array_column($cart, 'line_total'));
+        $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
+
+        if (empty($filtered_cart)) return false;
+
+        $subtotal = array_sum(array_column($filtered_cart, 'line_total'));
         return $subtotal >= ($config['min_amount'] ?? 0);
     }
 

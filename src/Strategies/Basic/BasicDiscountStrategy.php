@@ -1,21 +1,12 @@
 <?php
-namespace PW\OfertasAvanzadas\Strategies\Urgency;
+namespace PW\OfertasAvanzadas\Strategies\Basic;
 
 use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 
-class FlashSaleStrategy implements DiscountStrategy {
+class BasicDiscountStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
-        $current_time = current_time('timestamp');
-        $start = strtotime($config['start_time'] ?? '');
-        $end = strtotime($config['end_time'] ?? '');
-
-        if ($current_time < $start || $current_time > $end) {
-            return false;
-        }
-
         $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
-
         return !empty($filtered_cart);
     }
 
@@ -35,28 +26,16 @@ class FlashSaleStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name' => 'Flash Sale (Oferta Relámpago)',
-            'description' => 'Descuento por tiempo limitado para generar urgencia',
-            'effectiveness' => 5,
-            'when_to_use' => 'Black Friday, Cyber Monday, lanzamientos de productos. Máxima efectividad en ventanas de 6-24 horas.',
-            'objective' => 'urgency'
+            'name' => 'Descuento Básico por Productos',
+            'description' => 'Aplica un descuento simple por porcentaje o monto fijo a productos seleccionados',
+            'effectiveness' => 4,
+            'when_to_use' => 'Promociones generales, descuentos estacionales, ofertas específicas por producto o categoría. Ideal cuando necesitas un descuento directo sin condiciones complejas.',
+            'objective' => 'basic'
         ];
     }
 
     public static function getConfigFields(): array {
         return [
-            [
-                'key' => 'start_time',
-                'label' => 'Hora de inicio',
-                'type' => 'datetime',
-                'required' => true
-            ],
-            [
-                'key' => 'end_time',
-                'label' => 'Hora de fin',
-                'type' => 'datetime',
-                'required' => true
-            ],
             [
                 'key' => 'discount_type',
                 'label' => 'Tipo de descuento',
@@ -68,7 +47,8 @@ class FlashSaleStrategy implements DiscountStrategy {
                 'key' => 'discount_value',
                 'label' => 'Valor del descuento',
                 'type' => 'number',
-                'required' => true
+                'required' => true,
+                'description' => 'Porcentaje (ej: 15) o monto fijo en tu moneda local'
             ]
         ];
     }

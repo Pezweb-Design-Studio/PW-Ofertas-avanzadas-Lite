@@ -8,10 +8,14 @@ class RecurringPurchaseStrategy implements DiscountStrategy {
     public function canApply(array $cart, array $config, array $conditions): bool {
         if (!is_user_logged_in()) return false;
 
+        $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
+
+        if (empty($filtered_cart)) return false;
+
         $user_id = get_current_user_id();
         $required_purchases = $config['required_purchases'] ?? 3;
 
-        foreach ($cart as $item) {
+        foreach ($filtered_cart as $item) {
             $product_id = $item['product_id'];
             $purchase_count = $this->getUserProductPurchases($user_id, $product_id);
 

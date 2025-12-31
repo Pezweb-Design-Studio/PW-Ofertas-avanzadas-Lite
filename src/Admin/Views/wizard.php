@@ -2,6 +2,10 @@
 if (!defined('ABSPATH')) exit;
 
 $objectives = [
+        'basic' => [
+                'title' => 'Básico',
+                'desc' => 'Descuento simple por porcentaje o monto fijo a productos seleccionados'
+        ],
         'aov' => [
                 'title' => 'Aumentar Valor del Carrito',
                 'desc' => 'Incrementa el ticket promedio con descuentos estratégicos'
@@ -214,7 +218,7 @@ $objectives = [
                 <label class="block text-sm font-bold mb-2">Prioridad</label>
                 <input type="number" name="priority" id="form-priority" value="10" min="1" max="100"
                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                <p class="text-sm text-gray-500 mt-1">Mayor nÃºmero = mayor prioridad (1-100)</p>
+                <p class="text-sm text-gray-500 mt-1">Mayor número = mayor prioridad (1-100)</p>
             </div>
 
             <input type="hidden" name="objective" id="form-objective">
