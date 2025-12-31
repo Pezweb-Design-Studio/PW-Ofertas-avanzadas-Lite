@@ -63,6 +63,11 @@ class CampaignRepository {
             return 0;
         }
 
+        // Invalidar cache de badges
+        if (class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
+            \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
+        }
+
         return $wpdb->insert_id;
     }
 
@@ -106,29 +111,48 @@ class CampaignRepository {
             return false;
         }
 
+        // Invalidar cache de badges
+        if (class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
+            \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
+        }
+
         return true;
     }
 
     public static function updateStatus(int $id, int $active): bool {
         global $wpdb;
-        return $wpdb->update(
+        $result = $wpdb->update(
                 "{$wpdb->prefix}pwoa_campaigns",
                 ['active' => $active],
                 ['id' => $id, 'deleted_at' => null],
                 ['%d'],
                 ['%d', '%s']
             ) !== false;
+
+        // Invalidar cache de badges
+        if ($result && class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
+            \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
+        }
+
+        return $result;
     }
 
     public static function softDelete(int $id): bool {
         global $wpdb;
-        return $wpdb->update(
+        $result = $wpdb->update(
                 "{$wpdb->prefix}pwoa_campaigns",
                 ['deleted_at' => current_time('mysql')],
                 ['id' => $id],
                 ['%s'],
                 ['%d']
             ) !== false;
+
+        // Invalidar cache de badges
+        if ($result && class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
+            \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
+        }
+
+        return $result;
     }
 
     public static function delete(int $id): bool {
