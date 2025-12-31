@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('ABSPATH')) exit;
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;

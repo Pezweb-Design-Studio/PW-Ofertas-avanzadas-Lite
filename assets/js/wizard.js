@@ -1,4 +1,4 @@
-const PWOAWizard = {
+﻿const PWOAWizard = {
 
     currentObjective: null,
     currentObjectiveTitle: null,

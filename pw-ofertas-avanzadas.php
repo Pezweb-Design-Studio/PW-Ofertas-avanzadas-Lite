@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Plugin Name: PW - Ofertas Avanzadas
  * Description: Sistema de descuentos orientado a estrategias de marketing para WooCommerce

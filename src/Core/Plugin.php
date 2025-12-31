@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 namespace PW\OfertasAvanzadas\Core;
 
 use PW\OfertasAvanzadas\Admin\AdminController;
