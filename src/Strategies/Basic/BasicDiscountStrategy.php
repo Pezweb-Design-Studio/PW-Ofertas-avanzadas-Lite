@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 namespace PW\OfertasAvanzadas\Strategies\Basic;
 
 use PW\OfertasAvanzadas\Strategies\DiscountStrategy;

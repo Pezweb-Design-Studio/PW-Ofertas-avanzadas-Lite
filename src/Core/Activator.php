@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 namespace PW\OfertasAvanzadas\Core;
 
 class Activator {

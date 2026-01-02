@@ -1,9 +1,10 @@
-<?php
+﻿<?php
 namespace PW\OfertasAvanzadas\Core;
 
 use PW\OfertasAvanzadas\Admin\AdminController;
 use PW\OfertasAvanzadas\Handlers\CartHandler;
 use PW\OfertasAvanzadas\Handlers\ProductExpiryHandler;
+use PW\OfertasAvanzadas\Handlers\ProductBadgeHandler;
 
 class Plugin {
     private static $instance = null;
@@ -22,6 +23,7 @@ class Plugin {
         }
 
         new CartHandler();
+        new ProductBadgeHandler();
         $this->loadAssets();
     }
 

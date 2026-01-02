@@ -1,21 +1,18 @@
 ﻿<?php
-namespace PW\OfertasAvanzadas\Strategies\AOV;
+namespace PW\OfertasAvanzadas\Strategies\Basic;
 
 use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 
-class MinAmountStrategy implements DiscountStrategy {
+class BasicDiscountStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
         $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
-
-        if (empty($filtered_cart)) return false;
-
-        $total = array_sum(array_column($filtered_cart, 'line_total'));
-        return $total >= ($config['min_amount'] ?? 0);
+        return !empty($filtered_cart);
     }
 
     public function calculate(array $cart, array $config): array {
         $total = array_sum(array_column($cart, 'line_total'));
+
         $amount = $config['discount_type'] === 'percentage'
             ? $total * ($config['discount_value'] / 100)
             : $config['discount_value'];
@@ -29,22 +26,16 @@ class MinAmountStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name' => 'Descuento por Monto Mínimo',
-            'description' => 'Aplica descuento cuando el carrito supera un monto específico',
-            'effectiveness' => 5,
-            'when_to_use' => 'Efectivo todo el año. Ideal para aumentar ticket promedio. Recomendado en pre-navidad y fechas comerciales.',
-            'objective' => 'aov'
+            'name' => 'Descuento Básico por Productos',
+            'description' => 'Aplica un descuento simple por porcentaje o monto fijo a productos seleccionados',
+            'effectiveness' => 4,
+            'when_to_use' => 'Promociones generales, descuentos estacionales, ofertas específicas por producto o categoría. Ideal cuando necesitas un descuento directo sin condiciones complejas.',
+            'objective' => 'basic'
         ];
     }
 
     public static function getConfigFields(): array {
         return [
-            [
-                'key' => 'min_amount',
-                'label' => 'Monto mínimo',
-                'type' => 'number',
-                'required' => true
-            ],
             [
                 'key' => 'discount_type',
                 'label' => 'Tipo de descuento',
@@ -56,7 +47,8 @@ class MinAmountStrategy implements DiscountStrategy {
                 'key' => 'discount_value',
                 'label' => 'Valor del descuento',
                 'type' => 'number',
-                'required' => true
+                'required' => true,
+                'description' => 'Porcentaje (ej: 15) o monto fijo en tu moneda local'
             ]
         ];
     }

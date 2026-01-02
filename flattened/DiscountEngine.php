@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 namespace PW\OfertasAvanzadas\Services;
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
@@ -72,6 +72,7 @@ class DiscountEngine {
 
     private static function getStrategyClass(string $strategy): string {
         $map = [
+            'basic_discount' => 'PW\\OfertasAvanzadas\\Strategies\\Basic\\BasicDiscountStrategy',
             'min_amount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\MinAmountStrategy',
             'free_shipping' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',
             'tiered_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy',

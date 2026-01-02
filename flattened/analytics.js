@@ -1,4 +1,4 @@
-const PWOAAnalytics = {
+﻿const PWOAAnalytics = {
 
     chart: null,
 

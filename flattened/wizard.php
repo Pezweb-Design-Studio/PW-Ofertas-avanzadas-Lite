@@ -1,7 +1,11 @@
-<?php
+﻿<?php
 if (!defined('ABSPATH')) exit;
 
 $objectives = [
+        'basic' => [
+                'title' => 'Básico',
+                'desc' => 'Descuento simple por porcentaje o monto fijo a productos seleccionados'
+        ],
         'aov' => [
                 'title' => 'Aumentar Valor del Carrito',
                 'desc' => 'Incrementa el ticket promedio con descuentos estratégicos'

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!defined('ABSPATH')) exit;
 
 $objectives = [
@@ -143,7 +143,7 @@ $objectives = [
             </div>
 
             <!-- FILTRADO DE PRODUCTOS -->
-            <div class="border-t pt-6 mt-6">
+            <div id="product-filters-section" class="border-t pt-6 mt-6">
                 <h3 class="text-lg font-bold mb-4">Filtrar productos (opcional)</h3>
                 <p class="text-sm text-gray-600 mb-6">Si no configuras filtros, el descuento se aplicará a todos los productos del carrito</p>
 

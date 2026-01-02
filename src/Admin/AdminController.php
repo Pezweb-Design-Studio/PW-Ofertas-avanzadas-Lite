@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 namespace PW\OfertasAvanzadas\Admin;
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
@@ -242,7 +242,8 @@ class AdminController {
             'aov' => [
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\MinAmountStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',
-                'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy'
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy',
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\BulkDiscountStrategy'
             ],
             'liquidation' => [
                 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\ExpiryBasedStrategy',

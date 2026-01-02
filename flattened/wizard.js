@@ -1,4 +1,4 @@
-const PWOAWizard = {
+﻿const PWOAWizard = {
 
     currentObjective: null,
     currentObjectiveTitle: null,
@@ -405,6 +405,7 @@ const PWOAWizard = {
 
     getStrategyKey(name) {
         const map = {
+            'Descuento Básico por Productos': 'basic_discount',
             'Descuento por Monto Mínimo': 'min_amount',
             'Envío Gratis sobre Monto Mínimo': 'free_shipping',
             'Descuento Escalonado por Cantidad': 'tiered_discount',

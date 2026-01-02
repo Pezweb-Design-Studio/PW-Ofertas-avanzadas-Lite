@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 namespace PW\OfertasAvanzadas\Services;
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
@@ -76,6 +76,7 @@ class DiscountEngine {
             'min_amount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\MinAmountStrategy',
             'free_shipping' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',
             'tiered_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy',
+            'bulk_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\BulkDiscountStrategy',
             'expiry_based' => 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\ExpiryBasedStrategy',
             'low_stock' => 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\LowStockStrategy',
             'recurring_purchase' => 'PW\\OfertasAvanzadas\\Strategies\\Loyalty\\RecurringPurchaseStrategy',
