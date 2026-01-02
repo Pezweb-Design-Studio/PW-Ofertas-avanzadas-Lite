@@ -243,7 +243,8 @@ class AdminController {
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\MinAmountStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy',
-                'PW\\OfertasAvanzadas\\Strategies\\AOV\\BulkDiscountStrategy'
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\BulkDiscountStrategy',
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\BuyXPayYStrategy'
             ],
             'liquidation' => [
                 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\ExpiryBasedStrategy',

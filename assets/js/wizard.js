@@ -116,6 +116,11 @@
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => this.searchProducts(t.value), 300);
         }
+
+        // Validación y preview para buy_x_pay_y
+        else if (t.name === 'config[buy_quantity]' || t.name === 'config[pay_quantity]') {
+            this.validateBuyXPayY();
+        }
     },
 
     async handleSubmit(e) {
@@ -124,6 +129,23 @@
 
         const form = e.target;
         const formData = new FormData(form);
+
+        // Validación especial para buy_x_pay_y
+        if (this.state.strategy === 'buy_x_pay_y') {
+            const buy = parseInt(formData.get('config[buy_quantity]')) || 0;
+            const pay = parseInt(formData.get('config[pay_quantity]')) || 0;
+
+            if (buy <= 0 || pay <= 0) {
+                alert('Error: Debes especificar cantidades válidas para "Llevas" y "Pagas"');
+                return;
+            }
+
+            if (buy <= pay) {
+                alert('Error: La cantidad a llevar debe ser mayor que la cantidad a pagar.\n\nEjemplo válido: Lleva 3, Paga 2');
+                return;
+            }
+        }
+
         const config = {};
         const repeaters = {};
 
@@ -372,8 +394,28 @@
             return;
         }
 
-        const html = fields.map(f => f.type === 'repeater' ? this.renderRepeaterField(f) : this.renderField(f)).join('');
-        document.getElementById('dynamic-fields').innerHTML = html;
+        // Detectar si es buy_x_pay_y para agrupar campos
+        const isBuyXPayY = fields.some(f => f.key === 'buy_quantity');
+
+        if (isBuyXPayY) {
+            const buyField = fields.find(f => f.key === 'buy_quantity');
+            const payField = fields.find(f => f.key === 'pay_quantity');
+            const maxField = fields.find(f => f.key === 'max_sets');
+
+            let html = '<div class="grid grid-cols-2 gap-6 mb-6">';
+            html += this.renderField(buyField);
+            html += this.renderField(payField);
+            html += '</div>';
+
+            if (maxField) {
+                html += this.renderField(maxField);
+            }
+
+            document.getElementById('dynamic-fields').innerHTML = html;
+        } else {
+            const html = fields.map(f => f.type === 'repeater' ? this.renderRepeaterField(f) : this.renderField(f)).join('');
+            document.getElementById('dynamic-fields').innerHTML = html;
+        }
     },
 
     renderField(f) {
@@ -840,12 +882,71 @@
             'Envío Gratis sobre Monto Mínimo': 'free_shipping',
             'Descuento Escalonado por Cantidad': 'tiered_discount',
             'Descuentos por Volumen (Bulk)': 'bulk_discount',
+            'Lleva X Paga Y': 'buy_x_pay_y',
             'Descuento por Fecha de Vencimiento': 'expiry_based',
             'Descuento por Stock Bajo': 'low_stock',
             'Descuento por Compras Recurrentes': 'recurring_purchase',
             'Flash Sale (Oferta Relámpago)': 'flash_sale'
         };
         return map[name] || '';
+    },
+
+    validateBuyXPayY() {
+        const buyInput = document.querySelector('[name="config[buy_quantity]"]');
+        const payInput = document.querySelector('[name="config[pay_quantity]"]');
+
+        if (!buyInput || !payInput) return;
+
+        const buy = parseInt(buyInput.value) || 0;
+        const pay = parseInt(payInput.value) || 0;
+
+        // Buscar el contenedor del grid (padre de ambos inputs)
+        const gridContainer = buyInput.closest('.grid');
+
+        // Limpiar preview y error anteriores
+        let preview = document.getElementById('buy-x-pay-y-preview');
+        if (preview) preview.remove();
+
+        let error = document.getElementById('buy-x-pay-y-error');
+        if (error) error.remove();
+
+        if (buy <= 0 || pay <= 0) return;
+
+        // Validar buy > pay
+        if (buy <= pay) {
+            buyInput.classList.add('border-red-500');
+            payInput.classList.add('border-red-500');
+
+            const err = document.createElement('div');
+            err.id = 'buy-x-pay-y-error';
+            err.className = 'bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-6';
+            err.innerHTML = '<strong>Error:</strong> La cantidad a llevar debe ser mayor que la cantidad a pagar';
+
+            gridContainer.insertAdjacentElement('afterend', err);
+            return;
+        }
+
+        // Remover error visual
+        buyInput.classList.remove('border-red-500');
+        payInput.classList.remove('border-red-500');
+
+        // Calcular descuento
+        const discount = ((buy - pay) / buy * 100).toFixed(2);
+
+        // Mostrar preview
+        const prev = document.createElement('div');
+        prev.id = 'buy-x-pay-y-preview';
+        prev.className = 'bg-blue-50 border-l-4 border-blue-500 text-blue-800 px-4 py-3 rounded mb-6';
+        prev.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div>
+                    <div class="text-sm"><strong>Vista previa:</strong> Lleva ${buy} Paga ${pay} = <strong>${discount}% OFF</strong> por set</div>
+                    <div class="text-xs text-blue-600 mt-1">Cada ${buy} unidades, ${buy - pay} ${buy - pay === 1 ? 'es' : 'son'} gratis</div>
+                </div>
+            </div>
+        `;
+
+        gridContainer.insertAdjacentElement('afterend', prev);
     }
 };
 

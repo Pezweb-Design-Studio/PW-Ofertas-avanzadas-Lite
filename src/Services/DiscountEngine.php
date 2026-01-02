@@ -77,6 +77,7 @@ class DiscountEngine {
             'free_shipping' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',
             'tiered_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy',
             'bulk_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\BulkDiscountStrategy',
+            'buy_x_pay_y' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\BuyXPayYStrategy',
             'expiry_based' => 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\ExpiryBasedStrategy',
             'low_stock' => 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\LowStockStrategy',
             'recurring_purchase' => 'PW\\OfertasAvanzadas\\Strategies\\Loyalty\\RecurringPurchaseStrategy',
