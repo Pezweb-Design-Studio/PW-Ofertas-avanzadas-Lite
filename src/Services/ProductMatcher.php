@@ -82,6 +82,18 @@ class ProductMatcher {
             'fields' => 'ids'
         ];
 
+        // Attribute filter (PRIMERO, si existe)
+        if (!empty($conditions['attribute_slug']) && !empty($conditions['attribute_value'])) {
+            if (!isset($args['tax_query'])) {
+                $args['tax_query'] = [];
+            }
+            $args['tax_query'][] = [
+                'taxonomy' => $conditions['attribute_slug'],
+                'field' => 'slug',
+                'terms' => $conditions['attribute_value']
+            ];
+        }
+
         // Product IDs filter
         if (!empty($conditions['product_ids'])) {
             $args['post__in'] = $conditions['product_ids'];
@@ -94,6 +106,9 @@ class ProductMatcher {
 
         // Category filter
         if (!empty($conditions['category_ids'])) {
+            if (!isset($args['tax_query'])) {
+                $args['tax_query'] = [];
+            }
             $args['tax_query'][] = [
                 'taxonomy' => 'product_cat',
                 'field' => 'term_id',
@@ -103,6 +118,9 @@ class ProductMatcher {
 
         // Tag filter
         if (!empty($conditions['tag_ids'])) {
+            if (!isset($args['tax_query'])) {
+                $args['tax_query'] = [];
+            }
             $args['tax_query'][] = [
                 'taxonomy' => 'product_tag',
                 'field' => 'term_id',
@@ -139,6 +157,41 @@ class ProductMatcher {
         if (isset($conditions['on_sale']) && $conditions['on_sale'] === true) {
             $args['post__in'] = wc_get_product_ids_on_sale();
         }
+
+        $query = new \WP_Query($args);
+        return $query->found_posts;
+    }
+
+    public static function matchesByAttribute(\WC_Product $product, string $attribute_slug, string $value): bool {
+        $product_value = $product->get_attribute($attribute_slug);
+        return !empty($product_value) && strtolower(trim($product_value)) === strtolower(trim($value));
+    }
+
+    public static function filterCartByAttribute(array $cart, string $attribute_slug, string $value): array {
+        if (empty($attribute_slug) || empty($value)) return [];
+
+        return array_filter($cart, function($item) use ($attribute_slug, $value) {
+            $product = wc_get_product($item['product_id']);
+            return $product && self::matchesByAttribute($product, $attribute_slug, $value);
+        });
+    }
+
+    public static function countProductsByAttribute(string $attribute_slug, string $value): int {
+        if (empty($attribute_slug) || empty($value)) return 0;
+
+        $args = [
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'tax_query' => [
+                [
+                    'taxonomy' => $attribute_slug,
+                    'field' => 'slug',
+                    'terms' => $value
+                ]
+            ]
+        ];
 
         $query = new \WP_Query($args);
         return $query->found_posts;

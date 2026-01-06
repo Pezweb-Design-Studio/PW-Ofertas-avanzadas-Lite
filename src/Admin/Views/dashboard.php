@@ -129,11 +129,10 @@ $objective_config = [
 
             <!-- Table Header -->
             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
-                <div class="grid grid-cols-12 gap-4 items-center text-sm font-semibold text-gray-700">
+                <div class="grid grid-cols-11 gap-4 items-center text-sm font-semibold text-gray-700">
                     <div class="col-span-4">Campaña</div>
                     <div class="col-span-2">Objetivo</div>
                     <div class="col-span-2 text-center">Periodo</div>
-                    <div class="col-span-1 text-center">Prioridad</div>
                     <div class="col-span-2 text-center">Estado</div>
                     <div class="col-span-1 text-right">Acciones</div>
                 </div>
@@ -147,7 +146,7 @@ $objective_config = [
                     $is_expired = $campaign->end_date && strtotime($campaign->end_date) < current_time('timestamp');
                     ?>
                     <div class="px-6 py-5 hover:bg-gray-50 transition-colors">
-                        <div class="grid grid-cols-12 gap-4 items-center">
+                        <div class="grid grid-cols-11 gap-4 items-center">
 
                             <!-- Campaign Name & Strategy -->
                             <div class="col-span-4">
@@ -187,16 +186,6 @@ $objective_config = [
                                 <?php else: ?>
                                     <span class="text-gray-400">Permanente</span>
                                 <?php endif; ?>
-                            </div>
-
-                            <!-- Priority -->
-                            <div class="col-span-1 text-center">
-                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm
-                                    <?php echo $campaign->priority >= 50 ? 'bg-red-100 text-red-700' :
-                                        ($campaign->priority >= 20 ? 'bg-yellow-100 text-yellow-700' :
-                                                'bg-gray-100 text-gray-600'); ?>">
-                                    <?php echo esc_html($campaign->priority); ?>
-                                </span>
                             </div>
 
                             <!-- Status Toggle -->

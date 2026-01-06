@@ -5,7 +5,8 @@
         strategyData: null,
         editMode: false,
         editId: null,
-        selectedProducts: []
+        selectedProducts: [],
+        validateTimeout: null
     },
 
     init() {
@@ -93,7 +94,6 @@
         }
 
         // Validate/show products
-        else if (t.id === 'btn-validate-filters') this.validateFilters();
         else if (t.id === 'btn-show-products') this.showMatchingProducts();
 
         // Modal
@@ -120,6 +120,32 @@
         // Validación y preview para buy_x_pay_y
         else if (t.name === 'config[buy_quantity]' || t.name === 'config[pay_quantity]') {
             this.validateBuyXPayY();
+        }
+
+        // Cargar términos cuando cambia el atributo
+        else if (t.name === 'config[attribute_slug]') {
+            this.loadAttributeTerms(t.value);
+            // Validar automáticamente después de cargar términos
+            clearTimeout(this.state.validateTimeout);
+            this.state.validateTimeout = setTimeout(() => this.validateFilters(), 500);
+        }
+
+        // Preview para attribute_quantity_discount
+        else if (t.name === 'config[min_quantity]' || t.name === 'config[discount_value]' || t.name === 'config[max_applications]') {
+            if (this.state.strategy === 'attribute_quantity_discount') {
+                this.previewAttributeDiscount();
+            }
+        }
+
+        // Validación automática de filtros
+        else if (
+            t.id === 'form-categories' ||
+            t.id === 'form-min-price' ||
+            t.id === 'form-max-price' ||
+            t.name === 'config[attribute_value]'
+        ) {
+            clearTimeout(this.state.validateTimeout);
+            this.state.validateTimeout = setTimeout(() => this.validateFilters(), 500);
         }
     },
 
@@ -176,7 +202,7 @@
             config: JSON.stringify(config),
             conditions: JSON.stringify(this.buildConditions()),
             stacking_mode: formData.get('stacking_mode'),
-            priority: formData.get('priority'),
+            priority: 10, // Siempre 10, campo eliminado de UI
             start_date: formData.get('start_date'),
             end_date: formData.get('end_date')
         };
@@ -240,7 +266,6 @@
 
         setTimeout(() => {
             document.getElementById('form-name').value = c.name;
-            document.getElementById('form-priority').value = c.priority;
             document.getElementById('form-stacking-mode').value = c.stacking_mode;
 
             if (c.start_date && c.start_date !== '0000-00-00 00:00:00') {
@@ -260,6 +285,9 @@
             setTimeout(() => {
                 this.loadRepeaters(c.config);
                 this.loadConditions(c.conditions);
+
+                // Validar automáticamente después de cargar todos los datos
+                setTimeout(() => this.validateFilters(), 300);
             }, 50);
         }, 100);
     },
@@ -299,6 +327,9 @@
 
         this.goToStep('config');
         this.toggleProductFilters();
+
+        // Validar automáticamente después de cargar el step
+        setTimeout(() => this.validateFilters(), 300);
     },
 
     goToStep(step) {
@@ -412,7 +443,12 @@
             }
 
             document.getElementById('dynamic-fields').innerHTML = html;
-        } else {
+        }
+        // Detectar si es attribute_quantity_discount
+        else if (fields.some(f => f.type === 'attribute_select')) {
+            this.renderAttributeFields(fields);
+        }
+        else {
             const html = fields.map(f => f.type === 'repeater' ? this.renderRepeaterField(f) : this.renderField(f)).join('');
             document.getElementById('dynamic-fields').innerHTML = html;
         }
@@ -784,12 +820,27 @@
         `).join('');
 
         document.getElementById('form-product-ids').value = this.state.selectedProducts.map(p => p.id).join(',');
+
+        // Validar automáticamente cuando cambian los productos
+        clearTimeout(this.state.validateTimeout);
+        this.state.validateTimeout = setTimeout(() => this.validateFilters(), 500);
     },
 
     buildConditions() {
         if (this.state.strategy === 'bulk_discount') return {};
 
         const cond = {};
+
+        // Si es attribute_quantity_discount, agregar atributo y valor
+        if (this.state.strategy === 'attribute_quantity_discount') {
+            const attrSlug = document.querySelector('[name="config[attribute_slug]"]')?.value;
+            const attrValue = document.querySelector('[name="config[attribute_value]"]')?.value;
+
+            if (attrSlug && attrValue) {
+                cond.attribute_slug = attrSlug;
+                cond.attribute_value = attrValue;
+            }
+        }
 
         if (this.state.selectedProducts.length) {
             cond.product_ids = this.state.selectedProducts.map(p => parseInt(p.id));
@@ -811,8 +862,10 @@
     },
 
     async validateFilters() {
-        const cond = this.buildConditions();
         const span = document.getElementById('matching-count');
+        if (!span) return; // No validar si no hay UI de filtros (ej: bulk_discount)
+
+        const cond = this.buildConditions();
         span.textContent = 'Validando...';
 
         const res = await fetch(pwoaData.ajaxUrl, {
@@ -883,6 +936,7 @@
             'Descuento Escalonado por Cantidad': 'tiered_discount',
             'Descuentos por Volumen (Bulk)': 'bulk_discount',
             'Lleva X Paga Y': 'buy_x_pay_y',
+            'Descuento por Atributos': 'attribute_quantity_discount',
             'Descuento por Fecha de Vencimiento': 'expiry_based',
             'Descuento por Stock Bajo': 'low_stock',
             'Descuento por Compras Recurrentes': 'recurring_purchase',
@@ -947,6 +1001,126 @@
         `;
 
         gridContainer.insertAdjacentElement('afterend', prev);
+    },
+
+    async renderAttributeFields(fields) {
+        let html = '';
+
+        // Cargar lista de atributos
+        const attributes = await this.fetchAttributes();
+
+        for (const field of fields) {
+            if (field.type === 'attribute_select') {
+                const opts = attributes.map(a => `<option value="${a.slug}">${a.name}</option>`).join('');
+                html += `
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold mb-2">${field.label}</label>
+                        <select name="config[${field.key}]" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Seleccionar atributo...</option>
+                            ${opts}
+                        </select>
+                        ${field.description ? `<p class="text-sm text-gray-500 mt-1">${field.description}</p>` : ''}
+                    </div>
+                `;
+            } else if (field.type === 'attribute_value_select') {
+                html += `
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold mb-2">${field.label}</label>
+                        <select name="config[${field.key}]" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" id="attribute-value-select">
+                            <option value="">Primero selecciona un atributo...</option>
+                        </select>
+                        ${field.description ? `<p class="text-sm text-gray-500 mt-1">${field.description}</p>` : ''}
+                    </div>
+                `;
+            } else if (field.key === 'discount_type' || field.key === 'discount_value') {
+                // Agrupar estos dos en grid
+                if (field.key === 'discount_type') {
+                    const valueField = fields.find(f => f.key === 'discount_value');
+                    html += '<div class="grid grid-cols-2 gap-6 mb-6">';
+                    html += this.renderField(field);
+                    html += this.renderField(valueField);
+                    html += '</div>';
+                }
+            } else if (field.key !== 'discount_value') {
+                html += this.renderField(field);
+            }
+        }
+
+        document.getElementById('dynamic-fields').innerHTML = html;
+    },
+
+    async fetchAttributes() {
+        const res = await fetch(pwoaData.ajaxUrl, {
+            method: 'POST',
+            body: new URLSearchParams({
+                action: 'pwoa_get_attributes',
+                nonce: pwoaData.nonce
+            })
+        });
+
+        const data = await res.json();
+        return data.success ? data.data : [];
+    },
+
+    async loadAttributeTerms(attributeSlug) {
+        const select = document.getElementById('attribute-value-select');
+        if (!select || !attributeSlug) return;
+
+        select.innerHTML = '<option value="">Cargando...</option>';
+
+        const res = await fetch(pwoaData.ajaxUrl, {
+            method: 'POST',
+            body: new URLSearchParams({
+                action: 'pwoa_get_attribute_terms',
+                attribute_slug: attributeSlug,
+                nonce: pwoaData.nonce
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success && data.data.length) {
+            select.innerHTML = '<option value="">Seleccionar valor...</option>' +
+                data.data.map(t => `<option value="${t.slug}">${t.name}</option>`).join('');
+        } else {
+            select.innerHTML = '<option value="">No hay valores disponibles</option>';
+        }
+
+        this.previewAttributeDiscount();
+    },
+
+    previewAttributeDiscount() {
+        const attrSlug = document.querySelector('[name="config[attribute_slug]"]')?.value;
+        const attrValue = document.querySelector('[name="config[attribute_value]"]')?.value;
+        const minQty = parseInt(document.querySelector('[name="config[min_quantity]"]')?.value) || 0;
+        const discValue = parseFloat(document.querySelector('[name="config[discount_value]"]')?.value) || 0;
+        const maxApps = parseInt(document.querySelector('[name="config[max_applications]"]')?.value) || 0;
+
+        let preview = document.getElementById('attr-discount-preview');
+        if (preview) preview.remove();
+
+        if (!attrSlug || !attrValue || minQty <= 0 || discValue <= 0) return;
+
+        const attrName = document.querySelector('[name="config[attribute_slug]"] option:checked')?.text || '';
+        const valueName = document.querySelector('[name="config[attribute_value]"] option:checked')?.text || '';
+
+        const prev = document.createElement('div');
+        prev.id = 'attr-discount-preview';
+        prev.className = 'bg-blue-50 border-l-4 border-blue-500 text-blue-800 px-4 py-3 rounded mb-6';
+
+        let maxText = maxApps > 0 ? ` (máximo ${maxApps * minQty} productos)` : '';
+
+        prev.innerHTML = `
+            <div>
+                <div class="text-sm"><strong>Vista previa:</strong> Cada ${minQty} productos de "${valueName}" = <strong>${discValue}% OFF</strong></div>
+                <div class="text-xs text-blue-600 mt-1">Máximo ${maxApps > 0 ? maxApps + ' aplicaciones' : 'ilimitado'}${maxText}</div>
+            </div>
+        `;
+
+        const maxField = document.querySelector('[name="config[max_applications]"]');
+        if (maxField) {
+            maxField.closest('.mb-6').insertAdjacentElement('afterend', prev);
+        }
     }
 };
 

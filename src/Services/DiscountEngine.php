@@ -25,11 +25,13 @@ class DiscountEngine {
 
             if (!$strategy->canApply($cart, $config, $conditions)) continue;
 
+            // Workaround: pasar conditions dentro de config para strategies que lo necesiten
+            $config['_conditions'] = $conditions;
+
             $discount = $strategy->calculate($cart, $config);
             $discount['campaign_id'] = $campaign->id;
             $discount['campaign_name'] = $campaign->name;
             $discount['stacking_mode'] = $campaign->stacking_mode;
-            $discount['priority'] = $campaign->priority;
 
             $applicable[] = $discount;
         }
@@ -42,14 +44,17 @@ class DiscountEngine {
             return ['amount' => 0];
         }
 
-        // Verificar si alguno permite stacking
+        // PASO 1: Verificar si alguna campaña permite stacking
         $stack_discounts = array_filter($applicable, fn($d) => $d['stacking_mode'] === 'stack');
 
         if (!empty($stack_discounts)) {
+            // Modo STACK: Sumar todos los descuentos que permiten apilamiento
             return self::stackDiscounts($stack_discounts);
         }
 
-        // Modo priority: retornar el de mayor descuento
+        // PASO 2: Modo PRIORITY (mejor descuento)
+        // Ordenar por amount descendente, gana el de mayor descuento
+        // Si hay empate en amount, se aplica cualquiera (primera del array)
         usort($applicable, fn($a, $b) => $b['amount'] <=> $a['amount']);
 
         return [
@@ -78,6 +83,7 @@ class DiscountEngine {
             'tiered_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy',
             'bulk_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\BulkDiscountStrategy',
             'buy_x_pay_y' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\BuyXPayYStrategy',
+            'attribute_quantity_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\AttributeQuantityDiscountStrategy',
             'expiry_based' => 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\ExpiryBasedStrategy',
             'low_stock' => 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\LowStockStrategy',
             'recurring_purchase' => 'PW\\OfertasAvanzadas\\Strategies\\Loyalty\\RecurringPurchaseStrategy',

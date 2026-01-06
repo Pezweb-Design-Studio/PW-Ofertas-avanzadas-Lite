@@ -17,6 +17,10 @@ class AdminController {
         add_action('wp_ajax_pwoa_search_products', [$this, 'ajaxSearchProducts']);
         add_action('wp_ajax_pwoa_validate_conditions', [$this, 'ajaxValidateConditions']);
         add_action('wp_ajax_pwoa_get_matching_products', [$this, 'ajaxGetMatchingProducts']);
+        add_action('wp_ajax_pwoa_get_attributes', [$this, 'ajaxGetAttributes']);
+        add_action('wp_ajax_pwoa_get_attribute_terms', [$this, 'ajaxGetAttributeTerms']);
+        add_action('wp_ajax_pwoa_validate_attribute', [$this, 'ajaxValidateAttribute']);
+        add_action('wp_ajax_pwoa_get_products_by_attribute', [$this, 'ajaxGetProductsByAttribute']);
     }
 
     public function addMenuPages(): void {
@@ -244,7 +248,8 @@ class AdminController {
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\AOV\\BulkDiscountStrategy',
-                'PW\\OfertasAvanzadas\\Strategies\\AOV\\BuyXPayYStrategy'
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\BuyXPayYStrategy',
+                'PW\\OfertasAvanzadas\\Strategies\\AOV\\AttributeQuantityDiscountStrategy'
             ],
             'liquidation' => [
                 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\ExpiryBasedStrategy',
@@ -389,6 +394,17 @@ class AdminController {
             'fields' => 'ids'
         ];
 
+        // Filtrar por atributo (PRIMERO, si existe)
+        if (!empty($conditions['attribute_slug']) && !empty($conditions['attribute_value'])) {
+            $args['tax_query'] = [
+                [
+                    'taxonomy' => $conditions['attribute_slug'],
+                    'field' => 'slug',
+                    'terms' => $conditions['attribute_value']
+                ]
+            ];
+        }
+
         // Filtrar por IDs específicos
         if (!empty($conditions['product_ids'])) {
             $args['post__in'] = $conditions['product_ids'];
@@ -396,12 +412,13 @@ class AdminController {
 
         // Filtrar por categorías
         if (!empty($conditions['category_ids'])) {
-            $args['tax_query'] = [
-                [
-                    'taxonomy' => 'product_cat',
-                    'field' => 'term_id',
-                    'terms' => $conditions['category_ids']
-                ]
+            if (!isset($args['tax_query'])) {
+                $args['tax_query'] = [];
+            }
+            $args['tax_query'][] = [
+                'taxonomy' => 'product_cat',
+                'field' => 'term_id',
+                'terms' => $conditions['category_ids']
             ];
         }
 
@@ -429,6 +446,125 @@ class AdminController {
                 ];
             }
         }
+
+        $query = new \WP_Query($args);
+        $product_ids = $query->posts;
+        $products = [];
+
+        foreach ($product_ids as $product_id) {
+            $product = wc_get_product($product_id);
+            if ($product) {
+                $products[] = [
+                    'id' => $product->get_id(),
+                    'name' => $product->get_name(),
+                    'sku' => $product->get_sku() ?: '',
+                    'price' => $product->get_price(),
+                    'formatted_price' => wc_price($product->get_price()),
+                    'stock' => $product->get_stock_quantity()
+                ];
+            }
+        }
+
+        wp_send_json_success([
+            'count' => count($products),
+            'products' => $products
+        ]);
+    }
+
+    public function ajaxGetAttributes(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $attributes = wc_get_attribute_taxonomies();
+        $result = [];
+
+        foreach ($attributes as $attr) {
+            $result[] = [
+                'slug' => wc_attribute_taxonomy_name($attr->attribute_name),
+                'name' => $attr->attribute_label
+            ];
+        }
+
+        wp_send_json_success($result);
+    }
+
+    public function ajaxGetAttributeTerms(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $attribute_slug = sanitize_text_field($_POST['attribute_slug'] ?? '');
+
+        if (empty($attribute_slug)) {
+            wp_send_json_error('Atributo no especificado');
+        }
+
+        $terms = get_terms([
+            'taxonomy' => $attribute_slug,
+            'hide_empty' => false
+        ]);
+
+        if (is_wp_error($terms)) {
+            wp_send_json_error('Error al obtener términos');
+        }
+
+        $result = [];
+        foreach ($terms as $term) {
+            $result[] = [
+                'slug' => $term->slug,
+                'name' => $term->name
+            ];
+        }
+
+        wp_send_json_success($result);
+    }
+
+    public function ajaxValidateAttribute(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $attribute_slug = sanitize_text_field($_POST['attribute_slug'] ?? '');
+        $attribute_value = sanitize_text_field($_POST['attribute_value'] ?? '');
+
+        $count = \PW\OfertasAvanzadas\Services\ProductMatcher::countProductsByAttribute(
+            $attribute_slug,
+            $attribute_value
+        );
+
+        wp_send_json_success(['count' => $count]);
+    }
+
+    public function ajaxGetProductsByAttribute(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $attribute_slug = sanitize_text_field($_POST['attribute_slug'] ?? '');
+        $attribute_value = sanitize_text_field($_POST['attribute_value'] ?? '');
+
+        $args = [
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'posts_per_page' => 100,
+            'fields' => 'ids',
+            'tax_query' => [
+                [
+                    'taxonomy' => $attribute_slug,
+                    'field' => 'slug',
+                    'terms' => $attribute_value
+                ]
+            ]
+        ];
 
         $query = new \WP_Query($args);
         $product_ids = $query->posts;

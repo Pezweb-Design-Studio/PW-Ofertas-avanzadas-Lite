@@ -199,12 +199,7 @@ $objectives = [
                         <span class="font-bold">Productos que cumplen criterios:</span>
                         <span id="matching-count" class="ml-2 font-mono">-</span>
                     </p>
-                    <div class="flex gap-3 mt-3">
-                        <button type="button"
-                                id="btn-validate-filters"
-                                class="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                            Validar filtros
-                        </button>
+                    <div class="mt-3">
                         <button type="button"
                                 id="btn-show-products"
                                 class="text-sm bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
