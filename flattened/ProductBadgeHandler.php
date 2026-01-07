@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 namespace PW\OfertasAvanzadas\Handlers;
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
@@ -45,6 +45,24 @@ class ProductBadgeHandler {
                 background: #10b981 !important;
             }
             
+            .pwoa-custom-badge {
+                position: absolute !important;
+                top: 48px !important;
+                right: 8px !important;
+                background: #10b981 !important;
+                color: white !important;
+                padding: 4px 8px !important;
+                border-radius: 6px !important;
+                font-size: 11px !important;
+                font-weight: 600 !important;
+                line-height: 1.2 !important;
+                z-index: 998 !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+                pointer-events: none !important;
+                max-width: 120px !important;
+                text-align: center !important;
+            }
+            
             /* Para bloques de WooCommerce */
             .wc-block-components-product-image {
                 position: relative !important;
@@ -77,9 +95,9 @@ class ProductBadgeHandler {
         } else {
             // Para listados de productos
             $products = wc_get_products([
-                'limit' => 100,
-                'status' => 'publish',
-                'return' => 'ids'
+                    'limit' => 100,
+                    'status' => 'publish',
+                    'return' => 'ids'
             ]);
 
             foreach ($products as $product_id) {
@@ -256,7 +274,7 @@ class ProductBadgeHandler {
     }
 
     private function calculateBestDiscount($product, array $campaigns): array {
-        $best = ['amount' => 0, 'type' => 'percentage', 'value' => 0];
+        $best = ['amount' => 0, 'type' => 'percentage', 'value' => 0, 'badge_text' => ''];
 
         foreach ($campaigns as $campaign) {
             $conditions = json_decode($campaign->conditions, true) ?? [];
@@ -265,17 +283,59 @@ class ProductBadgeHandler {
                 $config = json_decode($campaign->config, true);
                 $discount_type = $campaign->discount_type;
 
-                $discount_value = $this->getDiscountValue($product, $config, $discount_type, $campaign->strategy);
+                // Para bulk_discount, buscar config específica del producto
+                if ($campaign->strategy === 'bulk_discount') {
+                    $bulk_result = $this->getBulkDiscountForProduct($product, $config);
 
-                if ($discount_value <= 0) continue;
+                    if ($bulk_result['value'] > 0) {
+                        $discount_amount = $this->calculateAmount($product, $bulk_result['value'], $bulk_result['type']);
 
-                $discount_amount = $this->calculateAmount($product, $discount_value, $discount_type);
+                        if ($discount_amount > $best['amount']) {
+                            $best = [
+                                    'amount' => $discount_amount,
+                                    'type' => $bulk_result['type'],
+                                    'value' => $bulk_result['value'],
+                                    'badge_text' => $bulk_result['badge_text']
+                            ];
+                        }
+                    }
+                } else {
+                    $discount_value = $this->getDiscountValue($product, $config, $discount_type, $campaign->strategy);
 
-                if ($discount_amount > $best['amount']) {
+                    if ($discount_value <= 0) continue;
+
+                    $discount_amount = $this->calculateAmount($product, $discount_value, $discount_type);
+
+                    if ($discount_amount > $best['amount']) {
+                        $best = [
+                                'amount' => $discount_amount,
+                                'type' => $discount_type,
+                                'value' => $discount_value,
+                                'badge_text' => ''
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $best;
+    }
+
+    private function getBulkDiscountForProduct($product, array $config): array {
+        $bulk_items = $config['bulk_items'] ?? [];
+        $product_id = $product->get_id();
+
+        $best = ['value' => 0, 'type' => 'percentage', 'badge_text' => ''];
+
+        foreach ($bulk_items as $bulk_item) {
+            if (intval($bulk_item['product_id'] ?? 0) === $product_id) {
+                $discount_value = floatval($bulk_item['discount_value'] ?? 0);
+
+                if ($discount_value > $best['value']) {
                     $best = [
-                        'amount' => $discount_amount,
-                        'type' => $discount_type,
-                        'value' => $discount_value
+                            'value' => $discount_value,
+                            'type' => $bulk_item['discount_type'] ?? 'percentage',
+                            'badge_text' => $bulk_item['badge_text'] ?? ''
                     ];
                 }
             }
@@ -364,19 +424,34 @@ class ProductBadgeHandler {
     }
 
     private function renderBadge(array $discount): string {
-        if ($discount['type'] === 'percentage') {
-            $label = round($discount['value']) . '%';
-            $class = 'pwoa-discount-badge';
-        } else {
-            $label = wc_price($discount['value']);
-            $class = 'pwoa-discount-badge fixed-amount';
+        $badges = '';
+
+        // Badge de descuento (siempre se muestra si hay descuento)
+        if ($discount['amount'] > 0) {
+            if ($discount['type'] === 'percentage') {
+                $label = round($discount['value']) . '%';
+                $class = 'pwoa-discount-badge';
+            } else {
+                $label = wc_price($discount['value']);
+                $class = 'pwoa-discount-badge fixed-amount';
+            }
+
+            $badges .= sprintf(
+                    '<span class="%s">-%s</span>',
+                    esc_attr($class),
+                    $label
+            );
         }
 
-        return sprintf(
-            '<span class="%s">-%s</span>',
-            esc_attr($class),
-            $label
-        );
+        // Badge custom (opcional, solo si existe badge_text)
+        if (!empty($discount['badge_text'])) {
+            $badges .= sprintf(
+                    '<span class="pwoa-custom-badge">%s</span>',
+                    esc_html($discount['badge_text'])
+            );
+        }
+
+        return $badges;
     }
 
     public static function clearCache(): void {

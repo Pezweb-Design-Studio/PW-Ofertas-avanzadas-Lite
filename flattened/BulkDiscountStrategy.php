@@ -29,23 +29,6 @@ class BulkDiscountStrategy implements DiscountStrategy {
         $total_discount = 0;
         $affected_items = [];
 
-        // Obtener campaign_id desde config (lo pasaremos desde DiscountEngine)
-        $campaign_id = $config['_campaign_id'] ?? 0;
-        $units_sold = [];
-
-        // Cargar units_sold desde DB si tenemos campaign_id
-        if ($campaign_id > 0) {
-            global $wpdb;
-            $campaign = $wpdb->get_row($wpdb->prepare(
-                "SELECT units_sold FROM {$wpdb->prefix}pwoa_campaigns WHERE id = %d",
-                $campaign_id
-            ));
-
-            if ($campaign && $campaign->units_sold) {
-                $units_sold = json_decode($campaign->units_sold, true) ?: [];
-            }
-        }
-
         foreach ($bulk_items as $bulk_item) {
             $product_id = intval($bulk_item['product_id'] ?? 0);
             $max_quantity = intval($bulk_item['max_quantity'] ?? 0);
@@ -54,23 +37,12 @@ class BulkDiscountStrategy implements DiscountStrategy {
 
             if ($max_quantity <= 0 || $discount_value <= 0) continue;
 
-            // Calcular unidades ya vendidas para este producto
-            $sold = intval($units_sold[$product_id] ?? 0);
-            $available = max(0, $max_quantity - $sold);
-
-            // Si no hay unidades disponibles, skip
-            if ($available <= 0) continue;
-
             // Buscar producto en cart
             foreach ($cart as $key => $cart_item) {
                 if ($cart_item['product_id'] != $product_id) continue;
 
                 $cart_qty = intval($cart_item['quantity']);
-
-                // Aplicar descuento solo a unidades disponibles
-                $discounted_qty = min($cart_qty, $available);
-
-                if ($discounted_qty <= 0) continue;
+                $discounted_qty = min($cart_qty, $max_quantity);
 
                 // Calcular precio por unidad
                 $price_per_unit = $cart_item['line_total'] / $cart_qty;

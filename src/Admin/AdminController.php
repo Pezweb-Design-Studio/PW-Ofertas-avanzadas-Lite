@@ -21,6 +21,7 @@ class AdminController {
         add_action('wp_ajax_pwoa_get_attribute_terms', [$this, 'ajaxGetAttributeTerms']);
         add_action('wp_ajax_pwoa_validate_attribute', [$this, 'ajaxValidateAttribute']);
         add_action('wp_ajax_pwoa_get_products_by_attribute', [$this, 'ajaxGetProductsByAttribute']);
+        add_action('wp_ajax_pwoa_reset_units_sold', [$this, 'ajaxResetUnitsSold']);
     }
 
     public function addMenuPages(): void {
@@ -588,5 +589,32 @@ class AdminController {
             'count' => count($products),
             'products' => $products
         ]);
+    }
+
+    public function ajaxResetUnitsSold(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $campaign_id = intval($_POST['campaign_id'] ?? 0);
+
+        if (!$campaign_id) {
+            wp_send_json_error('ID de campaña inválido');
+        }
+
+        $success = CampaignRepository::resetUnitsSold($campaign_id);
+
+        if (!$success) {
+            wp_send_json_error('Error al resetear contador');
+        }
+
+        // Invalidar cache de badges
+        if (class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
+            \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
+        }
+
+        wp_send_json_success(['message' => 'Contador reseteado correctamente']);
     }
 }

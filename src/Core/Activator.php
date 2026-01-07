@@ -20,6 +20,7 @@ class Activator {
             active TINYINT(1) DEFAULT 1,
             start_date DATETIME,
             end_date DATETIME,
+            units_sold JSON,
             deleted_at TIMESTAMP NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

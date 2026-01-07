@@ -1,15 +1,15 @@
-﻿<?php
+<?php
 if (!defined('ABSPATH')) exit;
 ?>
 
 <div class="wrap">
 
-    <h1 class="text-4xl font-bold mb-12">AnalÃ­ticas</h1>
+    <h1 class="text-4xl font-bold mb-12">AnalÃÂ­ticas</h1>
 
     <div class="grid grid-cols-4 gap-6 mb-12">
 
         <div class="bg-white p-8 rounded-lg shadow">
-            <p class="text-gray-500 mb-2">Ã“rdenes con Descuento</p>
+            <p class="text-gray-500 mb-2">Ãârdenes con Descuento</p>
             <p class="text-4xl font-bold"><?php echo number_format($stats['total_orders']); ?></p>
         </div>
 
@@ -31,18 +31,18 @@ if (!defined('ABSPATH')) exit;
     </div>
 
     <div class="bg-white p-8 rounded-lg shadow">
-        <h2 class="text-2xl font-bold mb-8">Top Campañas</h2>
+        <h2 class="text-2xl font-bold mb-8">Top CampaÃ±as</h2>
 
         <?php
         $top_campaigns = \PW\OfertasAvanzadas\Repositories\StatsRepository::getTopCampaigns();
         if (empty($top_campaigns)):
             ?>
-            <p class="text-gray-500 text-center py-8">Sin datos de campañas aún</p>
+            <p class="text-gray-500 text-center py-8">Sin datos de campaÃ±as aÃºn</p>
         <?php else: ?>
             <table class="w-full">
                 <thead>
                 <tr class="border-b">
-                    <th class="text-left py-4">Campaña</th>
+                    <th class="text-left py-4">CampaÃ±a</th>
                     <th class="text-right py-4">Usos</th>
                     <th class="text-right py-4">Total Descontado</th>
                 </tr>

@@ -209,15 +209,9 @@ $objectives = [
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-bold mb-2">Prioridad</label>
-                <input type="number" name="priority" id="form-priority" value="10" min="1" max="100"
-                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                <p class="text-sm text-gray-500 mt-1">Mayor número = mayor prioridad (1-100)</p>
-            </div>
-
             <input type="hidden" name="objective" id="form-objective">
             <input type="hidden" name="strategy" id="form-strategy">
+            <input type="hidden" name="priority" id="form-priority" value="10">
             <input type="hidden" name="discount_type" id="form-discount-type">
 
             <div class="flex gap-4 pt-4">

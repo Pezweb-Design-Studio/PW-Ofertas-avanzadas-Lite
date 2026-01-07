@@ -9,6 +9,7 @@ $strategy_labels = [
         'min_amount' => 'Monto Mínimo',
         'free_shipping' => 'Envío Gratis',
         'tiered_discount' => 'Descuento Escalonado',
+        'bulk_discount' => 'Volumen (Bulk)',
         'expiry_based' => 'Por Vencimiento',
         'low_stock' => 'Stock Bajo',
         'recurring_purchase' => 'Compra Recurrente',
@@ -163,6 +164,42 @@ $objective_config = [
                                         </span>
                                     <?php endif; ?>
                                 </div>
+
+                                <?php if ($campaign->strategy === 'bulk_discount'):
+                                    $config = json_decode($campaign->config, true);
+                                    $units_sold = $campaign->units_sold ? json_decode($campaign->units_sold, true) : [];
+                                    $bulk_items = $config['bulk_items'] ?? [];
+
+                                    if (!empty($bulk_items)):
+                                        $total_sold = 0;
+                                        $total_max = 0;
+
+                                        foreach ($bulk_items as $item) {
+                                            $product_id = $item['product_id'] ?? 0;
+                                            $max_qty = intval($item['max_quantity'] ?? 0);
+                                            $sold = intval($units_sold[$product_id] ?? 0);
+
+                                            $total_sold += $sold;
+                                            $total_max += $max_qty;
+                                        }
+
+                                        $percentage = $total_max > 0 ? min(100, ($total_sold / $total_max) * 100) : 0;
+                                        $color = $percentage >= 80 ? 'red' : ($percentage >= 50 ? 'yellow' : 'green');
+                                        ?>
+                                        <div class="mt-2">
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <span class="text-gray-600">Unidades vendidas:</span>
+                                                <span class="font-semibold text-<?php echo $color; ?>-700">
+                                            <?php echo number_format($total_sold); ?> / <?php echo number_format($total_max); ?>
+                                        </span>
+                                                <span class="text-gray-400">(<?php echo number_format($percentage, 1); ?>%)</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                                <div class="bg-<?php echo $color; ?>-500 h-1.5 rounded-full transition-all"
+                                                     style="width: <?php echo min(100, $percentage); ?>%"></div>
+                                            </div>
+                                        </div>
+                                    <?php endif; endif; ?>
                             </div>
 
                             <!-- Objective Badge -->
@@ -224,6 +261,16 @@ $objective_config = [
                             <!-- Actions -->
                             <div class="col-span-1 text-right">
                                 <div class="flex items-center justify-end gap-2">
+                                    <?php if ($campaign->strategy === 'bulk_discount'): ?>
+                                        <button class="btn-reset text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                                                data-campaign-id="<?php echo esc_attr($campaign->id); ?>"
+                                                data-campaign-name="<?php echo esc_attr($campaign->name); ?>"
+                                                title="Resetear contador">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                        </button>
+                                    <?php endif; ?>
                                     <button class="btn-edit text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
                                             data-campaign-id="<?php echo esc_attr($campaign->id); ?>"
                                             title="Editar campaña">
@@ -349,6 +396,46 @@ $objective_config = [
                 setTimeout(() => {
                     window.location.reload();
                 }, 300);
+
+            } catch (error) {
+                this.disabled = false;
+                this.style.opacity = '1';
+                alert('Error: ' + error.message);
+            }
+        });
+    });
+
+    // Botones de Reset (solo bulk campaigns)
+    document.querySelectorAll('.btn-reset').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const campaignId = this.dataset.campaignId;
+            const campaignName = this.dataset.campaignName;
+
+            if (!confirm(`¿Resetear contador de unidades vendidas de "${campaignName}"?\n\nEsto pondrá en 0 el contador de todas las unidades vendidas.`)) {
+                return;
+            }
+
+            this.disabled = true;
+            this.style.opacity = '0.5';
+
+            try {
+                const response = await fetch(ajaxurl, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'pwoa_reset_units_sold',
+                        campaign_id: campaignId,
+                        nonce: '<?php echo wp_create_nonce('pwoa_nonce'); ?>'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.data || 'Error al resetear');
+                }
+
+                alert('✓ ' + data.data.message);
+                window.location.reload();
 
             } catch (error) {
                 this.disabled = false;

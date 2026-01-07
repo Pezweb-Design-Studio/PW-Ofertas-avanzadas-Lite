@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (!defined('ABSPATH')) exit;
 
 $objectives = [
@@ -143,7 +143,7 @@ $objectives = [
             </div>
 
             <!-- FILTRADO DE PRODUCTOS -->
-            <div class="border-t pt-6 mt-6">
+            <div id="product-filters-section" class="border-t pt-6 mt-6">
                 <h3 class="text-lg font-bold mb-4">Filtrar productos (opcional)</h3>
                 <p class="text-sm text-gray-600 mb-6">Si no configuras filtros, el descuento se aplicará a todos los productos del carrito</p>
 
@@ -199,12 +199,7 @@ $objectives = [
                         <span class="font-bold">Productos que cumplen criterios:</span>
                         <span id="matching-count" class="ml-2 font-mono">-</span>
                     </p>
-                    <div class="flex gap-3 mt-3">
-                        <button type="button"
-                                id="btn-validate-filters"
-                                class="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                            Validar filtros
-                        </button>
+                    <div class="mt-3">
                         <button type="button"
                                 id="btn-show-products"
                                 class="text-sm bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
@@ -214,15 +209,9 @@ $objectives = [
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-bold mb-2">Prioridad</label>
-                <input type="number" name="priority" id="form-priority" value="10" min="1" max="100"
-                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                <p class="text-sm text-gray-500 mt-1">Mayor número = mayor prioridad (1-100)</p>
-            </div>
-
             <input type="hidden" name="objective" id="form-objective">
             <input type="hidden" name="strategy" id="form-strategy">
+            <input type="hidden" name="priority" id="form-priority" value="10">
             <input type="hidden" name="discount_type" id="form-discount-type">
 
             <div class="flex gap-4 pt-4">
