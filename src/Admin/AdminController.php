@@ -8,6 +8,7 @@ class AdminController {
 
     public function __construct() {
         add_action('admin_menu', [$this, 'addMenuPages']);
+        add_action('wp_ajax_pwoa_get_wizard_data', [$this, 'ajaxGetWizardData']);
         add_action('wp_ajax_pwoa_get_strategies', [$this, 'ajaxGetStrategies']);
         add_action('wp_ajax_pwoa_save_campaign', [$this, 'ajaxSaveCampaign']);
         add_action('wp_ajax_pwoa_update_campaign', [$this, 'ajaxUpdateCampaign']);
@@ -22,6 +23,7 @@ class AdminController {
         add_action('wp_ajax_pwoa_validate_attribute', [$this, 'ajaxValidateAttribute']);
         add_action('wp_ajax_pwoa_get_products_by_attribute', [$this, 'ajaxGetProductsByAttribute']);
         add_action('wp_ajax_pwoa_reset_units_sold', [$this, 'ajaxResetUnitsSold']);
+        add_action('wp_ajax_pwoa_get_campaigns_paginated', [$this, 'ajaxGetCampaignsPaginated']);
     }
 
     public function addMenuPages(): void {
@@ -55,7 +57,13 @@ class AdminController {
     }
 
     public function renderDashboard(): void {
-        $campaigns = CampaignRepository::getAll();
+        $page = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+        $per_page = 20;
+
+        $campaigns = CampaignRepository::getPaginated($page, $per_page);
+        $total = CampaignRepository::getCount();
+        $total_pages = ceil($total / $per_page);
+
         include PWOA_PATH . 'src/Admin/Views/dashboard.php';
     }
 
@@ -68,6 +76,67 @@ class AdminController {
         include PWOA_PATH . 'src/Admin/Views/analytics.php';
     }
 
+    // ⚡ NUEVO: Endpoint unificado para wizard
+    public function ajaxGetWizardData(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $campaign_id = isset($_POST['campaign_id']) ? intval($_POST['campaign_id']) : 0;
+        $objective = sanitize_text_field($_POST['objective'] ?? '');
+
+        $response = [
+            'attributes' => $this->getCachedAttributes(),
+            'categories' => $this->getCachedCategories()
+        ];
+
+        // Si es edición, cargar campaña + estrategias de ese objetivo
+        if ($campaign_id > 0) {
+            $campaign = CampaignRepository::getById($campaign_id);
+
+            if (!$campaign) {
+                wp_send_json_error('Campaña no encontrada');
+            }
+
+            $campaign->config = json_decode($campaign->config, true);
+            $campaign->conditions = json_decode($campaign->conditions, true);
+
+            $response['campaign'] = $campaign;
+            $response['strategies'] = $this->getCachedStrategies($campaign->objective);
+        }
+        // Si es creación con objetivo, solo estrategias
+        elseif (!empty($objective)) {
+            $response['strategies'] = $this->getCachedStrategies($objective);
+        }
+
+        wp_send_json_success($response);
+    }
+
+    // ⚡ NUEVO: Paginación de campañas
+    public function ajaxGetCampaignsPaginated(): void {
+        check_ajax_referer('pwoa_nonce', 'nonce');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error('Permisos insuficientes');
+        }
+
+        $page = isset($_POST['page']) ? max(1, intval($_POST['page'])) : 1;
+        $per_page = 20;
+
+        $campaigns = CampaignRepository::getPaginated($page, $per_page);
+        $total = CampaignRepository::getCount();
+
+        wp_send_json_success([
+            'campaigns' => $campaigns,
+            'total' => $total,
+            'page' => $page,
+            'per_page' => $per_page,
+            'total_pages' => ceil($total / $per_page)
+        ]);
+    }
+
     public function ajaxGetStrategies(): void {
         check_ajax_referer('pwoa_nonce', 'nonce');
 
@@ -76,7 +145,7 @@ class AdminController {
         }
 
         $objective = sanitize_text_field($_POST['objective'] ?? '');
-        $strategies = $this->getStrategiesByObjective($objective);
+        $strategies = $this->getCachedStrategies($objective);
 
         wp_send_json_success($strategies);
     }
@@ -91,7 +160,6 @@ class AdminController {
         $config = json_decode(stripslashes($_POST['config'] ?? '{}'), true);
         $strategy = sanitize_text_field($_POST['strategy'] ?? '');
 
-        // Determinar discount_type según la estrategia
         $discount_type = sanitize_text_field($_POST['discount_type'] ?? '');
 
         if (empty($discount_type)) {
@@ -162,7 +230,6 @@ class AdminController {
             wp_send_json_error('Campaña no encontrada');
         }
 
-        // Decodificar JSON para enviar al frontend
         $campaign->config = json_decode($campaign->config, true);
         $campaign->conditions = json_decode($campaign->conditions, true);
 
@@ -229,7 +296,6 @@ class AdminController {
 
         $campaign_id = intval($_POST['campaign_id'] ?? 0);
 
-        // Soft delete
         $success = CampaignRepository::softDelete($campaign_id);
 
         if (!$success) {
@@ -237,6 +303,63 @@ class AdminController {
         }
 
         wp_send_json_success(['message' => 'Campaña eliminada correctamente']);
+    }
+
+    // ⚡ OPTIMIZADO: Caché de estrategias
+    private function getCachedStrategies(string $objective): array {
+        $cache_key = 'pwoa_strategies_' . $objective;
+        $strategies = get_transient($cache_key);
+
+        if ($strategies === false) {
+            $strategies = $this->getStrategiesByObjective($objective);
+            set_transient($cache_key, $strategies, HOUR_IN_SECONDS);
+        }
+
+        return $strategies;
+    }
+
+    // ⚡ OPTIMIZADO: Caché de atributos
+    private function getCachedAttributes(): array {
+        $cache_key = 'pwoa_attributes';
+        $attributes = get_transient($cache_key);
+
+        if ($attributes === false) {
+            $attrs = wc_get_attribute_taxonomies();
+            $attributes = [];
+
+            foreach ($attrs as $attr) {
+                $attributes[] = [
+                    'slug' => wc_attribute_taxonomy_name($attr->attribute_name),
+                    'name' => $attr->attribute_label
+                ];
+            }
+
+            set_transient($cache_key, $attributes, HOUR_IN_SECONDS);
+        }
+
+        return $attributes;
+    }
+
+    // ⚡ OPTIMIZADO: Caché de categorías
+    private function getCachedCategories(): array {
+        $cache_key = 'pwoa_categories';
+        $categories = get_transient($cache_key);
+
+        if ($categories === false) {
+            $cats = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false]);
+            $categories = [];
+
+            foreach ($cats as $cat) {
+                $categories[] = [
+                    'id' => $cat->term_id,
+                    'name' => $cat->name
+                ];
+            }
+
+            set_transient($cache_key, $categories, HOUR_IN_SECONDS);
+        }
+
+        return $categories;
     }
 
     private function getStrategiesByObjective(string $objective): array {
@@ -277,6 +400,7 @@ class AdminController {
 
         return $result;
     }
+
     public function ajaxSearchProducts(): void {
         check_ajax_referer('pwoa_nonce', 'nonce');
 
@@ -295,7 +419,6 @@ class AdminController {
         $results = [];
         $found_ids = [];
 
-        // Buscar por ID exacto (si es numérico)
         if (is_numeric($search)) {
             $product = wc_get_product(intval($search));
             if ($product && $product->get_status() === 'publish') {
@@ -310,7 +433,6 @@ class AdminController {
             }
         }
 
-        // Buscar por SKU
         $sku_query = $wpdb->prepare(
             "SELECT post_id FROM {$wpdb->postmeta} 
             WHERE meta_key = '_sku' 
@@ -337,7 +459,6 @@ class AdminController {
             if (count($results) >= 20) break;
         }
 
-        // Buscar por nombre
         if (count($results) < 20) {
             $name_query = new \WP_Query([
                 'post_type' => 'product',
@@ -365,6 +486,7 @@ class AdminController {
 
         wp_send_json_success($results);
     }
+
     public function ajaxValidateConditions(): void {
         check_ajax_referer('pwoa_nonce', 'nonce');
 
@@ -378,6 +500,7 @@ class AdminController {
 
         wp_send_json_success(['count' => $count]);
     }
+
     public function ajaxGetMatchingProducts(): void {
         check_ajax_referer('pwoa_nonce', 'nonce');
 
@@ -387,15 +510,13 @@ class AdminController {
 
         $conditions = json_decode(stripslashes($_POST['conditions'] ?? '{}'), true);
 
-        // Obtener los productos que coinciden
         $args = [
             'post_type' => 'product',
             'post_status' => 'publish',
-            'posts_per_page' => 100, // Máximo 100 productos en el modal
+            'posts_per_page' => 20,
             'fields' => 'ids'
         ];
 
-        // Filtrar por atributo (PRIMERO, si existe)
         if (!empty($conditions['attribute_slug']) && !empty($conditions['attribute_value'])) {
             $args['tax_query'] = [
                 [
@@ -406,12 +527,10 @@ class AdminController {
             ];
         }
 
-        // Filtrar por IDs específicos
         if (!empty($conditions['product_ids'])) {
             $args['post__in'] = $conditions['product_ids'];
         }
 
-        // Filtrar por categorías
         if (!empty($conditions['category_ids'])) {
             if (!isset($args['tax_query'])) {
                 $args['tax_query'] = [];
@@ -423,7 +542,6 @@ class AdminController {
             ];
         }
 
-        // Filtrar por precio
         if (!empty($conditions['min_price']) || !empty($conditions['max_price'])) {
             $args['meta_query'] = [
                 'relation' => 'AND'
@@ -479,16 +597,7 @@ class AdminController {
             wp_send_json_error('Permisos insuficientes');
         }
 
-        $attributes = wc_get_attribute_taxonomies();
-        $result = [];
-
-        foreach ($attributes as $attr) {
-            $result[] = [
-                'slug' => wc_attribute_taxonomy_name($attr->attribute_name),
-                'name' => $attr->attribute_label
-            ];
-        }
-
+        $result = $this->getCachedAttributes();
         wp_send_json_success($result);
     }
 
@@ -556,7 +665,7 @@ class AdminController {
         $args = [
             'post_type' => 'product',
             'post_status' => 'publish',
-            'posts_per_page' => 100,
+            'posts_per_page' => 20,
             'fields' => 'ids',
             'tax_query' => [
                 [
@@ -610,7 +719,6 @@ class AdminController {
             wp_send_json_error('Error al resetear contador');
         }
 
-        // Invalidar cache de badges
         if (class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
             \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
         }

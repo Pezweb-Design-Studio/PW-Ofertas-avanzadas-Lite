@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 namespace PW\OfertasAvanzadas\Handlers;
 
 use PW\OfertasAvanzadas\Services\DiscountEngine;

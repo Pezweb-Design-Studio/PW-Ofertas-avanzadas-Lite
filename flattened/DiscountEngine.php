@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 namespace PW\OfertasAvanzadas\Services;
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
@@ -27,6 +27,8 @@ class DiscountEngine {
 
             // Workaround: pasar conditions dentro de config para strategies que lo necesiten
             $config['_conditions'] = $conditions;
+            // Pasar campaign_id para que strategies puedan consultar datos de la campaña
+            $config['_campaign_id'] = $campaign->id;
 
             $discount = $strategy->calculate($cart, $config);
             $discount['campaign_id'] = $campaign->id;

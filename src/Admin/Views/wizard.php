@@ -1,6 +1,9 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
+// ⚡ Detectar modo edición
+$is_edit_mode = isset($_GET['edit']) && !empty($_GET['edit']);
+
 $objectives = [
         'basic' => [
                 'title' => 'Básico',
@@ -79,7 +82,7 @@ $objectives = [
     </nav>
 
     <!-- Step 1: Objetivo -->
-    <div id="step-objective">
+    <div id="step-objective" class="<?php echo $is_edit_mode ? 'hidden' : ''; ?>">
         <h1 class="text-4xl font-bold mb-12">¿Qué quieres lograr?</h1>
 
         <div class="grid grid-cols-2 gap-8">
@@ -105,7 +108,7 @@ $objectives = [
     </div>
 
     <!-- Step 3: Configuración -->
-    <div id="step-config" class="hidden">
+    <div id="step-config" class="<?php echo $is_edit_mode ? '' : 'hidden'; ?>">
         <h1 class="text-4xl font-bold mb-3" id="selected-strategy-title"></h1>
         <p class="text-lg text-gray-500 mb-12">Configura los parámetros de tu campaña</p>
 

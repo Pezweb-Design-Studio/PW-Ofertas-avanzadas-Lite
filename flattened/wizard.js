@@ -1,4 +1,4 @@
-const PWOAWizard = {
+﻿const PWOAWizard = {
     state: {
         objective: null,
         strategy: null,
@@ -6,7 +6,8 @@ const PWOAWizard = {
         editMode: false,
         editId: null,
         selectedProducts: [],
-        validateTimeout: null
+        needsValidation: false,
+        cachedData: null
     },
 
     init() {
@@ -15,15 +16,14 @@ const PWOAWizard = {
         if (editId) {
             this.state.editMode = true;
             this.state.editId = editId;
-            this.loadCampaign(editId);
+            this.loadCampaignOptimized(editId);
         }
 
-        // Event delegation - UN solo listener para todo
         document.addEventListener('click', e => this.handleClick(e));
         document.addEventListener('input', e => this.handleInput(e));
+        document.addEventListener('blur', e => this.handleBlur(e), true);
         document.addEventListener('submit', e => this.handleSubmit(e));
 
-        // Click outside para cerrar dropdowns
         document.addEventListener('click', e => {
             if (!e.target.closest('.repeater-product-search')) {
                 document.querySelectorAll('.repeater-search-results').forEach(d => d.classList.add('hidden'));
@@ -34,28 +34,19 @@ const PWOAWizard = {
     handleClick(e) {
         const t = e.target;
 
-        // Objectives
         if (t.closest('.objective-btn')) {
             const btn = t.closest('.objective-btn');
             this.selectObjective(btn.dataset.objective, btn.dataset.title);
         }
-
-        // Strategies
         else if (t.closest('.strategy-card')) {
             const data = JSON.parse(t.closest('.strategy-card').dataset.strategy);
             this.selectStrategy(data);
         }
-
-        // Breadcrumb
         else if (t.id === 'crumb-objective') this.goToStep('objective');
         else if (t.id === 'crumb-strategy') this.goToStep('strategy');
-
-        // Back buttons
         else if (t.id === 'btn-back') this.goToStep('objective');
         else if (t.id === 'btn-back-config') this.goToStep('strategy');
         else if (t.id === 'btn-cancel' && confirm('¿Descartar cambios?')) location.href = '?page=pwoa-dashboard';
-
-        // Repeater actions
         else if (t.closest('.add-repeater')) {
             const key = t.closest('.add-repeater').dataset.fieldKey;
             this.addRepeaterRow(key);
@@ -67,8 +58,6 @@ const PWOAWizard = {
             row.remove();
             this.checkDuplicates(key);
         }
-
-        // Accordion
         else if (t.closest('.repeater-header')) {
             if (t.closest('.remove-repeater')) return;
             const row = t.closest('.repeater-row');
@@ -78,25 +67,17 @@ const PWOAWizard = {
             content.style.display = isOpen ? 'none' : 'block';
             icon.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
         }
-
-        // Product search results
         else if (t.closest('.repeater-product-result')) {
             const el = t.closest('.repeater-product-result');
             const input = el.closest('.repeater-content').querySelector('.repeater-product-search');
             this.selectProduct(el, input);
         }
-
-        // Remove selected product (filters section)
         else if (t.closest('.remove-product')) {
             const id = t.closest('.remove-product').dataset.id;
             this.state.selectedProducts = this.state.selectedProducts.filter(p => p.id !== id);
             this.renderSelectedProducts();
         }
-
-        // Validate/show products
         else if (t.id === 'btn-show-products') this.showMatchingProducts();
-
-        // Modal
         else if (t.id === 'close-modal' || t.id === 'close-modal-btn' || t.id === 'products-modal') {
             document.getElementById('products-modal').classList.add('hidden');
         }
@@ -105,47 +86,48 @@ const PWOAWizard = {
     handleInput(e) {
         const t = e.target;
 
-        // Product search en repeater
         if (t.classList.contains('repeater-product-search')) {
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => this.searchInRepeater(t), 300);
         }
-
-        // Product search en filtros
         else if (t.id === 'product-search') {
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => this.searchProducts(t.value), 300);
         }
-
-        // Validación y preview para buy_x_pay_y
         else if (t.name === 'config[buy_quantity]' || t.name === 'config[pay_quantity]') {
             this.validateBuyXPayY();
         }
-
-        // Cargar términos cuando cambia el atributo
         else if (t.name === 'config[attribute_slug]') {
             this.loadAttributeTerms(t.value);
-            // Validar automáticamente después de cargar términos
-            clearTimeout(this.state.validateTimeout);
-            this.state.validateTimeout = setTimeout(() => this.validateFilters(), 500);
+            this.state.needsValidation = true;
         }
-
-        // Preview para attribute_quantity_discount
         else if (t.name === 'config[min_quantity]' || t.name === 'config[discount_value]' || t.name === 'config[max_applications]') {
             if (this.state.strategy === 'attribute_quantity_discount') {
                 this.previewAttributeDiscount();
             }
         }
-
-        // Validación automática de filtros
         else if (
             t.id === 'form-categories' ||
             t.id === 'form-min-price' ||
             t.id === 'form-max-price' ||
             t.name === 'config[attribute_value]'
         ) {
-            clearTimeout(this.state.validateTimeout);
-            this.state.validateTimeout = setTimeout(() => this.validateFilters(), 500);
+            this.state.needsValidation = true;
+        }
+    },
+
+    // ⚡ NUEVO: Solo validar cuando usuario sale del campo
+    handleBlur(e) {
+        const t = e.target;
+
+        if (this.state.needsValidation && (
+            t.id === 'form-categories' ||
+            t.id === 'form-min-price' ||
+            t.id === 'form-max-price' ||
+            t.name === 'config[attribute_value]'
+        )) {
+            this.validateFilters();
+            this.state.needsValidation = false;
         }
     },
 
@@ -156,7 +138,6 @@ const PWOAWizard = {
         const form = e.target;
         const formData = new FormData(form);
 
-        // Validación especial para buy_x_pay_y
         if (this.state.strategy === 'buy_x_pay_y') {
             const buy = parseInt(formData.get('config[buy_quantity]')) || 0;
             const pay = parseInt(formData.get('config[pay_quantity]')) || 0;
@@ -202,7 +183,7 @@ const PWOAWizard = {
             config: JSON.stringify(config),
             conditions: JSON.stringify(this.buildConditions()),
             stacking_mode: formData.get('stacking_mode'),
-            priority: 10, // Siempre 10, campo eliminado de UI
+            priority: 10,
             start_date: formData.get('start_date'),
             end_date: formData.get('end_date')
         };
@@ -228,91 +209,118 @@ const PWOAWizard = {
         }
     },
 
-    async loadCampaign(id) {
-        const res = await fetch(pwoaData.ajaxUrl, {
-            method: 'POST',
-            body: new URLSearchParams({
-                action: 'pwoa_get_campaign',
-                campaign_id: id,
-                nonce: pwoaData.nonce
-            })
-        });
+    // ⚡ OPTIMIZADO: 1 fetch con toda la data
+    async loadCampaignOptimized(id) {
+        try {
+            const res = await fetch(pwoaData.ajaxUrl, {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'pwoa_get_wizard_data',
+                    campaign_id: id,
+                    nonce: pwoaData.nonce
+                })
+            });
 
-        const data = await res.json();
-        if (!data.success) {
-            alert('Error al cargar campaña: ' + data.data);
+            const result = await res.json();
+
+            if (!result.success) {
+                alert('Error al cargar campaña: ' + result.data);
+                location.href = '?page=pwoa-dashboard';
+                return;
+            }
+
+            const data = result.data;
+            this.state.cachedData = data;
+
+            const c = data.campaign;
+            this.state.objective = c.objective;
+            this.state.strategy = c.strategy;
+
+            this.state.strategyData = data.strategies.find(s => this.getStrategyKey(s.name) === c.strategy);
+
+            if (!this.state.strategyData) {
+                alert('Error: Estrategia no encontrada');
+                return;
+            }
+
+            document.getElementById('selected-strategy-title').textContent = this.state.strategyData.name;
+
+            const fragment = this.renderConfigFieldsOptimized(this.state.strategyData.config_fields || []);
+            const container = document.getElementById('dynamic-fields');
+            container.replaceChildren(fragment);
+
+            document.getElementById('form-objective').value = c.objective;
+            document.getElementById('form-strategy').value = c.strategy;
+
+            this.hideSteps();
+            document.getElementById('step-config').classList.remove('hidden');
+            this.toggleProductFilters();
+
+            // ⚡ Cargar todos los datos en paralelo
+            await Promise.all([
+                this.populateFormFields(c),
+                this.loadRepeaters(c.config),
+                this.loadConditions(c.conditions)
+            ]);
+
+            // ⚡ Validar UNA sola vez al final
+            this.validateFilters();
+
+        } catch (error) {
+            alert('Error al cargar campaña: ' + error.message);
             location.href = '?page=pwoa-dashboard';
-            return;
+        }
+    },
+
+    // ⚡ NUEVO: Poblar campos del form
+    async populateFormFields(campaign) {
+        document.getElementById('form-name').value = campaign.name;
+        document.getElementById('form-stacking-mode').value = campaign.stacking_mode;
+
+        if (campaign.start_date && campaign.start_date !== '0000-00-00 00:00:00') {
+            document.getElementById('form-start-date').value = campaign.start_date.replace(' ', 'T').substring(0, 16);
+        }
+        if (campaign.end_date && campaign.end_date !== '0000-00-00 00:00:00') {
+            document.getElementById('form-end-date').value = campaign.end_date.replace(' ', 'T').substring(0, 16);
         }
 
-        const c = data.data;
-        this.state.objective = c.objective;
-        this.state.strategy = c.strategy;
+        for (let key in campaign.config) {
+            const input = document.querySelector(`[name="config[${key}]"]`);
+            if (input) input.value = campaign.config[key];
+        }
 
-        const strategies = await this.fetchStrategies(c.objective);
-        this.state.strategyData = strategies.find(s => this.getStrategyKey(s.name) === c.strategy);
-
-        if (!this.state.strategyData) return;
-
-        document.getElementById('selected-strategy-title').textContent = this.state.strategyData.name;
-        this.renderConfigFields(this.state.strategyData.config_fields || []);
-
-        document.getElementById('form-objective').value = c.objective;
-        document.getElementById('form-strategy').value = c.strategy;
-
-        this.hideSteps();
-        document.getElementById('step-config').classList.remove('hidden');
-        this.toggleProductFilters();
-
-        setTimeout(() => {
-            document.getElementById('form-name').value = c.name;
-            document.getElementById('form-stacking-mode').value = c.stacking_mode;
-
-            if (c.start_date && c.start_date !== '0000-00-00 00:00:00') {
-                document.getElementById('form-start-date').value = c.start_date.replace(' ', 'T').substring(0, 16);
-            }
-            if (c.end_date && c.end_date !== '0000-00-00 00:00:00') {
-                document.getElementById('form-end-date').value = c.end_date.replace(' ', 'T').substring(0, 16);
-            }
-
-            for (let key in c.config) {
-                const input = document.querySelector(`[name="config[${key}]"]`);
-                if (input) input.value = c.config[key];
-            }
-
-            document.getElementById('submit-btn').textContent = 'Actualizar Campaña';
-
-            setTimeout(() => {
-                this.loadRepeaters(c.config);
-                this.loadConditions(c.conditions);
-
-                // Validar automáticamente después de cargar todos los datos
-                setTimeout(() => this.validateFilters(), 300);
-            }, 50);
-        }, 100);
+        document.getElementById('submit-btn').textContent = 'Actualizar Campaña';
     },
 
     async selectObjective(objective, title) {
         this.state.objective = objective;
         document.getElementById('selected-objective-title').textContent = title;
 
-        const strategies = await this.fetchStrategies(objective);
+        // ⚡ Usar endpoint unificado
+        const strategies = await this.fetchWizardData({ objective });
         this.renderStrategies(strategies);
         this.goToStep('strategy');
     },
 
-    async fetchStrategies(objective) {
+    // ⚡ NUEVO: Endpoint unificado
+    async fetchWizardData(params) {
         const res = await fetch(pwoaData.ajaxUrl, {
             method: 'POST',
             body: new URLSearchParams({
-                action: 'pwoa_get_strategies',
-                objective: objective,
+                action: 'pwoa_get_wizard_data',
+                ...params,
                 nonce: pwoaData.nonce
             })
         });
 
         const data = await res.json();
-        return data.success ? data.data : [];
+
+        if (data.success) {
+            this.state.cachedData = data.data;
+            return data.data.strategies || [];
+        }
+
+        return [];
     },
 
     selectStrategy(data) {
@@ -320,7 +328,10 @@ const PWOAWizard = {
         this.state.strategy = this.getStrategyKey(data.name);
 
         document.getElementById('selected-strategy-title').textContent = data.name;
-        this.renderConfigFields(data.config_fields || []);
+
+        const fragment = this.renderConfigFieldsOptimized(data.config_fields || []);
+        const container = document.getElementById('dynamic-fields');
+        container.replaceChildren(fragment);
 
         document.getElementById('form-objective').value = this.state.objective;
         document.getElementById('form-strategy').value = this.state.strategy;
@@ -328,7 +339,7 @@ const PWOAWizard = {
         this.goToStep('config');
         this.toggleProductFilters();
 
-        // Validar automáticamente después de cargar el step
+        // Validar una vez al entrar al step
         setTimeout(() => this.validateFilters(), 300);
     },
 
@@ -354,7 +365,6 @@ const PWOAWizard = {
 
         breadcrumb.classList.remove('hidden');
 
-        // Reset classes
         ['crumb-objective', 'crumb-strategy', 'crumb-config'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -419,13 +429,18 @@ const PWOAWizard = {
         document.getElementById('strategies-list').innerHTML = html;
     },
 
-    renderConfigFields(fields) {
+    // ⚡ OPTIMIZADO: Document Fragment (1 solo reflow)
+    renderConfigFieldsOptimized(fields) {
+        const fragment = document.createDocumentFragment();
+
         if (!fields.length) {
-            document.getElementById('dynamic-fields').innerHTML = '<p class="text-gray-500">Esta estrategia no requiere configuración adicional.</p>';
-            return;
+            const p = document.createElement('p');
+            p.className = 'text-gray-500';
+            p.textContent = 'Esta estrategia no requiere configuración adicional.';
+            fragment.appendChild(p);
+            return fragment;
         }
 
-        // Detectar si es buy_x_pay_y para agrupar campos
         const isBuyXPayY = fields.some(f => f.key === 'buy_quantity');
 
         if (isBuyXPayY) {
@@ -433,66 +448,127 @@ const PWOAWizard = {
             const payField = fields.find(f => f.key === 'pay_quantity');
             const maxField = fields.find(f => f.key === 'max_sets');
 
-            let html = '<div class="grid grid-cols-2 gap-6 mb-6">';
-            html += this.renderField(buyField);
-            html += this.renderField(payField);
-            html += '</div>';
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-2 gap-6 mb-6';
+            grid.appendChild(this.createFieldElement(buyField));
+            grid.appendChild(this.createFieldElement(payField));
+            fragment.appendChild(grid);
 
             if (maxField) {
-                html += this.renderField(maxField);
+                fragment.appendChild(this.createFieldElement(maxField));
             }
-
-            document.getElementById('dynamic-fields').innerHTML = html;
         }
-        // Detectar si es attribute_quantity_discount
         else if (fields.some(f => f.type === 'attribute_select')) {
-            this.renderAttributeFields(fields);
+            this.renderAttributeFieldsOptimized(fields, fragment);
         }
         else {
-            const html = fields.map(f => f.type === 'repeater' ? this.renderRepeaterField(f) : this.renderField(f)).join('');
-            document.getElementById('dynamic-fields').innerHTML = html;
+            fields.forEach(f => {
+                fragment.appendChild(
+                    f.type === 'repeater'
+                        ? this.createRepeaterElement(f)
+                        : this.createFieldElement(f)
+                );
+            });
         }
+
+        return fragment;
     },
 
-    renderField(f) {
-        const req = f.required ? 'required' : '';
-        const desc = f.description ? `<p class="text-sm text-gray-500 mt-1">${f.description}</p>` : '';
-        let input = '';
+    // ⚡ NUEVO: Crear elemento de campo (en vez de innerHTML)
+    createFieldElement(f) {
+        const div = document.createElement('div');
+        div.className = 'mb-6';
+
+        const label = document.createElement('label');
+        label.className = 'block text-sm font-bold mb-2';
+        label.textContent = f.label;
+        div.appendChild(label);
+
+        let input;
 
         switch(f.type) {
             case 'select':
-                const opts = Object.entries(f.options || {}).map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
-                input = `<select name="config[${f.key}]" ${req} class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">${opts}</select>`;
+                input = document.createElement('select');
+                input.name = `config[${f.key}]`;
+                input.className = 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500';
+                if (f.required) input.required = true;
+
+                Object.entries(f.options || {}).forEach(([v, l]) => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = l;
+                    input.appendChild(opt);
+                });
                 break;
+
             case 'number':
-                input = `<input type="number" name="config[${f.key}]" ${req} value="${f.default || ''}" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">`;
+                input = document.createElement('input');
+                input.type = 'number';
+                input.name = `config[${f.key}]`;
+                input.className = 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500';
+                if (f.required) input.required = true;
+                if (f.default) input.value = f.default;
                 break;
+
             case 'datetime':
-                input = `<input type="datetime-local" name="config[${f.key}]" ${req} class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">`;
+                input = document.createElement('input');
+                input.type = 'datetime-local';
+                input.name = `config[${f.key}]`;
+                input.className = 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500';
+                if (f.required) input.required = true;
                 break;
+
             default:
-                input = `<input type="text" name="config[${f.key}]" ${req} class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">`;
+                input = document.createElement('input');
+                input.type = 'text';
+                input.name = `config[${f.key}]`;
+                input.className = 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500';
+                if (f.required) input.required = true;
         }
 
-        return `<div class="mb-6"><label class="block text-sm font-bold mb-2">${f.label}</label>${input}${desc}</div>`;
+        div.appendChild(input);
+
+        if (f.description) {
+            const desc = document.createElement('p');
+            desc.className = 'text-sm text-gray-500 mt-1';
+            desc.textContent = f.description;
+            div.appendChild(desc);
+        }
+
+        return div;
     },
 
-    renderRepeaterField(f) {
-        const btnText = f.key === 'bulk_items' ? 'Agregar otro producto' : 'Agregar nivel';
+    // ⚡ NUEVO: Crear elemento repeater
+    createRepeaterElement(f) {
+        const container = document.createElement('div');
+        container.className = 'mb-8';
 
-        return `
-            <div class="mb-8">
-                <h3 class="text-xl font-bold mb-2">${f.label}</h3>
-                ${f.description ? `<p class="text-sm text-gray-600 mb-6">${f.description}</p>` : ''}
-                <div id="repeater-${f.key}" data-field-key="${f.key}">
-                    ${this.renderRepeaterRow(f, 0)}
-                </div>
-                <button type="button" class="add-repeater mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center gap-2" data-field-key="${f.key}">
-                    <span class="text-xl">+</span>
-                    <span>${btnText}</span>
-                </button>
-            </div>
-        `;
+        const h3 = document.createElement('h3');
+        h3.className = 'text-xl font-bold mb-2';
+        h3.textContent = f.label;
+        container.appendChild(h3);
+
+        if (f.description) {
+            const desc = document.createElement('p');
+            desc.className = 'text-sm text-gray-600 mb-6';
+            desc.textContent = f.description;
+            container.appendChild(desc);
+        }
+
+        const repeaterDiv = document.createElement('div');
+        repeaterDiv.id = `repeater-${f.key}`;
+        repeaterDiv.dataset.fieldKey = f.key;
+        repeaterDiv.innerHTML = this.renderRepeaterRow(f, 0);
+        container.appendChild(repeaterDiv);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'add-repeater mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center gap-2';
+        btn.dataset.fieldKey = f.key;
+        btn.innerHTML = `<span class="text-xl">+</span><span>${f.key === 'bulk_items' ? 'Agregar otro producto' : 'Agregar nivel'}</span>`;
+        container.appendChild(btn);
+
+        return container;
     },
 
     renderRepeaterRow(field, idx) {
@@ -604,23 +680,18 @@ const PWOAWizard = {
         const name = el.dataset.name;
         const row = input.closest('.repeater-row');
 
-        // Set hidden input
         const hidden = input.parentElement.nextElementSibling;
         hidden.value = id;
 
-        // Show selected
         const display = hidden.nextElementSibling;
         display.innerHTML = `<strong>✓</strong> ${name} <span class="text-gray-500">(ID: ${id})</span>`;
 
-        // Update header preview
         const preview = row.querySelector('.product-name-preview');
         if (preview) preview.textContent = `- ${name}`;
 
-        // Clear search
         input.value = '';
         input.nextElementSibling.classList.add('hidden');
 
-        // Check duplicates
         const key = input.dataset.fieldKey;
         this.checkDuplicates(key);
     },
@@ -659,36 +730,45 @@ const PWOAWizard = {
         });
     },
 
-    loadRepeaters(config) {
+    async loadRepeaters(config) {
         if (!this.state.strategyData?.config_fields) return;
 
-        this.state.strategyData.config_fields.forEach(f => {
-            if (f.type !== 'repeater' || !config[f.key]?.length) return;
+        const promises = this.state.strategyData.config_fields
+            .filter(f => f.type === 'repeater' && config[f.key]?.length)
+            .map(f => this.loadRepeaterField(f, config));
 
-            const container = document.getElementById('repeater-' + f.key);
-            if (!container) return;
+        await Promise.all(promises);
+    },
 
-            container.innerHTML = '';
+    async loadRepeaterField(field, config) {
+        const container = document.getElementById('repeater-' + field.key);
+        if (!container) return;
 
-            config[f.key].forEach((rowData, i) => {
-                container.insertAdjacentHTML('beforeend', this.renderRepeaterRow(f, i));
+        container.innerHTML = '';
 
-                f.fields.forEach(sf => {
-                    if (sf.type === 'product_search' && rowData[sf.key]) {
-                        const hidden = document.querySelector(`[name="config[${f.key}][${i}][${sf.key}]"]`);
-                        if (hidden) {
-                            hidden.value = rowData[sf.key];
-                            this.loadProductName(rowData[sf.key], hidden);
-                        }
-                    } else {
-                        const input = document.querySelector(`[name="config[${f.key}][${i}][${sf.key}]"]`);
-                        if (input && rowData[sf.key] !== undefined) input.value = rowData[sf.key];
-                    }
-                });
-            });
+        const rowPromises = config[field.key].map((rowData, i) => {
+            container.insertAdjacentHTML('beforeend', this.renderRepeaterRow(field, i));
 
-            this.checkDuplicates(f.key);
+            return Promise.all(
+                field.fields.map(sf => this.loadRepeaterSubField(sf, field.key, i, rowData))
+            );
         });
+
+        await Promise.all(rowPromises);
+        this.checkDuplicates(field.key);
+    },
+
+    async loadRepeaterSubField(sf, key, idx, rowData) {
+        if (sf.type === 'product_search' && rowData[sf.key]) {
+            const hidden = document.querySelector(`[name="config[${key}][${idx}][${sf.key}]"]`);
+            if (hidden) {
+                hidden.value = rowData[sf.key];
+                await this.loadProductName(rowData[sf.key], hidden);
+            }
+        } else {
+            const input = document.querySelector(`[name="config[${key}][${idx}][${sf.key}]"]`);
+            if (input && rowData[sf.key] !== undefined) input.value = rowData[sf.key];
+        }
     },
 
     async loadProductName(id, hidden) {
@@ -715,12 +795,11 @@ const PWOAWizard = {
         }
     },
 
-    loadConditions(cond) {
+    async loadConditions(cond) {
         if (!cond) return;
 
-        // Load selected products
         if (cond.product_ids?.length) {
-            cond.product_ids.forEach(async id => {
+            const promises = cond.product_ids.map(async id => {
                 const res = await fetch(pwoaData.ajaxUrl, {
                     method: 'POST',
                     body: new URLSearchParams({
@@ -734,12 +813,13 @@ const PWOAWizard = {
                 if (data.success && data.data[0]) {
                     const p = data.data[0];
                     this.state.selectedProducts.push({ id: p.id.toString(), name: p.name, sku: p.sku || '' });
-                    this.renderSelectedProducts();
                 }
             });
+
+            await Promise.all(promises);
+            this.renderSelectedProducts();
         }
 
-        // Load categories
         if (cond.category_ids?.length) {
             const select = document.getElementById('form-categories');
             if (select) {
@@ -750,7 +830,6 @@ const PWOAWizard = {
             }
         }
 
-        // Load prices
         if (cond.min_price) {
             const input = document.getElementById('form-min-price');
             if (input) input.value = cond.min_price;
@@ -796,7 +875,6 @@ const PWOAWizard = {
 
         container.classList.remove('hidden');
 
-        // Bind click
         container.querySelectorAll('.product-result').forEach(el => {
             el.addEventListener('click', () => {
                 const prod = { id: el.dataset.id, name: el.dataset.name, sku: el.dataset.sku };
@@ -821,9 +899,7 @@ const PWOAWizard = {
 
         document.getElementById('form-product-ids').value = this.state.selectedProducts.map(p => p.id).join(',');
 
-        // Validar automáticamente cuando cambian los productos
-        clearTimeout(this.state.validateTimeout);
-        this.state.validateTimeout = setTimeout(() => this.validateFilters(), 500);
+        this.state.needsValidation = true;
     },
 
     buildConditions() {
@@ -831,7 +907,6 @@ const PWOAWizard = {
 
         const cond = {};
 
-        // Si es attribute_quantity_discount, agregar atributo y valor
         if (this.state.strategy === 'attribute_quantity_discount') {
             const attrSlug = document.querySelector('[name="config[attribute_slug]"]')?.value;
             const attrValue = document.querySelector('[name="config[attribute_value]"]')?.value;
@@ -863,7 +938,7 @@ const PWOAWizard = {
 
     async validateFilters() {
         const span = document.getElementById('matching-count');
-        if (!span) return; // No validar si no hay UI de filtros (ej: bulk_discount)
+        if (!span) return;
 
         const cond = this.buildConditions();
         span.textContent = 'Validando...';
@@ -954,10 +1029,8 @@ const PWOAWizard = {
         const buy = parseInt(buyInput.value) || 0;
         const pay = parseInt(payInput.value) || 0;
 
-        // Buscar el contenedor del grid (padre de ambos inputs)
         const gridContainer = buyInput.closest('.grid');
 
-        // Limpiar preview y error anteriores
         let preview = document.getElementById('buy-x-pay-y-preview');
         if (preview) preview.remove();
 
@@ -966,7 +1039,6 @@ const PWOAWizard = {
 
         if (buy <= 0 || pay <= 0) return;
 
-        // Validar buy > pay
         if (buy <= pay) {
             buyInput.classList.add('border-red-500');
             payInput.classList.add('border-red-500');
@@ -980,14 +1052,11 @@ const PWOAWizard = {
             return;
         }
 
-        // Remover error visual
         buyInput.classList.remove('border-red-500');
         payInput.classList.remove('border-red-500');
 
-        // Calcular descuento
         const discount = ((buy - pay) / buy * 100).toFixed(2);
 
-        // Mostrar preview
         const prev = document.createElement('div');
         prev.id = 'buy-x-pay-y-preview';
         prev.className = 'bg-blue-50 border-l-4 border-blue-500 text-blue-800 px-4 py-3 rounded mb-6';
@@ -1003,50 +1072,92 @@ const PWOAWizard = {
         gridContainer.insertAdjacentElement('afterend', prev);
     },
 
-    async renderAttributeFields(fields) {
-        let html = '';
-
-        // Cargar lista de atributos
-        const attributes = await this.fetchAttributes();
+    async renderAttributeFieldsOptimized(fields, fragment) {
+        const attributes = this.state.cachedData?.attributes || await this.fetchAttributes();
 
         for (const field of fields) {
             if (field.type === 'attribute_select') {
-                const opts = attributes.map(a => `<option value="${a.slug}">${a.name}</option>`).join('');
-                html += `
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold mb-2">${field.label}</label>
-                        <select name="config[${field.key}]" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                            <option value="">Seleccionar atributo...</option>
-                            ${opts}
-                        </select>
-                        ${field.description ? `<p class="text-sm text-gray-500 mt-1">${field.description}</p>` : ''}
-                    </div>
-                `;
-            } else if (field.type === 'attribute_value_select') {
-                html += `
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold mb-2">${field.label}</label>
-                        <select name="config[${field.key}]" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" id="attribute-value-select">
-                            <option value="">Primero selecciona un atributo...</option>
-                        </select>
-                        ${field.description ? `<p class="text-sm text-gray-500 mt-1">${field.description}</p>` : ''}
-                    </div>
-                `;
-            } else if (field.key === 'discount_type' || field.key === 'discount_value') {
-                // Agrupar estos dos en grid
+                const div = document.createElement('div');
+                div.className = 'mb-6';
+
+                const label = document.createElement('label');
+                label.className = 'block text-sm font-bold mb-2';
+                label.textContent = field.label;
+                div.appendChild(label);
+
+                const select = document.createElement('select');
+                select.name = `config[${field.key}]`;
+                select.required = true;
+                select.className = 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500';
+
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = 'Seleccionar atributo...';
+                select.appendChild(defaultOpt);
+
+                attributes.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a.slug;
+                    opt.textContent = a.name;
+                    select.appendChild(opt);
+                });
+
+                div.appendChild(select);
+
+                if (field.description) {
+                    const desc = document.createElement('p');
+                    desc.className = 'text-sm text-gray-500 mt-1';
+                    desc.textContent = field.description;
+                    div.appendChild(desc);
+                }
+
+                fragment.appendChild(div);
+            }
+            else if (field.type === 'attribute_value_select') {
+                const div = document.createElement('div');
+                div.className = 'mb-6';
+
+                const label = document.createElement('label');
+                label.className = 'block text-sm font-bold mb-2';
+                label.textContent = field.label;
+                div.appendChild(label);
+
+                const select = document.createElement('select');
+                select.name = `config[${field.key}]`;
+                select.required = true;
+                select.id = 'attribute-value-select';
+                select.className = 'w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500';
+
+                const defaultOpt = document.createElement('option');
+                defaultOpt.value = '';
+                defaultOpt.textContent = 'Primero selecciona un atributo...';
+                select.appendChild(defaultOpt);
+
+                div.appendChild(select);
+
+                if (field.description) {
+                    const desc = document.createElement('p');
+                    desc.className = 'text-sm text-gray-500 mt-1';
+                    desc.textContent = field.description;
+                    div.appendChild(desc);
+                }
+
+                fragment.appendChild(div);
+            }
+            else if (field.key === 'discount_type' || field.key === 'discount_value') {
                 if (field.key === 'discount_type') {
                     const valueField = fields.find(f => f.key === 'discount_value');
-                    html += '<div class="grid grid-cols-2 gap-6 mb-6">';
-                    html += this.renderField(field);
-                    html += this.renderField(valueField);
-                    html += '</div>';
+                    const grid = document.createElement('div');
+                    grid.className = 'grid grid-cols-2 gap-6 mb-6';
+                    grid.appendChild(this.createFieldElement(field));
+                    grid.appendChild(this.createFieldElement(valueField));
+                    fragment.appendChild(grid);
                 }
-            } else if (field.key !== 'discount_value') {
-                html += this.renderField(field);
+            }
+            else if (field.key !== 'discount_value') {
+                fragment.appendChild(this.createFieldElement(field));
             }
         }
-
-        document.getElementById('dynamic-fields').innerHTML = html;
     },
 
     async fetchAttributes() {

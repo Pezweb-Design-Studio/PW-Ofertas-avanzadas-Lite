@@ -13,7 +13,9 @@ $strategy_labels = [
         'expiry_based' => 'Por Vencimiento',
         'low_stock' => 'Stock Bajo',
         'recurring_purchase' => 'Compra Recurrente',
-        'flash_sale' => 'Flash Sale'
+        'flash_sale' => 'Flash Sale',
+        'buy_x_pay_y' => 'Lleva X Paga Y',
+        'attribute_quantity_discount' => 'Por Atributos'
 ];
 
 // Mapeo de objetivos a colores y etiquetas
@@ -85,9 +87,8 @@ $objective_config = [
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600">Total Campañas</p>
-                        <p class="text-2xl font-bold text-gray-900 mt-1"><?php echo count($campaigns); ?></p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1"><?php echo number_format($total); ?></p>
                     </div>
-
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -98,7 +99,6 @@ $objective_config = [
                             <?php echo count($truly_active); ?>
                         </p>
                     </div>
-
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -109,7 +109,6 @@ $objective_config = [
                             <?php echo count($paused); ?>
                         </p>
                     </div>
-
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -120,7 +119,6 @@ $objective_config = [
                             <?php echo count($scheduled); ?>
                         </p>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -297,6 +295,67 @@ $objective_config = [
 
         </div>
 
+        <!-- ⚡ Paginación -->
+        <?php if ($total_pages > 1): ?>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 mt-6">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-600">
+                        Mostrando <span class="font-semibold"><?php echo (($page - 1) * 20) + 1; ?></span>
+                        a <span class="font-semibold"><?php echo min($page * 20, $total); ?></span>
+                        de <span class="font-semibold"><?php echo number_format($total); ?></span> campañas
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <?php if ($page > 1): ?>
+                            <a href="?page=pwoa-dashboard&paged=<?php echo $page - 1; ?>"
+                               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                ← Anterior
+                            </a>
+                        <?php endif; ?>
+
+                        <?php
+                        // Mostrar hasta 5 números de página
+                        $start = max(1, $page - 2);
+                        $end = min($total_pages, $page + 2);
+
+                        if ($start > 1): ?>
+                            <a href="?page=pwoa-dashboard&paged=1"
+                               class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                1
+                            </a>
+                            <?php if ($start > 2): ?>
+                                <span class="px-2 text-gray-500">...</span>
+                            <?php endif; ?>
+                        <?php endif; ?>
+
+                        <?php for ($i = $start; $i <= $end; $i++): ?>
+                            <a href="?page=pwoa-dashboard&paged=<?php echo $i; ?>"
+                               class="px-3 py-2 <?php echo $i === $page ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'; ?> rounded-lg transition">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endfor; ?>
+
+                        <?php if ($end < $total_pages): ?>
+                            <?php if ($end < $total_pages - 1): ?>
+                                <span class="px-2 text-gray-500">...</span>
+                            <?php endif; ?>
+                            <a href="?page=pwoa-dashboard&paged=<?php echo $total_pages; ?>"
+                               class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                <?php echo $total_pages; ?>
+                            </a>
+                        <?php endif; ?>
+
+                        <?php if ($page < $total_pages): ?>
+                            <a href="?page=pwoa-dashboard&paged=<?php echo $page + 1; ?>"
+                               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                Siguiente →
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
     <?php endif; ?>
 
 </div>
@@ -344,7 +403,6 @@ $objective_config = [
         });
     });
 
-    // Botones de Editar
     document.querySelectorAll('.btn-edit').forEach(btn => {
         btn.addEventListener('click', function() {
             const campaignId = this.dataset.campaignId;
@@ -352,7 +410,6 @@ $objective_config = [
         });
     });
 
-    // Botones de Eliminar
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', async function() {
             const campaignId = this.dataset.campaignId;
@@ -405,7 +462,6 @@ $objective_config = [
         });
     });
 
-    // Botones de Reset (solo bulk campaigns)
     document.querySelectorAll('.btn-reset').forEach(btn => {
         btn.addEventListener('click', async function() {
             const campaignId = this.dataset.campaignId;

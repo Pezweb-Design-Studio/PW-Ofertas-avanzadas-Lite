@@ -1,4 +1,4 @@
-ï»¿const PWOAAnalytics = {
+﻿const PWOAAnalytics = {
 
     chart: null,
 
@@ -42,8 +42,8 @@
             this.chart.destroy();
         }
 
-        // ImplementaciÃ³n simple sin dependencias externas
-        // En producciÃ³n podrÃÂ­as usar Chart.js
+        // Implementación simple sin dependencias externas
+        // En producción podrÃ­as usar Chart.js
         this.renderSimpleChart(ctx, data.trends);
     },
 
@@ -61,7 +61,7 @@
             return;
         }
 
-        // Dibujar lÃÂ­neas bÃ¡sicas
+        // Dibujar lÃ­neas básicas
         ctx.strokeStyle = '#3B82F6';
         ctx.lineWidth = 2;
         ctx.beginPath();
@@ -98,7 +98,7 @@
             case 'total_discounted':
             case 'avg_discount':
             case 'total_revenue':
-                // WooCommerce formatearÃ¡ en PHP, aquÃ­ solo mostramos el nÃºmero
+                // WooCommerce formateará en PHP, aquí solo mostramos el número
                 return parseFloat(value).toLocaleString();
             case 'conversion_rate':
             case 'roi':

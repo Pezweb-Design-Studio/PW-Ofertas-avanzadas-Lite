@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('ABSPATH')) exit;
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
@@ -9,10 +9,13 @@ $strategy_labels = [
         'min_amount' => 'Monto Mínimo',
         'free_shipping' => 'Envío Gratis',
         'tiered_discount' => 'Descuento Escalonado',
+        'bulk_discount' => 'Volumen (Bulk)',
         'expiry_based' => 'Por Vencimiento',
         'low_stock' => 'Stock Bajo',
         'recurring_purchase' => 'Compra Recurrente',
-        'flash_sale' => 'Flash Sale'
+        'flash_sale' => 'Flash Sale',
+        'buy_x_pay_y' => 'Lleva X Paga Y',
+        'attribute_quantity_discount' => 'Por Atributos'
 ];
 
 // Mapeo de objetivos a colores y etiquetas
@@ -84,9 +87,8 @@ $objective_config = [
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-gray-600">Total Campañas</p>
-                        <p class="text-2xl font-bold text-gray-900 mt-1"><?php echo count($campaigns); ?></p>
+                        <p class="text-2xl font-bold text-gray-900 mt-1"><?php echo number_format($total); ?></p>
                     </div>
-
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -97,7 +99,6 @@ $objective_config = [
                             <?php echo count($truly_active); ?>
                         </p>
                     </div>
-
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -108,7 +109,6 @@ $objective_config = [
                             <?php echo count($paused); ?>
                         </p>
                     </div>
-
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -119,7 +119,6 @@ $objective_config = [
                             <?php echo count($scheduled); ?>
                         </p>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -163,6 +162,42 @@ $objective_config = [
                                         </span>
                                     <?php endif; ?>
                                 </div>
+
+                                <?php if ($campaign->strategy === 'bulk_discount'):
+                                    $config = json_decode($campaign->config, true);
+                                    $units_sold = $campaign->units_sold ? json_decode($campaign->units_sold, true) : [];
+                                    $bulk_items = $config['bulk_items'] ?? [];
+
+                                    if (!empty($bulk_items)):
+                                        $total_sold = 0;
+                                        $total_max = 0;
+
+                                        foreach ($bulk_items as $item) {
+                                            $product_id = $item['product_id'] ?? 0;
+                                            $max_qty = intval($item['max_quantity'] ?? 0);
+                                            $sold = intval($units_sold[$product_id] ?? 0);
+
+                                            $total_sold += $sold;
+                                            $total_max += $max_qty;
+                                        }
+
+                                        $percentage = $total_max > 0 ? min(100, ($total_sold / $total_max) * 100) : 0;
+                                        $color = $percentage >= 80 ? 'red' : ($percentage >= 50 ? 'yellow' : 'green');
+                                        ?>
+                                        <div class="mt-2">
+                                            <div class="flex items-center gap-2 text-xs">
+                                                <span class="text-gray-600">Unidades vendidas:</span>
+                                                <span class="font-semibold text-<?php echo $color; ?>-700">
+                                            <?php echo number_format($total_sold); ?> / <?php echo number_format($total_max); ?>
+                                        </span>
+                                                <span class="text-gray-400">(<?php echo number_format($percentage, 1); ?>%)</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                                <div class="bg-<?php echo $color; ?>-500 h-1.5 rounded-full transition-all"
+                                                     style="width: <?php echo min(100, $percentage); ?>%"></div>
+                                            </div>
+                                        </div>
+                                    <?php endif; endif; ?>
                             </div>
 
                             <!-- Objective Badge -->
@@ -224,6 +259,16 @@ $objective_config = [
                             <!-- Actions -->
                             <div class="col-span-1 text-right">
                                 <div class="flex items-center justify-end gap-2">
+                                    <?php if ($campaign->strategy === 'bulk_discount'): ?>
+                                        <button class="btn-reset text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
+                                                data-campaign-id="<?php echo esc_attr($campaign->id); ?>"
+                                                data-campaign-name="<?php echo esc_attr($campaign->name); ?>"
+                                                title="Resetear contador">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                        </button>
+                                    <?php endif; ?>
                                     <button class="btn-edit text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
                                             data-campaign-id="<?php echo esc_attr($campaign->id); ?>"
                                             title="Editar campaña">
@@ -249,6 +294,67 @@ $objective_config = [
             </div>
 
         </div>
+
+        <!-- ⚡ Paginación -->
+        <?php if ($total_pages > 1): ?>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 mt-6">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-600">
+                        Mostrando <span class="font-semibold"><?php echo (($page - 1) * 20) + 1; ?></span>
+                        a <span class="font-semibold"><?php echo min($page * 20, $total); ?></span>
+                        de <span class="font-semibold"><?php echo number_format($total); ?></span> campañas
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <?php if ($page > 1): ?>
+                            <a href="?page=pwoa-dashboard&paged=<?php echo $page - 1; ?>"
+                               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                ← Anterior
+                            </a>
+                        <?php endif; ?>
+
+                        <?php
+                        // Mostrar hasta 5 números de página
+                        $start = max(1, $page - 2);
+                        $end = min($total_pages, $page + 2);
+
+                        if ($start > 1): ?>
+                            <a href="?page=pwoa-dashboard&paged=1"
+                               class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                1
+                            </a>
+                            <?php if ($start > 2): ?>
+                                <span class="px-2 text-gray-500">...</span>
+                            <?php endif; ?>
+                        <?php endif; ?>
+
+                        <?php for ($i = $start; $i <= $end; $i++): ?>
+                            <a href="?page=pwoa-dashboard&paged=<?php echo $i; ?>"
+                               class="px-3 py-2 <?php echo $i === $page ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'; ?> rounded-lg transition">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endfor; ?>
+
+                        <?php if ($end < $total_pages): ?>
+                            <?php if ($end < $total_pages - 1): ?>
+                                <span class="px-2 text-gray-500">...</span>
+                            <?php endif; ?>
+                            <a href="?page=pwoa-dashboard&paged=<?php echo $total_pages; ?>"
+                               class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                <?php echo $total_pages; ?>
+                            </a>
+                        <?php endif; ?>
+
+                        <?php if ($page < $total_pages): ?>
+                            <a href="?page=pwoa-dashboard&paged=<?php echo $page + 1; ?>"
+                               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                Siguiente →
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
 
     <?php endif; ?>
 
@@ -297,7 +403,6 @@ $objective_config = [
         });
     });
 
-    // Botones de Editar
     document.querySelectorAll('.btn-edit').forEach(btn => {
         btn.addEventListener('click', function() {
             const campaignId = this.dataset.campaignId;
@@ -305,7 +410,6 @@ $objective_config = [
         });
     });
 
-    // Botones de Eliminar
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', async function() {
             const campaignId = this.dataset.campaignId;
@@ -349,6 +453,45 @@ $objective_config = [
                 setTimeout(() => {
                     window.location.reload();
                 }, 300);
+
+            } catch (error) {
+                this.disabled = false;
+                this.style.opacity = '1';
+                alert('Error: ' + error.message);
+            }
+        });
+    });
+
+    document.querySelectorAll('.btn-reset').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const campaignId = this.dataset.campaignId;
+            const campaignName = this.dataset.campaignName;
+
+            if (!confirm(`¿Resetear contador de unidades vendidas de "${campaignName}"?\n\nEsto pondrá en 0 el contador de todas las unidades vendidas.`)) {
+                return;
+            }
+
+            this.disabled = true;
+            this.style.opacity = '0.5';
+
+            try {
+                const response = await fetch(ajaxurl, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'pwoa_reset_units_sold',
+                        campaign_id: campaignId,
+                        nonce: '<?php echo wp_create_nonce('pwoa_nonce'); ?>'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.data || 'Error al resetear');
+                }
+
+                alert('✓ ' + data.data.message);
+                window.location.reload();
 
             } catch (error) {
                 this.disabled = false;

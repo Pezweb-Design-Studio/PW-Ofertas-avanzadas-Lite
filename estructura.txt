@@ -1,4 +1,5 @@
 .
+├── LICENCE.txt
 ├── README.md
 ├── assets
 │   └── js
@@ -23,6 +24,8 @@
     │   └── Plugin.php
     ├── Handlers
     │   ├── CartHandler.php
+    │   ├── OrderHandler.php
+    │   ├── ProductBadgeHandler.php
     │   └── ProductExpiryHandler.php
     ├── Repositories
     │   ├── CampaignRepository.php
@@ -33,9 +36,14 @@
     │   └── ProductMatcher.php
     └── Strategies
         ├── AOV
+        │   ├── AttributeQuantityDiscountStrategy.php
+        │   ├── BulkDiscountStrategy.php
+        │   ├── BuyXPayYStrategy.php
         │   ├── FreeShippingStrategy.php
         │   ├── MinAmountStrategy.php
         │   └── TieredDiscountStrategy.php
+        ├── Basic
+        │   └── BasicDiscountStrategy.php
         ├── DiscountStrategy.php
         ├── Liquidation
         │   ├── ExpiryBasedStrategy.php
@@ -45,4 +53,4 @@
         └── Urgency
             └── FlashSaleStrategy.php
 
-15 directories, 31 files
+16 directories, 38 files

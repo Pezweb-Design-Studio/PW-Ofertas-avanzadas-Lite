@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 namespace PW\OfertasAvanzadas\Repositories;
 
 class CampaignRepository {
@@ -24,6 +24,30 @@ class CampaignRepository {
         ");
     }
 
+    // ⚡ NUEVO: Paginación
+    public static function getPaginated(int $page = 1, int $per_page = 20): array {
+        global $wpdb;
+
+        $offset = ($page - 1) * $per_page;
+
+        return $wpdb->get_results($wpdb->prepare("
+            SELECT * FROM {$wpdb->prefix}pwoa_campaigns 
+            WHERE deleted_at IS NULL
+            ORDER BY created_at DESC
+            LIMIT %d OFFSET %d
+        ", $per_page, $offset));
+    }
+
+    // ⚡ NUEVO: Contar total de campañas
+    public static function getCount(): int {
+        global $wpdb;
+
+        return (int) $wpdb->get_var("
+            SELECT COUNT(*) FROM {$wpdb->prefix}pwoa_campaigns 
+            WHERE deleted_at IS NULL
+        ");
+    }
+
     public static function getById(int $id): ?object {
         global $wpdb;
         return $wpdb->get_row($wpdb->prepare("
@@ -46,7 +70,6 @@ class CampaignRepository {
             'priority' => intval($data['priority'] ?? 10)
         ];
 
-        // Solo agregar fechas si no están vacías
         if (!empty($data['start_date'])) {
             $insert_data['start_date'] = sanitize_text_field($data['start_date']);
         }
@@ -63,10 +86,12 @@ class CampaignRepository {
             return 0;
         }
 
-        // Invalidar cache de badges
         if (class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
             \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
         }
+
+        // ⚡ Limpiar cache de estrategias
+        self::clearStrategiesCache();
 
         return $wpdb->insert_id;
     }
@@ -85,7 +110,6 @@ class CampaignRepository {
             'priority' => intval($data['priority'] ?? 10)
         ];
 
-        // Manejar fechas opcionales
         if (isset($data['start_date'])) {
             $update_data['start_date'] = !empty($data['start_date'])
                 ? sanitize_text_field($data['start_date'])
@@ -111,10 +135,11 @@ class CampaignRepository {
             return false;
         }
 
-        // Invalidar cache de badges
         if (class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
             \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
         }
+
+        self::clearStrategiesCache();
 
         return true;
     }
@@ -129,7 +154,6 @@ class CampaignRepository {
                 ['%d', '%s']
             ) !== false;
 
-        // Invalidar cache de badges
         if ($result && class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
             \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
         }
@@ -147,10 +171,11 @@ class CampaignRepository {
                 ['%d']
             ) !== false;
 
-        // Invalidar cache de badges
         if ($result && class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
             \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
         }
+
+        self::clearStrategiesCache();
 
         return $result;
     }
@@ -171,5 +196,29 @@ class CampaignRepository {
             WHERE campaign_id = %d
         ", $id));
         return intval($count) > 0;
+    }
+
+    public static function resetUnitsSold(int $campaign_id): bool {
+        global $wpdb;
+
+        return $wpdb->update(
+                "{$wpdb->prefix}pwoa_campaigns",
+                ['units_sold' => null],
+                ['id' => $campaign_id],
+                ['%s'],
+                ['%d']
+            ) !== false;
+    }
+
+    // ⚡ NUEVO: Limpiar cache de estrategias
+    private static function clearStrategiesCache(): void {
+        $objectives = ['basic', 'aov', 'liquidation', 'loyalty', 'urgency'];
+
+        foreach ($objectives as $obj) {
+            delete_transient('pwoa_strategies_' . $obj);
+        }
+
+        delete_transient('pwoa_attributes');
+        delete_transient('pwoa_categories');
     }
 }
