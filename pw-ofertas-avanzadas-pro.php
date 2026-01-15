@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: PW - Ofertas Avanzadas Lite
- * Description: Sistema de descuentos orientado a estrategias de marketing para WooCommerce (Versión Lite)
- * Version: 1.0.3
+ * Plugin Name: PW - Ofertas Avanzadas Pro
+ * Description: Sistema de descuentos orientado a estrategias de marketing para WooCommerce (Versión Pro)
+ * Version: 2.0.1
  * Requires PHP: 7.4
  * Author: PezWeb
  * Plugin URI: https://tu-sitio.com/ofertas-avanzadas
@@ -11,18 +11,18 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('PWOA_VERSION', '1.0.3');
-define('PWOA_EDITION', 'lite');
+define('PWOA_VERSION', '2.0.1');
+define('PWOA_EDITION', 'pro');
 define('PWOA_PATH', plugin_dir_path(__FILE__));
 define('PWOA_URL', plugin_dir_url(__FILE__));
 
-// ⚠️ DETECCIÓN DE CONFLICTOS: Verificar si PRO está activo
+// âš ï¸ DETECCIÃ“N DE CONFLICTOS: Verificar si PRO estÃ¡ activo
 add_action('admin_init', function() {
     if (is_plugin_active('pw-ofertas-avanzadas-pro/pw-ofertas-avanzadas-pro.php')) {
         deactivate_plugins(plugin_basename(__FILE__));
         add_action('admin_notices', function() {
             echo '<div class="notice notice-warning is-dismissible">';
-            echo '<p><strong>PW Ofertas Avanzadas Lite</strong> se ha desactivado automáticamente porque ya tienes la versión Pro instalada.</p>';
+            echo '<p><strong>PW Ofertas Avanzadas Lite</strong> se ha desactivado automÃ¡ticamente porque ya tienes la versiÃ³n Pro instalada.</p>';
             echo '</div>';
         });
     }

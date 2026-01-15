@@ -1,7 +1,8 @@
 ﻿<?php
-namespace PW\OfertasAvanzadas\Strategies\Liquidation;
+namespace PW\OfertasAvanzadas\Strategies\Pro;
 
 use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
+use function PW\OfertasAvanzadas\Strategies\Liquidation\wc_get_product;
 
 class LowStockStrategy implements DiscountStrategy {
 

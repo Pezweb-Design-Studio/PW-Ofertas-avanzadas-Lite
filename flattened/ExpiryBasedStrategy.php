@@ -1,5 +1,5 @@
 ﻿<?php
-namespace PW\OfertasAvanzadas\Strategies\Liquidation;
+namespace PW\OfertasAvanzadas\Strategies\Lite;
 
 use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 

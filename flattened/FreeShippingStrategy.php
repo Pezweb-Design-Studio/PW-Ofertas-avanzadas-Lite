@@ -1,7 +1,8 @@
 ﻿<?php
-namespace PW\OfertasAvanzadas\Strategies\AOV;
+namespace PW\OfertasAvanzadas\Strategies\Pro;
 
 use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
+use function PW\OfertasAvanzadas\Strategies\AOV\WC;
 
 class FreeShippingStrategy implements DiscountStrategy {
 

@@ -1,5 +1,5 @@
 ﻿<?php
-namespace PW\OfertasAvanzadas\Strategies\Loyalty;
+namespace PW\OfertasAvanzadas\Strategies\Pro;
 
 use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
 

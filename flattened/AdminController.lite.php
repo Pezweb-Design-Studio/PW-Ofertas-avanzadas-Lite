@@ -2,7 +2,6 @@
 namespace PW\OfertasAvanzadas\Admin;
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
-use PW\OfertasAvanzadas\Repositories\StatsRepository;
 
 class AdminController {
 
@@ -46,14 +45,7 @@ class AdminController {
             [$this, 'renderWizard']
         );
 
-        add_submenu_page(
-            'pwoa-dashboard',
-            'Analíticas',
-            'Analíticas',
-            'manage_woocommerce',
-            'pwoa-analytics',
-            [$this, 'renderAnalytics']
-        );
+        // ⚠️ LITE: Analytics eliminado
     }
 
     public function renderDashboard(): void {
@@ -64,16 +56,28 @@ class AdminController {
         $total = CampaignRepository::getCount();
         $total_pages = ceil($total / $per_page);
 
+        // ⚠️ LITE: Validar límite de 5 campañas
+        $can_create = $total < 5;
+
         include PWOA_PATH . 'src/Admin/Views/dashboard.php';
     }
 
     public function renderWizard(): void {
-        include PWOA_PATH . 'src/Admin/Views/wizard.php';
-    }
+        // ⚠️ LITE: Validar límite de campañas
+        if (!isset($_GET['edit'])) {
+            $total = CampaignRepository::getCount();
+            if ($total >= 5) {
+                wp_die(
+                    '<h1>Límite alcanzado</h1>' .
+                    '<p>Has alcanzado el límite de 5 campañas en la versión Lite.</p>' .
+                    '<p><a href="https://tu-sitio.com/pro">Actualiza a Pro</a> para campañas ilimitadas.</p>',
+                    'Límite de campañas',
+                    ['back_link' => true]
+                );
+            }
+        }
 
-    public function renderAnalytics(): void {
-        $stats = StatsRepository::getSummary();
-        include PWOA_PATH . 'src/Admin/Views/analytics.php';
+        include PWOA_PATH . 'src/Admin/Views/wizard.php';
     }
 
     // ⚡ NUEVO: Endpoint unificado para wizard
@@ -155,6 +159,13 @@ class AdminController {
 
         if (!current_user_can('manage_woocommerce')) {
             wp_send_json_error('Permisos insuficientes');
+        }
+
+        // ⚠️ LITE: Validar límite de 5 campañas
+        $total = CampaignRepository::getCount();
+        if ($total >= 5) {
+            wp_send_json_error('Has alcanzado el límite de 5 campañas. Actualiza a Pro para campañas ilimitadas.');
+            return;
         }
 
         $config = json_decode(stripslashes($_POST['config'] ?? '{}'), true);
@@ -362,29 +373,21 @@ class AdminController {
         return $categories;
     }
 
+    // ⚠️ LITE: Solo estrategias básicas disponibles
     private function getStrategiesByObjective(string $objective): array {
         $strategies_map = [
             'basic' => [
                 'PW\\OfertasAvanzadas\\Strategies\\Lite\\BasicDiscountStrategy'
             ],
             'aov' => [
-                'PW\\OfertasAvanzadas\\Strategies\\Pro\\MinAmountStrategy',
-                'PW\\OfertasAvanzadas\\Strategies\\Pro\\FreeShippingStrategy',
-                'PW\\OfertasAvanzadas\\Strategies\\Pro\\TieredDiscountStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\Lite\\BulkDiscountStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\Lite\\BuyXPayYStrategy',
                 'PW\\OfertasAvanzadas\\Strategies\\Lite\\AttributeQuantityDiscountStrategy'
             ],
             'liquidation' => [
-                'PW\\OfertasAvanzadas\\Strategies\\Lite\\ExpiryBasedStrategy',
-                'PW\\OfertasAvanzadas\\Strategies\\Pro\\LowStockStrategy'
-            ],
-            'loyalty' => [
-                'PW\\OfertasAvanzadas\\Strategies\\Pro\\RecurringPurchaseStrategy'
-            ],
-            'urgency' => [
-                'PW\\OfertasAvanzadas\\Strategies\\Pro\\FlashSaleStrategy'
+                'PW\\OfertasAvanzadas\\Strategies\\Lite\\ExpiryBasedStrategy'
             ]
+            // ⚠️ LITE: loyalty y urgency NO disponibles
         ];
 
         $classes = $strategies_map[$objective] ?? [];
@@ -401,6 +404,7 @@ class AdminController {
         return $result;
     }
 
+    // Los siguientes métodos son idénticos en ambas versiones...
     public function ajaxSearchProducts(): void {
         check_ajax_referer('pwoa_nonce', 'nonce');
 

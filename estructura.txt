@@ -4,21 +4,28 @@
 ├── assets
 │   └── js
 │       ├── analytics.js
-│       └── wizard.js
+│       ├── wizard.js
+│       └── wizard.lite-addon.js
+├── build-deploy-v2.sh
 ├── build-deploy.sh
 ├── composer.json
 ├── composer.lock
 ├── estructura.txt
 ├── flatten.sh
+├── pw-ofertas-avanzadas-pro.php
+├── pw-ofertas-avanzadas.lite.php
 ├── pw-ofertas-avanzadas.php
 └── src
     ├── Admin
+    │   ├── AdminController.lite.php
     │   ├── AdminController.php
     │   └── Views
     │       ├── analytics.php
     │       ├── dashboard.php
+    │       ├── wizard.lite.php
     │       └── wizard.php
     ├── Core
+    │   ├── Activator.lite.php
     │   ├── Activator.php
     │   ├── Deactivator.php
     │   └── Plugin.php
@@ -35,22 +42,19 @@
     │   ├── DiscountEngine.php
     │   └── ProductMatcher.php
     └── Strategies
-        ├── AOV
+        ├── DiscountStrategy.php
+        ├── Lite
         │   ├── AttributeQuantityDiscountStrategy.php
+        │   ├── BasicDiscountStrategy.php
         │   ├── BulkDiscountStrategy.php
         │   ├── BuyXPayYStrategy.php
-        │   ├── FreeShippingStrategy.php
-        │   ├── MinAmountStrategy.php
-        │   └── TieredDiscountStrategy.php
-        ├── Basic
-        │   └── BasicDiscountStrategy.php
-        ├── DiscountStrategy.php
-        ├── Liquidation
-        │   ├── ExpiryBasedStrategy.php
-        │   └── LowStockStrategy.php
-        ├── Loyalty
-        │   └── RecurringPurchaseStrategy.php
-        └── Urgency
-            └── FlashSaleStrategy.php
+        │   └── ExpiryBasedStrategy.php
+        └── Pro
+            ├── FlashSaleStrategy.php
+            ├── FreeShippingStrategy.php
+            ├── LowStockStrategy.php
+            ├── MinAmountStrategy.php
+            ├── RecurringPurchaseStrategy.php
+            └── TieredDiscountStrategy.php
 
-16 directories, 38 files
+13 directories, 45 files

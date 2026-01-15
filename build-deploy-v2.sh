@@ -14,11 +14,39 @@ NC='\033[0m'
 echo -e "${BLUE}🚀 PW Ofertas Avanzadas Plugin Build${NC}"
 echo "====================================="
 
-# Archivo principal del plugin
-main_file="pw-ofertas-avanzadas.php"
+# Validar parámetro de edición
+edition="$1"
+
+if [ -z "$edition" ]; then
+    echo -e "${RED}❌ Error: Debes especificar la edición${NC}"
+    echo ""
+    echo "Uso: bash build-deploy-v2.sh [lite|pro]"
+    echo ""
+    echo "Ejemplos:"
+    echo "  bash build-deploy-v2.sh lite"
+    echo "  bash build-deploy-v2.sh pro"
+    exit 1
+fi
+
+if [ "$edition" != "lite" ] && [ "$edition" != "pro" ]; then
+    echo -e "${RED}❌ Error: Edición inválida '$edition'${NC}"
+    echo "Ediciones válidas: lite, pro"
+    exit 1
+fi
+
+# Mapear edición a archivo fuente
+if [ "$edition" = "lite" ]; then
+    main_file="pw-ofertas-avanzadas.lite.php"
+else
+    main_file="pw-ofertas-avanzadas-pro.php"
+fi
+
+echo -e "${CYAN}Edición: ${YELLOW}$edition${NC}"
+echo -e "${CYAN}Archivo fuente: ${YELLOW}$main_file${NC}"
+echo ""
 
 if [ ! -f "$main_file" ]; then
-    echo -e "${RED}❌ No se encontró el archivo principal del plugin: $main_file${NC}"
+    echo -e "${RED}❌ No se encontró el archivo: $main_file${NC}"
     exit 1
 fi
 
@@ -26,7 +54,7 @@ fi
 current_version=$(grep "Version:" "$main_file" | sed 's/.*Version: *//' | sed 's/ *\*.*$//' | tr -d '\n\r')
 if [ -z "$current_version" ]; then
     current_version="1.0.0"
-    echo -e "${YELLOW}⚠  No se encontró versión actual, usando 1.0.0${NC}"
+    echo -e "${YELLOW}⚠️  No se encontró versión actual, usando 1.0.0${NC}"
 fi
 
 IFS='.' read -ra VERSION_PARTS <<< "$current_version"
@@ -77,7 +105,7 @@ esac
 
 echo ""
 echo -e "${BLUE}Building version:${NC} ${current_version} → ${GREEN}${new_version}${NC} (${change_type})"
-echo -e "${BLUE}Output:${NC} releases/pw-ofertas-avanzadas-v${new_version}.zip"
+echo -e "${BLUE}Output:${NC} releases/pw-ofertas-avanzadas-${edition}-v${new_version}.zip"
 echo ""
 read -p "Continue? (y/N): " -r
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -119,7 +147,7 @@ if [ -f "composer.json" ]; then
         exit 1
     fi
 else
-    echo -e "${YELLOW}⚠  No composer.json found${NC}"
+    echo -e "${YELLOW}⚠️  No composer.json found${NC}"
 fi
 
 echo ""
@@ -128,8 +156,8 @@ echo -e "${YELLOW}[3/5]${NC} Creating ZIP with correct structure..."
 # Create releases directory
 mkdir -p releases
 
-# ZIP file path
-zip_file="releases/pw-ofertas-avanzadas-v${new_version}.zip"
+# ZIP file path with edition
+zip_file="releases/pw-ofertas-avanzadas-${edition}-v${new_version}.zip"
 
 # Remove existing ZIP if exists
 rm -f "$zip_file"
@@ -141,8 +169,8 @@ plugin_dir="$temp_parent/pw-ofertas-avanzadas"
 # Create the plugin directory structure
 mkdir -p "$plugin_dir"
 
-# Copy main plugin file
-cp "$main_file" "$plugin_dir/"
+# Copy main plugin file and rename to standard name
+cp "$main_file" "$plugin_dir/pw-ofertas-avanzadas.php"
 
 # Copy README
 cp README.md "$plugin_dir/"
@@ -150,7 +178,7 @@ cp README.md "$plugin_dir/"
 # Copy LICENCE
 cp LICENCE.txt "$plugin_dir/"
 
-# Copy directories (estructura exacta del proyecto)
+# Copy directories
 cp -r src "$plugin_dir/"
 cp -r assets "$plugin_dir/"
 cp -r vendor "$plugin_dir/"
@@ -163,8 +191,7 @@ cp composer.json "$plugin_dir/"
 cd "$plugin_dir"
 
 # Remove specific development/test files
-rm -f build-deploy.sh 2>/dev/null || true
-rm -f build-deploy-fixed.sh 2>/dev/null || true
+rm -f build-deploy*.sh 2>/dev/null || true
 rm -f flatten.sh 2>/dev/null || true
 rm -f estructura.txt 2>/dev/null || true
 rm -f .gitignore 2>/dev/null || true
@@ -186,7 +213,7 @@ find vendor/ -name "phpstan" -type d -exec rm -rf {} + 2>/dev/null || true
 
 cd ../..
 
-# Create the ZIP from the temp parent directory (includes pw-ofertas-avanzadas/ folder)
+# Create the ZIP from the temp parent directory
 cd "$temp_parent"
 zip -r "../$zip_file" pw-ofertas-avanzadas >/dev/null 2>&1
 cd ..
@@ -207,14 +234,14 @@ mkdir "$test_dir"
 cd "$test_dir"
 unzip -q "../$zip_file"
 
-if [ -d "pw-ofertas-avanzadas" ] && [ -f "pw-ofertas-avanzadas/$main_file" ]; then
+if [ -d "pw-ofertas-avanzadas" ] && [ -f "pw-ofertas-avanzadas/pw-ofertas-avanzadas.php" ]; then
     echo -e "${GREEN}✅ ZIP structure is correct!${NC}"
     echo -e "${GREEN}✅ WordPress will detect this plugin properly${NC}"
 
     # Verify key files
     echo ""
     echo "Key files verified:"
-    [ -f "pw-ofertas-avanzadas/$main_file" ] && echo "  ✅ $main_file"
+    [ -f "pw-ofertas-avanzadas/pw-ofertas-avanzadas.php" ] && echo "  ✅ pw-ofertas-avanzadas.php"
     [ -d "pw-ofertas-avanzadas/src" ] && echo "  ✅ src/"
     [ -d "pw-ofertas-avanzadas/vendor" ] && echo "  ✅ vendor/"
     [ -d "pw-ofertas-avanzadas/assets" ] && echo "  ✅ assets/"
@@ -223,7 +250,7 @@ if [ -d "pw-ofertas-avanzadas" ] && [ -f "pw-ofertas-avanzadas/$main_file" ]; th
     # Check what was cleaned
     echo ""
     echo "Development files removed:"
-    [ ! -f "pw-ofertas-avanzadas/build-deploy.sh" ] && echo "  ✅ build-deploy.sh (removed)"
+    [ ! -f "pw-ofertas-avanzadas/build-deploy.sh" ] && echo "  ✅ build-deploy*.sh (removed)"
     [ ! -f "pw-ofertas-avanzadas/flatten.sh" ] && echo "  ✅ flatten.sh (removed)"
     [ ! -f "pw-ofertas-avanzadas/estructura.txt" ] && echo "  ✅ estructura.txt (removed)"
     [ ! -d "pw-ofertas-avanzadas/node_modules" ] && echo "  ✅ node_modules/ (not included)"
@@ -246,6 +273,7 @@ echo ""
 echo "📦 Package: $zip_file"
 echo "📏 Size: $zip_size"
 echo "📖 Version: $new_version (${change_type})"
+echo "🏷️  Edition: ${edition}"
 echo "🚀 Ready for WordPress!"
 echo ""
 echo "To install:"
@@ -256,7 +284,7 @@ echo ""
 echo "Next steps:"
 echo "- Test the plugin on a fresh WordPress install"
 echo "- Commit version changes: git add $main_file composer.json"
-echo "- Create release: git commit -m 'Release v${new_version}'"
-echo "- Tag release: git tag v${new_version}"
+echo "- Create release: git commit -m 'Release ${edition} v${new_version}'"
+echo "- Tag release: git tag v${new_version}-${edition}"
 echo "- Push: git push origin main --tags"
 echo ""
