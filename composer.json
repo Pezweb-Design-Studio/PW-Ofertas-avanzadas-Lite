@@ -1,4 +1,4 @@
-﻿{
+{
     "name": "pw/ofertas-avanzadas",
     "description": "Sistema avanzado de descuentos orientado a marketing para WooCommerce",
     "type": "wordpress-plugin",
@@ -12,7 +12,7 @@
     },
     "authors": [
         {
-            "name": "Tu Nombre"
+            "name": "PezWeb"
         }
     ]
 }

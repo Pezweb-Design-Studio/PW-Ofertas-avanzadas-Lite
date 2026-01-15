@@ -2,14 +2,14 @@
 /**
  * Plugin Name: PW - Ofertas Avanzadas
  * Description: Sistema de descuentos orientado a estrategias de marketing para WooCommerce
- * Version: 1.0.3
+ * Version: 2.0.2
  * Requires PHP: 7.4
  * Author: Tu Nombre
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('PWOA_VERSION', '1.0.3');
+define('PWOA_VERSION', '2.0.2');
 define('PWOA_PATH', plugin_dir_path(__FILE__));
 define('PWOA_URL', plugin_dir_url(__FILE__));
 

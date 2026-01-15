@@ -79,17 +79,17 @@ class DiscountEngine {
 
     private static function getStrategyClass(string $strategy): string {
         $map = [
-            'basic_discount' => 'PW\\OfertasAvanzadas\\Strategies\\Basic\\BasicDiscountStrategy',
-            'min_amount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\MinAmountStrategy',
-            'free_shipping' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\FreeShippingStrategy',
-            'tiered_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\TieredDiscountStrategy',
-            'bulk_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\BulkDiscountStrategy',
-            'buy_x_pay_y' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\BuyXPayYStrategy',
-            'attribute_quantity_discount' => 'PW\\OfertasAvanzadas\\Strategies\\AOV\\AttributeQuantityDiscountStrategy',
-            'expiry_based' => 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\ExpiryBasedStrategy',
-            'low_stock' => 'PW\\OfertasAvanzadas\\Strategies\\Liquidation\\LowStockStrategy',
-            'recurring_purchase' => 'PW\\OfertasAvanzadas\\Strategies\\Loyalty\\RecurringPurchaseStrategy',
-            'flash_sale' => 'PW\\OfertasAvanzadas\\Strategies\\Urgency\\FlashSaleStrategy'
+            'basic_discount' => 'PW\\OfertasAvanzadas\\Strategies\\Lite\\BasicDiscountStrategy',
+            'min_amount' => 'PW\\OfertasAvanzadas\\Strategies\\Pro\\MinAmountStrategy',
+            'free_shipping' => 'PW\\OfertasAvanzadas\\Strategies\\Pro\\FreeShippingStrategy',
+            'tiered_discount' => 'PW\\OfertasAvanzadas\\Strategies\\Pro\\TieredDiscountStrategy',
+            'bulk_discount' => 'PW\\OfertasAvanzadas\\Strategies\\Lite\\BulkDiscountStrategy',
+            'buy_x_pay_y' => 'PW\\OfertasAvanzadas\\Strategies\\Lite\\BuyXPayYStrategy',
+            'attribute_quantity_discount' => 'PW\\OfertasAvanzadas\\Strategies\\Lite\\AttributeQuantityDiscountStrategy',
+            'expiry_based' => 'PW\\OfertasAvanzadas\\Strategies\\Lite\\ExpiryBasedStrategy',
+            'low_stock' => 'PW\\OfertasAvanzadas\\Strategies\\Pro\\LowStockStrategy',
+            'recurring_purchase' => 'PW\\OfertasAvanzadas\\Strategies\\Pro\\RecurringPurchaseStrategy',
+            'flash_sale' => 'PW\\OfertasAvanzadas\\Strategies\\Pro\\FlashSaleStrategy'
         ];
 
         return $map[$strategy] ?? '';
