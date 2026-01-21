@@ -136,11 +136,10 @@ echo -e "${YELLOW}[3/5]${NC} Building $edition edition..."
 output_dir="releases/$edition"
 mkdir -p "$output_dir"
 
-# Limpiar directorio de salida
-echo "  → Cleaning $output_dir..."
-rm -rf "$output_dir"/*
-
+# Limpiar SOLO el directorio temporal del plugin (no los ZIPs)
 plugin_dir="$output_dir/pw-ofertas-avanzadas"
+echo "  → Cleaning $plugin_dir..."
+rm -rf "$plugin_dir"
 mkdir -p "$plugin_dir"
 
 # Archivo principal
@@ -174,7 +173,7 @@ if [ "$edition" = "lite" ]; then
     # Admin (LITE)
     mkdir -p "$plugin_dir/src/Admin/Views"
     cp src/Admin/AdminController.lite.php "$plugin_dir/src/Admin/AdminController.php"
-    cp src/Admin/Views/dashboard.php "$plugin_dir/src/Admin/Views/"
+    cp src/Admin/Views/dashboard.lite.php "$plugin_dir/src/Admin/Views/dashboard.php"
     cp src/Admin/Views/wizard.lite.php "$plugin_dir/src/Admin/Views/wizard.php"
     cp assets/js/wizard.lite-addon.js "$plugin_dir/assets/js/"
 
@@ -214,6 +213,7 @@ else
     cp src/Admin/Views/dashboard.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/wizard.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/analytics.php "$plugin_dir/src/Admin/Views/"
+    cp src/Admin/Views/settings.php "$plugin_dir/src/Admin/Views/"
     cp assets/js/analytics.js "$plugin_dir/assets/js/"
 
     # Core (PRO)

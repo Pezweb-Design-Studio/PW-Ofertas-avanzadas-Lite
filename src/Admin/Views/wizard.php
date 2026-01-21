@@ -1,30 +1,33 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if (!defined("ABSPATH")) {
+    exit();
+}
 
 // ⚡ Detectar modo edición
-$is_edit_mode = isset($_GET['edit']) && !empty($_GET['edit']);
+$is_edit_mode = isset($_GET["edit"]) && !empty($_GET["edit"]);
 
 $objectives = [
-        'basic' => [
-                'title' => 'Básico',
-                'desc' => 'Descuento simple por porcentaje o monto fijo a productos seleccionados'
-        ],
-        'aov' => [
-                'title' => 'Aumentar Valor del Carrito',
-                'desc' => 'Incrementa el ticket promedio con descuentos estratégicos'
-        ],
-        'liquidation' => [
-                'title' => 'Liquidar Inventario',
-                'desc' => 'Mueve stock que no rota o está próximo a vencer'
-        ],
-        'loyalty' => [
-                'title' => 'Fidelización',
-                'desc' => 'Recompensa clientes recurrentes y genera lealtad'
-        ],
-        'urgency' => [
-                'title' => 'Conversión Rápida',
-                'desc' => 'Genera urgencia y aumenta ventas inmediatas'
-        ]
+    "basic" => [
+        "title" => "Básico",
+        "desc" =>
+            "Descuento simple por porcentaje o monto fijo a productos seleccionados",
+    ],
+    "aov" => [
+        "title" => "Aumentar Valor del Carrito",
+        "desc" => "Incrementa el ticket promedio con descuentos estratégicos",
+    ],
+    "liquidation" => [
+        "title" => "Liquidar Inventario",
+        "desc" => "Mueve stock que no rota o está próximo a vencer",
+    ],
+    "loyalty" => [
+        "title" => "Fidelización",
+        "desc" => "Recompensa clientes recurrentes y genera lealtad",
+    ],
+    "urgency" => [
+        "title" => "Conversión Rápida",
+        "desc" => "Genera urgencia y aumenta ventas inmediatas",
+    ],
 ];
 ?>
 
@@ -82,7 +85,9 @@ $objectives = [
     </nav>
 
     <!-- Step 1: Objetivo -->
-    <div id="step-objective" class="<?php echo $is_edit_mode ? 'hidden' : ''; ?>">
+    <div id="step-objective" class="<?php echo $is_edit_mode
+        ? "hidden"
+        : ""; ?>">
         <h1 class="text-4xl font-bold mb-12">¿Qué quieres lograr?</h1>
 
         <div class="grid grid-cols-2 gap-8">
@@ -91,9 +96,13 @@ $objectives = [
                         type="button"
                         class="objective-btn text-left bg-white p-8 rounded-lg shadow hover:shadow-xl transition border-2 border-transparent hover:border-blue-500"
                         data-objective="<?php echo esc_attr($key); ?>"
-                        data-title="<?php echo esc_attr($obj['title']); ?>">
-                    <h3 class="text-2xl font-bold mb-3"><?php echo esc_html($obj['title']); ?></h3>
-                    <p class="text-gray-600"><?php echo esc_html($obj['desc']); ?></p>
+                        data-title="<?php echo esc_attr($obj["title"]); ?>">
+                    <h3 class="text-2xl font-bold mb-3"><?php echo esc_html(
+                        $obj["title"],
+                    ); ?></h3>
+                    <p class="text-gray-600"><?php echo esc_html(
+                        $obj["desc"],
+                    ); ?></p>
                 </button>
             <?php endforeach; ?>
         </div>
@@ -108,7 +117,7 @@ $objectives = [
     </div>
 
     <!-- Step 3: Configuración -->
-    <div id="step-config" class="<?php echo $is_edit_mode ? '' : 'hidden'; ?>">
+    <div id="step-config" class="<?php echo $is_edit_mode ? "" : "hidden"; ?>">
         <h1 class="text-4xl font-bold mb-3" id="selected-strategy-title"></h1>
         <p class="text-lg text-gray-500 mb-12">Configura los parámetros de tu campaña</p>
 
@@ -137,12 +146,32 @@ $objectives = [
             </div>
 
             <div>
-                <label class="block text-sm font-bold mb-2">Modo de aplicación</label>
+                <label class="block text-sm font-bold mb-2">
+                    Modo de aplicación
+                    <a href="#" id="stacking-help" class="ml-2 text-blue-600 hover:text-blue-800 text-xs font-normal">
+                        ¿Qué significa esto?
+                    </a>
+                </label>
                 <select name="stacking_mode" id="form-stacking-mode" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                     <option value="priority">Prioridad (mejor descuento)</option>
                     <option value="stack">Apilar descuentos</option>
                 </select>
                 <p class="text-sm text-gray-500 mt-1">Si hay múltiples campañas activas, ¿aplicar solo la mejor o sumarlas?</p>
+
+                <!-- Tooltip de ayuda -->
+                <div id="stacking-tooltip" class="hidden mt-3 p-4 bg-blue-50 border-l-4 border-blue-400 rounded text-sm">
+                    <p class="font-bold text-blue-900 mb-2">Explicación:</p>
+                    <ul class="space-y-2 text-blue-800">
+                        <li><strong>Prioridad:</strong> Compite con otras campañas prioritarias. Solo se aplica la de mayor descuento.</li>
+                        <li><strong>Apilar:</strong> Se suma con otras campañas apilables disponibles.</li>
+                    </ul>
+                    <p class="mt-3 text-blue-900">
+                        <strong>Nota:</strong> El comportamiento exacto depende de la configuración global en
+                        <a href="<?php echo admin_url(
+                            "admin.php?page=pwoa-settings",
+                        ); ?>" class="underline font-bold">Ajustes</a>.
+                    </p>
+                </div>
             </div>
 
             <!-- FILTRADO DE PRODUCTOS -->
@@ -167,9 +196,16 @@ $objectives = [
                     <label class="block text-sm font-bold mb-2">Categorías</label>
                     <select id="form-categories" multiple class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" style="height: 120px;">
                         <?php
-                        $categories = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false]);
+                        $categories = get_terms([
+                            "taxonomy" => "product_cat",
+                            "hide_empty" => false,
+                        ]);
                         foreach ($categories as $cat) {
-                            echo '<option value="' . esc_attr($cat->term_id) . '">' . esc_html($cat->name) . '</option>';
+                            echo '<option value="' .
+                                esc_attr($cat->term_id) .
+                                '">' .
+                                esc_html($cat->name) .
+                                "</option>";
                         }
                         ?>
                     </select>

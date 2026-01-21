@@ -106,7 +106,7 @@ class AdminController
                 wp_die(
                     "<h1>Límite alcanzado</h1>" .
                         "<p>Has alcanzado el límite de 5 campañas en la versión Lite.</p>" .
-                        '<p><a href="https://pezweb.com/">Actualiza a Pro</a> para campañas ilimitadas.</p>',
+                        '<p><a href="https://pezweb.com/servicios/ofertas-avanzadas/">Actualiza a Pro</a> para campañas ilimitadas.</p>',
                     "Límite de campañas",
                     ["back_link" => true],
                 );

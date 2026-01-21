@@ -80,7 +80,7 @@ PWOAWizard.showProModal = function (featureName) {
                     <strong>${featureName}</strong> está disponible en la versión Pro junto con 6 estrategias avanzadas adicionales y analytics completos.
                 </p>
                 <div class="space-y-3">
-                    <a href="https://pezweb.com/" target="_blank"
+                    <a href="https://pezweb.com/servicios/ofertas-avanzadas/" target="_blank"
                        class="block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition">
                         Ver versión PRO →
                     </a>
@@ -137,7 +137,7 @@ PWOAWizard.renderStrategies = function (strategies) {
                 <p class="text-gray-700 text-lg mb-8">
                     Este objetivo está disponible en la versión Pro.
                 </p>
-                <a href="https://pezweb.com/" target="_blank"
+                <a href="https://pezweb.com/servicios/ofertas-avanzadas/" target="_blank"
                    class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-purple-700 transition">
                     Actualizar a Pro →
                 </a>
@@ -171,7 +171,7 @@ PWOAWizard.renderStrategies = function (strategies) {
                             Actualiza a Pro para desbloquear ${proCount} ${proCount === 1 ? "estrategia avanzada adicional" : "estrategias avanzadas adicionales"}.
                         </p>
                     </div>
-                    <a href="https://pezweb.com/" target="_blank"
+                    <a href="https://pezweb.com/servicios/ofertas-avanzadas/" target="_blank"
                        class="ml-4 bg-gradient-to-r from-blue-600 to-purple-600 !text-white px-6 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition whitespace-nowrap">
                         Ver Pro →
                     </a>

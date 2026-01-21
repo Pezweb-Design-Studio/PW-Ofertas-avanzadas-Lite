@@ -132,7 +132,7 @@ $objectives = [
                         <strong>Actualiza a Pro</strong> para campañas ilimitadas + 6 estrategias avanzadas.
                     </p>
                 </div>
-                <a href="https://pezweb.com/" target="_blank"
+                <a href="https://tu-sitio.com/pro" target="_blank"
                    class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition whitespace-nowrap">
                     Ver Pro →
                 </a>
@@ -234,6 +234,11 @@ $objectives = [
                     <option value="stack">Apilar descuentos</option>
                 </select>
                 <p class="text-sm text-gray-500 mt-1">Si hay múltiples campañas activas, ¿aplicar solo la mejor o sumarlas?</p>
+                <div class="mt-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 border-l-4 border-blue-500 rounded">
+                    <p class="text-sm text-gray-700">
+                        💡 <strong>Versión Pro:</strong> Configura comportamientos avanzados de descuentos múltiples en Ajustes.
+                    </p>
+                </div>
             </div>
 
             <!-- FILTRADO DE PRODUCTOS -->
