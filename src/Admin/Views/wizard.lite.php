@@ -1,39 +1,42 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if (!defined("ABSPATH")) {
+    exit();
+}
 
 // ⚡ Detectar modo edición
-$is_edit_mode = isset($_GET['edit']) && !empty($_GET['edit']);
+$is_edit_mode = isset($_GET["edit"]) && !empty($_GET["edit"]);
 
 // ⚠️ LITE: Mostrar banner de campañas restantes
 $total_campaigns = \PW\OfertasAvanzadas\Repositories\CampaignRepository::getCount();
 $remaining_slots = max(0, 5 - $total_campaigns);
 
 $objectives = [
-        'basic' => [
-                'title' => 'Básico',
-                'desc' => 'Descuento simple por porcentaje o monto fijo a productos seleccionados',
-                'available' => true
-        ],
-        'aov' => [
-                'title' => 'Aumentar Valor del Carrito',
-                'desc' => 'Incrementa el ticket promedio con descuentos estratégicos',
-                'available' => true
-        ],
-        'liquidation' => [
-                'title' => 'Liquidar Inventario',
-                'desc' => 'Mueve stock que no rota o está próximo a vencer',
-                'available' => true
-        ],
-        'loyalty' => [
-                'title' => 'Fidelización',
-                'desc' => 'Recompensa clientes recurrentes y genera lealtad',
-                'available' => false // ⚠️ LITE: Bloqueado
-        ],
-        'urgency' => [
-                'title' => 'Conversión Rápida',
-                'desc' => 'Genera urgencia y aumenta ventas inmediatas',
-                'available' => false // ⚠️ LITE: Bloqueado
-        ]
+    "basic" => [
+        "title" => "Básico",
+        "desc" =>
+            "Descuento simple por porcentaje o monto fijo a productos seleccionados",
+        "available" => true,
+    ],
+    "aov" => [
+        "title" => "Aumentar Valor del Carrito",
+        "desc" => "Incrementa el ticket promedio con descuentos estratégicos",
+        "available" => true,
+    ],
+    "liquidation" => [
+        "title" => "Liquidar Inventario",
+        "desc" => "Mueve stock que no rota o está próximo a vencer",
+        "available" => true,
+    ],
+    "loyalty" => [
+        "title" => "Fidelización",
+        "desc" => "Recompensa clientes recurrentes y genera lealtad",
+        "available" => false, // ⚠️ LITE: Bloqueado
+    ],
+    "urgency" => [
+        "title" => "Conversión Rápida",
+        "desc" => "Genera urgencia y aumenta ventas inmediatas",
+        "available" => false, // ⚠️ LITE: Bloqueado
+    ],
 ];
 ?>
 
@@ -118,7 +121,10 @@ $objectives = [
                         <?php if ($remaining_slots == 0): ?>
                             ⚠️ Límite alcanzado
                         <?php else: ?>
-                            ⏰ <?php echo $remaining_slots; ?> <?php echo $remaining_slots == 1 ? 'campaña restante' : 'campañas restantes'; ?>
+                            ⏰ <?php echo $remaining_slots; ?> <?php echo $remaining_slots ==
+ 1
+     ? "campaña restante"
+     : "campañas restantes"; ?>
                         <?php endif; ?>
                     </h3>
                     <p class="text-sm text-orange-700">
@@ -126,7 +132,7 @@ $objectives = [
                         <strong>Actualiza a Pro</strong> para campañas ilimitadas + 6 estrategias avanzadas.
                     </p>
                 </div>
-                <a href="https://tu-sitio.com/pro" target="_blank"
+                <a href="https://pezweb.com/" target="_blank"
                    class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:from-blue-700 hover:to-purple-700 transition whitespace-nowrap">
                     Ver Pro →
                 </a>
@@ -156,19 +162,29 @@ $objectives = [
     </nav>
 
     <!-- Step 1: Objetivo -->
-    <div id="step-objective" class="<?php echo $is_edit_mode ? 'hidden' : ''; ?>">
+    <div id="step-objective" class="<?php echo $is_edit_mode
+        ? "hidden"
+        : ""; ?>">
         <h1 class="text-4xl font-bold mb-12">¿Qué quieres lograr?</h1>
 
         <div class="grid grid-cols-2 gap-8">
             <?php foreach ($objectives as $key => $obj): ?>
                 <button
                         type="button"
-                        class="objective-btn <?php echo !$obj['available'] ? 'pro' : ''; ?> text-left bg-white p-8 rounded-lg shadow hover:shadow-xl transition border-2 border-transparent hover:border-blue-500"
+                        class="objective-btn <?php echo !$obj["available"]
+                            ? "pro"
+                            : ""; ?> text-left bg-white p-8 rounded-lg shadow hover:shadow-xl transition border-2 border-transparent hover:border-blue-500"
                         data-objective="<?php echo esc_attr($key); ?>"
-                        data-title="<?php echo esc_attr($obj['title']); ?>"
-                        data-available="<?php echo $obj['available'] ? '1' : '0'; ?>">
-                    <h3 class="text-2xl font-bold mb-3"><?php echo esc_html($obj['title']); ?></h3>
-                    <p class="text-gray-600"><?php echo esc_html($obj['desc']); ?></p>
+                        data-title="<?php echo esc_attr($obj["title"]); ?>"
+                        data-available="<?php echo $obj["available"]
+                            ? "1"
+                            : "0"; ?>">
+                    <h3 class="text-2xl font-bold mb-3"><?php echo esc_html(
+                        $obj["title"],
+                    ); ?></h3>
+                    <p class="text-gray-600"><?php echo esc_html(
+                        $obj["desc"],
+                    ); ?></p>
                 </button>
             <?php endforeach; ?>
         </div>
@@ -183,7 +199,7 @@ $objectives = [
     </div>
 
     <!-- Step 3: Configuración -->
-    <div id="step-config" class="<?php echo $is_edit_mode ? '' : 'hidden'; ?>">
+    <div id="step-config" class="<?php echo $is_edit_mode ? "" : "hidden"; ?>">
         <h1 class="text-4xl font-bold mb-3" id="selected-strategy-title"></h1>
         <p class="text-lg text-gray-500 mb-12">Configura los parámetros de tu campaña</p>
 
@@ -242,9 +258,16 @@ $objectives = [
                     <label class="block text-sm font-bold mb-2">Categorías</label>
                     <select id="form-categories" multiple class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" style="height: 120px;">
                         <?php
-                        $categories = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false]);
+                        $categories = get_terms([
+                            "taxonomy" => "product_cat",
+                            "hide_empty" => false,
+                        ]);
                         foreach ($categories as $cat) {
-                            echo '<option value="' . esc_attr($cat->term_id) . '">' . esc_html($cat->name) . '</option>';
+                            echo '<option value="' .
+                                esc_attr($cat->term_id) .
+                                '">' .
+                                esc_html($cat->name) .
+                                "</option>";
                         }
                         ?>
                     </select>

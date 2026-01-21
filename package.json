@@ -1,6 +1,6 @@
 {
   "name": "pw-ofertas-avanzadas",
-  "version": "2.0.2",
+  "version": "2.0.9",
   "description": "Sistema avanzado de descuentos para WooCommerce",
   "scripts": {
     "build:lite": "./build-deploy.sh lite",
