@@ -2,16 +2,16 @@
 /**
  * Plugin Name: PW - Ofertas Avanzadas Lite
  * Description: Sistema de descuentos orientado a estrategias de marketing para WooCommerce (Versión Lite)
- * Version: 2.0.2
+ * Version: 2.0.10
  * Requires PHP: 7.4
  * Author: PezWeb
- * Plugin URI: https://tu-sitio.com/ofertas-avanzadas
+ * Plugin URI: https://pezweb.com/
  * Text Domain: pw-ofertas-avanzadas
  */
 
 if (!defined('ABSPATH')) exit;
 
-define('PWOA_VERSION', '2.0.2');
+define('PWOA_VERSION', '2.0.10');
 define('PWOA_EDITION', 'lite');
 define('PWOA_PATH', plugin_dir_path(__FILE__));
 define('PWOA_URL', plugin_dir_url(__FILE__));

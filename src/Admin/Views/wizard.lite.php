@@ -9,31 +9,31 @@ $total_campaigns = \PW\OfertasAvanzadas\Repositories\CampaignRepository::getCoun
 $remaining_slots = max(0, 5 - $total_campaigns);
 
 $objectives = [
-    'basic' => [
-        'title' => 'Básico',
-        'desc' => 'Descuento simple por porcentaje o monto fijo a productos seleccionados',
-        'available' => true
-    ],
-    'aov' => [
-        'title' => 'Aumentar Valor del Carrito',
-        'desc' => 'Incrementa el ticket promedio con descuentos estratégicos',
-        'available' => true
-    ],
-    'liquidation' => [
-        'title' => 'Liquidar Inventario',
-        'desc' => 'Mueve stock que no rota o está próximo a vencer',
-        'available' => true
-    ],
-    'loyalty' => [
-        'title' => 'Fidelización',
-        'desc' => 'Recompensa clientes recurrentes y genera lealtad',
-        'available' => false // ⚠️ LITE: Bloqueado
-    ],
-    'urgency' => [
-        'title' => 'Conversión Rápida',
-        'desc' => 'Genera urgencia y aumenta ventas inmediatas',
-        'available' => false // ⚠️ LITE: Bloqueado
-    ]
+        'basic' => [
+                'title' => 'Básico',
+                'desc' => 'Descuento simple por porcentaje o monto fijo a productos seleccionados',
+                'available' => true
+        ],
+        'aov' => [
+                'title' => 'Aumentar Valor del Carrito',
+                'desc' => 'Incrementa el ticket promedio con descuentos estratégicos',
+                'available' => true
+        ],
+        'liquidation' => [
+                'title' => 'Liquidar Inventario',
+                'desc' => 'Mueve stock que no rota o está próximo a vencer',
+                'available' => true
+        ],
+        'loyalty' => [
+                'title' => 'Fidelización',
+                'desc' => 'Recompensa clientes recurrentes y genera lealtad',
+                'available' => false // ⚠️ LITE: Bloqueado
+        ],
+        'urgency' => [
+                'title' => 'Conversión Rápida',
+                'desc' => 'Genera urgencia y aumenta ventas inmediatas',
+                'available' => false // ⚠️ LITE: Bloqueado
+        ]
 ];
 ?>
 
@@ -66,13 +66,11 @@ $objectives = [
         background-color: #d1d5db !important;
     }
 
-    /* ⚠️ LITE: Estilos para objectives bloqueados */
-    .objective-btn.locked {
-        opacity: 0.6;
-        cursor: not-allowed;
+    /* ⚠️ LITE: Estilos para objectives Pro (solo visual, no bloqueados) */
+    .objective-btn.pro {
         position: relative;
     }
-    .objective-btn.locked::after {
+    .objective-btn.pro::after {
         content: '🔒 PRO';
         position: absolute;
         top: 8px;
@@ -83,6 +81,29 @@ $objectives = [
         border-radius: 4px;
         font-size: 11px;
         font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* ⚡ NUEVO: Estilos para strategies bloqueadas */
+    .strategy-card.locked {
+        opacity: 0.7;
+        position: relative;
+    }
+    .strategy-card.locked:hover {
+        border-color: #9333ea !important;
+        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3) !important;
+    }
+    .strategy-card .pro-badge {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 </style>
 
@@ -141,11 +162,11 @@ $objectives = [
         <div class="grid grid-cols-2 gap-8">
             <?php foreach ($objectives as $key => $obj): ?>
                 <button
-                    type="button"
-                    class="objective-btn text-left bg-white p-8 rounded-lg shadow hover:shadow-xl transition border-2 border-transparent hover:border-blue-500 <?php echo !$obj['available'] ? 'locked' : ''; ?>"
-                    data-objective="<?php echo esc_attr($key); ?>"
-                    data-title="<?php echo esc_attr($obj['title']); ?>"
-                    data-available="<?php echo $obj['available'] ? '1' : '0'; ?>">
+                        type="button"
+                        class="objective-btn <?php echo !$obj['available'] ? 'pro' : ''; ?> text-left bg-white p-8 rounded-lg shadow hover:shadow-xl transition border-2 border-transparent hover:border-blue-500"
+                        data-objective="<?php echo esc_attr($key); ?>"
+                        data-title="<?php echo esc_attr($obj['title']); ?>"
+                        data-available="<?php echo $obj['available'] ? '1' : '0'; ?>">
                     <h3 class="text-2xl font-bold mb-3"><?php echo esc_html($obj['title']); ?></h3>
                     <p class="text-gray-600"><?php echo esc_html($obj['desc']); ?></p>
                 </button>

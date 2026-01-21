@@ -1,20 +1,19 @@
 .
-├── LICENCE.txt
-├── README.md
 ├── assets
 │   └── js
 │       ├── analytics.js
 │       ├── wizard.js
 │       └── wizard.lite-addon.js
-├── build-deploy-v2.sh
 ├── build-deploy.sh
 ├── composer.json
 ├── composer.lock
 ├── estructura.txt
 ├── flatten.sh
+├── LICENCE.txt
+├── package.json
 ├── pw-ofertas-avanzadas-pro.php
 ├── pw-ofertas-avanzadas.lite.php
-├── pw-ofertas-avanzadas.php
+├── README.md
 └── src
     ├── Admin
     │   ├── AdminController.lite.php
@@ -28,6 +27,7 @@
     │   ├── Activator.lite.php
     │   ├── Activator.php
     │   ├── Deactivator.php
+    │   ├── Plugin.lite.php
     │   └── Plugin.php
     ├── Handlers
     │   ├── CartHandler.php

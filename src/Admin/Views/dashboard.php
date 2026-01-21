@@ -37,7 +37,7 @@ $objective_config = [
             <p class="text-gray-600 mt-1">Gestiona tus estrategias de marketing</p>
         </div>
         <a href="<?php echo admin_url('admin.php?page=pwoa-new-campaign'); ?>"
-           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg inline-flex items-center gap-2">
+           class="bg-blue-600 hover:bg-blue-700 !text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg inline-flex items-center gap-2">
             <span class="text-xl">+</span>
             Nueva Campaña
         </a>
@@ -53,7 +53,7 @@ $objective_config = [
                 Crea tu primera campaña de descuentos para aumentar ventas y optimizar tu inventario
             </p>
             <a href="<?php echo admin_url('admin.php?page=pwoa-new-campaign'); ?>"
-               class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg inline-flex items-center gap-2 font-medium transition-all hover:shadow-lg">
+               class="bg-blue-600 hover:bg-blue-700 !text-white px-8 py-3 rounded-lg inline-flex items-center gap-2 font-medium transition-all hover:shadow-lg">
                 <span class="text-xl">+</span>
                 Crear Primera Campaña
             </a>

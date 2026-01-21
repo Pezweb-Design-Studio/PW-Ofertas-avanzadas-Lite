@@ -11,96 +11,136 @@ NC='\033[0m'
 echo -e "${BLUE}🚀 PW Ofertas Avanzadas Plugin Build${NC}"
 echo "====================================="
 
-edition="$1"
+# Parsear argumentos
+if [ "$1" = "deploy" ]; then
+    mode="deploy"
+    edition="$2"
+else
+    mode="build"
+    edition="$1"
+fi
 
+# Si no hay edición, mostrar ayuda
 if [ -z "$edition" ]; then
     echo -e "${RED}❌ Error: Debes especificar la edición${NC}"
-    echo "Uso: bash build-deploy-v2.sh [lite|pro]"
+    echo ""
+    echo "Uso:"
+    echo "  ${CYAN}./build-deploy-v2.sh deploy [lite|pro]${NC}  - Incrementa versión y crea ZIP"
+    echo "  ${CYAN}./build-deploy-v2.sh [lite|pro]${NC}         - Copia archivos para desarrollo"
+    echo ""
+    echo "NPM Scripts:"
+    echo "  ${CYAN}npm run build:lite${NC} / ${CYAN}npm run build:pro${NC}"
+    echo "  ${CYAN}npm run deploy:lite${NC} / ${CYAN}npm run deploy:pro${NC}"
     exit 1
 fi
 
+# Validar edición
 if [ "$edition" != "lite" ] && [ "$edition" != "pro" ]; then
     echo -e "${RED}❌ Error: Edición inválida '$edition'${NC}"
     exit 1
 fi
 
+# Determinar archivo principal
 if [ "$edition" = "lite" ]; then
     main_file="pw-ofertas-avanzadas.lite.php"
 else
     main_file="pw-ofertas-avanzadas-pro.php"
 fi
 
+echo -e "${CYAN}Modo: ${YELLOW}${mode}${NC}"
 echo -e "${CYAN}Edición: ${YELLOW}$edition${NC}"
 echo -e "${CYAN}Archivo fuente: ${YELLOW}$main_file${NC}"
 echo ""
 
+# Verificar que existe el archivo
 if [ ! -f "$main_file" ]; then
     echo -e "${RED}❌ No se encontró: $main_file${NC}"
     exit 1
 fi
 
+# Leer versión actual
 current_version=$(grep "Version:" "$main_file" | sed 's/.*Version: *//' | sed 's/ *\*.*$//' | tr -d '\n\r')
 if [ -z "$current_version" ]; then
     current_version="1.0.0"
 fi
 
-IFS='.' read -ra VERSION_PARTS <<< "$current_version"
-major=${VERSION_PARTS[0]:-1}
-minor=${VERSION_PARTS[1]:-0}
-patch=${VERSION_PARTS[2]:-0}
+new_version="$current_version"
 
-echo -e "${CYAN}Current version: ${YELLOW}$current_version${NC}"
-echo ""
-echo "Select version increment:"
-echo -e "${RED}1)${NC} MAJOR (${major}.x.x → $((major + 1)).0.0)"
-echo -e "${YELLOW}2)${NC} MINOR (x.${minor}.x → ${major}.$((minor + 1)).0)"
-echo -e "${GREEN}3)${NC} PATCH (x.x.${patch} → ${major}.${minor}.$((patch + 1)))"
-echo ""
+# ============================================
+# INCREMENTO DE VERSIÓN (solo si mode=deploy)
+# ============================================
+if [ "$mode" = "deploy" ]; then
+    IFS='.' read -ra VERSION_PARTS <<< "$current_version"
+    major=${VERSION_PARTS[0]:-1}
+    minor=${VERSION_PARTS[1]:-0}
+    patch=${VERSION_PARTS[2]:-0}
 
-read -p "Choose [1-3, default=3]: " -r increment_type
-increment_type=${increment_type:-3}
+    echo -e "${CYAN}Current version: ${YELLOW}$current_version${NC}"
+    echo ""
+    echo "Select version increment:"
+    echo -e "${RED}1)${NC} MAJOR (${major}.x.x → $((major + 1)).0.0)"
+    echo -e "${YELLOW}2)${NC} MINOR (x.${minor}.x → ${major}.$((minor + 1)).0)"
+    echo -e "${GREEN}3)${NC} PATCH (x.x.${patch} → ${major}.${minor}.$((patch + 1)))"
+    echo ""
 
-case $increment_type in
-    1) new_version="$((major + 1)).0.0"; change_type="MAJOR" ;;
-    2) new_version="${major}.$((minor + 1)).0"; change_type="MINOR" ;;
-    3) new_version="${major}.${minor}.$((patch + 1))"; change_type="PATCH" ;;
-    *) new_version="${major}.${minor}.$((patch + 1))"; change_type="PATCH" ;;
-esac
+    read -p "Choose [1-3, default=3]: " -r increment_type
+    increment_type=${increment_type:-3}
 
-echo ""
-echo -e "${BLUE}Building:${NC} ${current_version} → ${GREEN}${new_version}${NC} (${change_type})"
-echo -e "${BLUE}Output:${NC} releases/pw-ofertas-avanzadas-${edition}-v${new_version}.zip"
-echo ""
-read -p "Continue? (y/N): " -r
-[[ ! $REPLY =~ ^[Yy]$ ]] && exit 0
+    case $increment_type in
+        1) new_version="$((major + 1)).0.0"; change_type="MAJOR" ;;
+        2) new_version="${major}.$((minor + 1)).0"; change_type="MINOR" ;;
+        3) new_version="${major}.${minor}.$((patch + 1))"; change_type="PATCH" ;;
+        *) new_version="${major}.${minor}.$((patch + 1))"; change_type="PATCH" ;;
+    esac
 
-echo -e "${YELLOW}[1/4]${NC} Updating version..."
+    echo ""
+    echo -e "${BLUE}Building:${NC} ${current_version} → ${GREEN}${new_version}${NC} (${change_type})"
+    echo ""
+    read -p "Continue? (y/N): " -r
+    [[ ! $REPLY =~ ^[Yy]$ ]] && exit 0
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' "s/Version: .*/Version: $new_version/" "$main_file"
-    sed -i '' "s/define('PWOA_VERSION', '[^']*')/define('PWOA_VERSION', '$new_version')/" "$main_file"
+    echo -e "${YELLOW}[1/5]${NC} Updating version..."
+
+    # Actualizar versión en el archivo
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/Version: .*/Version: $new_version/" "$main_file"
+        sed -i '' "s/define('PWOA_VERSION', '[^']*')/define('PWOA_VERSION', '$new_version')/" "$main_file"
+    else
+        sed -i "s/Version: .*/Version: $new_version/" "$main_file"
+        sed -i "s/define('PWOA_VERSION', '[^']*')/define('PWOA_VERSION', '$new_version')/" "$main_file"
+    fi
+
+    echo -e "${GREEN}✅ Version updated${NC}"
 else
-    sed -i "s/Version: .*/Version: $new_version/" "$main_file"
-    sed -i "s/define('PWOA_VERSION', '[^']*')/define('PWOA_VERSION', '$new_version')/" "$main_file"
+    echo -e "${CYAN}Skipping version increment (build mode)${NC}"
+    echo -e "${CYAN}Using current version: ${YELLOW}$current_version${NC}"
+    echo ""
 fi
 
-echo -e "${GREEN}✅ Version updated${NC}"
-
-echo -e "${YELLOW}[2/4]${NC} Installing dependencies..."
+# ============================================
+# COMPOSER INSTALL
+# ============================================
+echo -e "${YELLOW}[2/5]${NC} Installing dependencies..."
 if [ -f "composer.json" ]; then
     rm -rf vendor
     composer install --no-dev --optimize-autoloader --quiet
     echo -e "${GREEN}✅ Composer done${NC}"
 fi
 
-echo -e "${YELLOW}[3/4]${NC} Building $edition edition..."
+# ============================================
+# BUILD
+# ============================================
+echo -e "${YELLOW}[3/5]${NC} Building $edition edition..."
 
-mkdir -p releases
-zip_file="releases/pw-ofertas-avanzadas-${edition}-v${new_version}.zip"
-rm -f "$zip_file"
+# Determinar directorio de salida (SIEMPRE dentro de releases/edition/)
+output_dir="releases/$edition"
+mkdir -p "$output_dir"
 
-temp_parent="temp_build_$$"
-plugin_dir="$temp_parent/pw-ofertas-avanzadas"
+# Limpiar directorio de salida
+echo "  → Cleaning $output_dir..."
+rm -rf "$output_dir"/*
+
+plugin_dir="$output_dir/pw-ofertas-avanzadas"
 mkdir -p "$plugin_dir"
 
 # Archivo principal
@@ -141,8 +181,8 @@ if [ "$edition" = "lite" ]; then
     # Core (LITE)
     mkdir -p "$plugin_dir/src/Core"
     cp src/Core/Activator.lite.php "$plugin_dir/src/Core/Activator.php"
+    cp src/Core/Plugin.lite.php "$plugin_dir/src/Core/Plugin.php"
     cp src/Core/Deactivator.php "$plugin_dir/src/Core/"
-    cp src/Core/Plugin.php "$plugin_dir/src/Core/"
 
     # Handlers (compartidos)
     mkdir -p "$plugin_dir/src/Handlers"
@@ -202,32 +242,57 @@ else
     cp -r src/Strategies/Pro/* "$plugin_dir/src/Strategies/Pro/"
 fi
 
-# Limpiar
+# ============================================
+# LIMPIEZA
+# ============================================
+echo -e "${YELLOW}[4/5]${NC} Cleaning up..."
 cd "$plugin_dir"
 find . -name "*.map" -delete 2>/dev/null || true
 find . -name ".DS_Store" -delete 2>/dev/null || true
 find vendor/ -name "*.md" -delete 2>/dev/null || true
 find vendor/ -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true
 find vendor/ -name ".git" -type d -exec rm -rf {} + 2>/dev/null || true
+cd - >/dev/null
 
-cd ../..
-cd "$temp_parent"
-zip -r "../$zip_file" pw-ofertas-avanzadas >/dev/null 2>&1
-cd ..
-rm -rf "$temp_parent"
+# ============================================
+# CREAR ZIP (solo en modo deploy)
+# ============================================
+if [ "$mode" = "deploy" ]; then
+    echo -e "${YELLOW}[5/5]${NC} Creating ZIP..."
 
-echo -e "${GREEN}✅ ZIP created: $zip_file${NC}"
+    zip_file="$output_dir/pw-ofertas-avanzadas-${edition}-v${new_version}.zip"
+    rm -f "$zip_file"
 
-echo -e "${YELLOW}[4/4]${NC} Verifying..."
-unzip -l "$zip_file" | head -20
+    cd "$output_dir"
+    zip -r "pw-ofertas-avanzadas-${edition}-v${new_version}.zip" pw-ofertas-avanzadas >/dev/null 2>&1
+    cd - >/dev/null
 
-zip_size=$(du -sh "$zip_file" | cut -f1)
-echo ""
-echo "================================="
-echo -e "${GREEN}🎉 BUILD COMPLETE${NC}"
-echo "================================="
-echo "📦 $zip_file"
-echo "📏 Size: $zip_size"
-echo "📖 Version: $new_version ($change_type)"
-echo "🏷️  Edition: $edition"
-echo ""
+    echo -e "${GREEN}✅ ZIP created: $zip_file${NC}"
+
+    # Verificación
+    unzip -l "$zip_file" | head -20
+
+    zip_size=$(du -sh "$zip_file" | cut -f1)
+    echo ""
+    echo "================================="
+    echo -e "${GREEN}🎉 DEPLOY COMPLETE${NC}"
+    echo "================================="
+    echo "📦 $zip_file"
+    echo "📁 Size: $zip_size"
+    echo "📖 Version: $new_version (${change_type})"
+    echo "🏷️  Edition: $edition"
+    echo ""
+else
+    echo -e "${YELLOW}[5/5]${NC} Skipping ZIP (build mode)..."
+
+    echo ""
+    echo "================================="
+    echo -e "${GREEN}🎉 BUILD COMPLETE${NC}"
+    echo "================================="
+    echo "📂 Output: $plugin_dir"
+    echo "📖 Version: $current_version"
+    echo "🏷️  Edition: $edition"
+    echo ""
+    echo "Files ready for development/testing"
+    echo ""
+fi

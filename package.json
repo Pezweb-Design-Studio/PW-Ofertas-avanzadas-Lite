@@ -1,0 +1,13 @@
+{
+  "name": "pw-ofertas-avanzadas",
+  "version": "2.0.2",
+  "description": "Sistema avanzado de descuentos para WooCommerce",
+  "scripts": {
+    "build:lite": "./build-deploy.sh lite",
+    "build:pro": "./build-deploy.sh pro",
+    "deploy:lite": "./build-deploy.sh deploy lite",
+    "deploy:pro": "./build-deploy.sh deploy pro"
+  },
+  "author": "PezWeb",
+  "license": "PROPRIETARY"
+}

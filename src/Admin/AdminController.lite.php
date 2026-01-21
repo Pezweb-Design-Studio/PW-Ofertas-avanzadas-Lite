@@ -44,8 +44,6 @@ class AdminController {
             'pwoa-new-campaign',
             [$this, 'renderWizard']
         );
-
-        // ⚠️ LITE: Analytics eliminado
     }
 
     public function renderDashboard(): void {
@@ -56,14 +54,12 @@ class AdminController {
         $total = CampaignRepository::getCount();
         $total_pages = ceil($total / $per_page);
 
-        // ⚠️ LITE: Validar límite de 5 campañas
         $can_create = $total < 5;
 
         include PWOA_PATH . 'src/Admin/Views/dashboard.php';
     }
 
     public function renderWizard(): void {
-        // ⚠️ LITE: Validar límite de campañas
         if (!isset($_GET['edit'])) {
             $total = CampaignRepository::getCount();
             if ($total >= 5) {
@@ -80,7 +76,6 @@ class AdminController {
         include PWOA_PATH . 'src/Admin/Views/wizard.php';
     }
 
-    // ⚡ NUEVO: Endpoint unificado para wizard
     public function ajaxGetWizardData(): void {
         check_ajax_referer('pwoa_nonce', 'nonce');
 
@@ -96,7 +91,6 @@ class AdminController {
             'categories' => $this->getCachedCategories()
         ];
 
-        // Si es edición, cargar campaña + estrategias de ese objetivo
         if ($campaign_id > 0) {
             $campaign = CampaignRepository::getById($campaign_id);
 
@@ -110,7 +104,6 @@ class AdminController {
             $response['campaign'] = $campaign;
             $response['strategies'] = $this->getCachedStrategies($campaign->objective);
         }
-        // Si es creación con objetivo, solo estrategias
         elseif (!empty($objective)) {
             $response['strategies'] = $this->getCachedStrategies($objective);
         }
@@ -118,7 +111,6 @@ class AdminController {
         wp_send_json_success($response);
     }
 
-    // ⚡ NUEVO: Paginación de campañas
     public function ajaxGetCampaignsPaginated(): void {
         check_ajax_referer('pwoa_nonce', 'nonce');
 
@@ -168,8 +160,14 @@ class AdminController {
             return;
         }
 
-        $config = json_decode(stripslashes($_POST['config'] ?? '{}'), true);
+        // ⚠️ LITE: Validar que strategy sea Lite
         $strategy = sanitize_text_field($_POST['strategy'] ?? '');
+        if (!$this->isLiteStrategy($strategy)) {
+            wp_send_json_error('Esta estrategia no está disponible en la versión Lite. Actualiza a Pro.');
+            return;
+        }
+
+        $config = json_decode(stripslashes($_POST['config'] ?? '{}'), true);
 
         $discount_type = sanitize_text_field($_POST['discount_type'] ?? '');
 
@@ -254,9 +252,15 @@ class AdminController {
             wp_send_json_error('Permisos insuficientes');
         }
 
+        // ⚠️ LITE: Validar que strategy sea Lite
+        $strategy = sanitize_text_field($_POST['strategy'] ?? '');
+        if (!$this->isLiteStrategy($strategy)) {
+            wp_send_json_error('Esta estrategia no está disponible en la versión Lite. Actualiza a Pro.');
+            return;
+        }
+
         $campaign_id = intval($_POST['campaign_id'] ?? 0);
         $config = json_decode(stripslashes($_POST['config'] ?? '{}'), true);
-        $strategy = sanitize_text_field($_POST['strategy'] ?? '');
 
         $discount_type = sanitize_text_field($_POST['discount_type'] ?? '');
 
@@ -316,7 +320,6 @@ class AdminController {
         wp_send_json_success(['message' => 'Campaña eliminada correctamente']);
     }
 
-    // ⚡ OPTIMIZADO: Caché de estrategias
     private function getCachedStrategies(string $objective): array {
         $cache_key = 'pwoa_strategies_' . $objective;
         $strategies = get_transient($cache_key);
@@ -329,7 +332,6 @@ class AdminController {
         return $strategies;
     }
 
-    // ⚡ OPTIMIZADO: Caché de atributos
     private function getCachedAttributes(): array {
         $cache_key = 'pwoa_attributes';
         $attributes = get_transient($cache_key);
@@ -351,7 +353,6 @@ class AdminController {
         return $attributes;
     }
 
-    // ⚡ OPTIMIZADO: Caché de categorías
     private function getCachedCategories(): array {
         $cache_key = 'pwoa_categories';
         $categories = get_transient($cache_key);
@@ -373,9 +374,9 @@ class AdminController {
         return $categories;
     }
 
-    // ⚠️ LITE: Solo estrategias básicas disponibles
+    // ⚠️ LITE: Strategies disponibles + Pro bloqueadas
     private function getStrategiesByObjective(string $objective): array {
-        $strategies_map = [
+        $lite_map = [
             'basic' => [
                 'PW\\OfertasAvanzadas\\Strategies\\Lite\\BasicDiscountStrategy'
             ],
@@ -386,17 +387,50 @@ class AdminController {
             ],
             'liquidation' => [
                 'PW\\OfertasAvanzadas\\Strategies\\Lite\\ExpiryBasedStrategy'
-            ]
-            // ⚠️ LITE: loyalty y urgency NO disponibles
+            ],
+            'loyalty' => [],
+            'urgency' => []
         ];
 
-        $classes = $strategies_map[$objective] ?? [];
+        // ⚡ NUEVO: Strategies Pro bloqueadas (solo metadata)
+        $pro_map = [
+            'basic' => [],
+            'aov' => [
+                'PW\\OfertasAvanzadas\\Strategies\\Pro\\MinAmountStrategy',
+                'PW\\OfertasAvanzadas\\Strategies\\Pro\\FreeShippingStrategy',
+                'PW\\OfertasAvanzadas\\Strategies\\Pro\\TieredDiscountStrategy'
+            ],
+            'liquidation' => [
+                'PW\\OfertasAvanzadas\\Strategies\\Pro\\LowStockStrategy'
+            ],
+            'loyalty' => [
+                'PW\\OfertasAvanzadas\\Strategies\\Pro\\RecurringPurchaseStrategy'
+            ],
+            'urgency' => [
+                'PW\\OfertasAvanzadas\\Strategies\\Pro\\FlashSaleStrategy'
+            ]
+        ];
+
         $result = [];
 
-        foreach ($classes as $class) {
+        // Cargar strategies LITE (disponibles)
+        $lite_classes = $lite_map[$objective] ?? [];
+        foreach ($lite_classes as $class) {
             if (class_exists($class)) {
                 $meta = $class::getMeta();
                 $meta['config_fields'] = $class::getConfigFields();
+                $meta['available'] = true; // ✅ Disponible en Lite
+                $result[] = $meta;
+            }
+        }
+
+        // Cargar strategies PRO (bloqueadas, solo metadata)
+        $pro_classes = $pro_map[$objective] ?? [];
+        foreach ($pro_classes as $class) {
+            // Solo metadata, sin necesidad de que exista la clase
+            $meta = $this->getProStrategyMeta($class);
+            if ($meta) {
+                $meta['available'] = false; // 🔒 Bloqueada
                 $result[] = $meta;
             }
         }
@@ -404,7 +438,75 @@ class AdminController {
         return $result;
     }
 
-    // Los siguientes métodos son idénticos en ambas versiones...
+    // ⚡ NUEVO: Metadata hardcoded de strategies Pro
+    private function getProStrategyMeta(string $class): ?array {
+        $meta_map = [
+            'PW\\OfertasAvanzadas\\Strategies\\Pro\\MinAmountStrategy' => [
+                'name' => 'Descuento por Monto Mínimo',
+                'description' => 'Aplica descuento cuando el carrito supera un monto específico',
+                'effectiveness' => 5,
+                'when_to_use' => 'Efectivo todo el año. Ideal para aumentar ticket promedio.',
+                'objective' => 'aov',
+                'config_fields' => []
+            ],
+            'PW\\OfertasAvanzadas\\Strategies\\Pro\\FreeShippingStrategy' => [
+                'name' => 'Envío Gratis sobre Monto Mínimo',
+                'description' => 'Elimina costo de envío cuando el carrito supera un monto específico',
+                'effectiveness' => 5,
+                'when_to_use' => 'Estrategia permanente altamente efectiva. Incrementa ticket promedio 20-35%.',
+                'objective' => 'aov',
+                'config_fields' => []
+            ],
+            'PW\\OfertasAvanzadas\\Strategies\\Pro\\TieredDiscountStrategy' => [
+                'name' => 'Descuento Escalonado por Cantidad',
+                'description' => 'Descuentos progresivos según cantidad de productos en el carrito',
+                'effectiveness' => 4,
+                'when_to_use' => 'Black Friday, Cyber Monday, campañas de volumen.',
+                'objective' => 'aov',
+                'config_fields' => []
+            ],
+            'PW\\OfertasAvanzadas\\Strategies\\Pro\\LowStockStrategy' => [
+                'name' => 'Descuento por Stock Bajo',
+                'description' => 'Aplica descuentos automáticos a productos con pocas unidades disponibles',
+                'effectiveness' => 4,
+                'when_to_use' => 'Liquidación de inventario, cambio de temporada, discontinuación de productos.',
+                'objective' => 'liquidation',
+                'config_fields' => []
+            ],
+            'PW\\OfertasAvanzadas\\Strategies\\Pro\\RecurringPurchaseStrategy' => [
+                'name' => 'Descuento por Compras Recurrentes',
+                'description' => 'Recompensa a clientes que compran el mismo producto múltiples veces',
+                'effectiveness' => 5,
+                'when_to_use' => 'Productos de recompra: cosméticos, suplementos, alimentos. Aumenta retención 40-60%.',
+                'objective' => 'loyalty',
+                'config_fields' => []
+            ],
+            'PW\\OfertasAvanzadas\\Strategies\\Pro\\FlashSaleStrategy' => [
+                'name' => 'Flash Sale (Oferta Relámpago)',
+                'description' => 'Descuento por tiempo limitado para generar urgencia',
+                'effectiveness' => 5,
+                'when_to_use' => 'Black Friday, Cyber Monday, lanzamientos de productos. Máxima efectividad en ventanas de 6-24 horas.',
+                'objective' => 'urgency',
+                'config_fields' => []
+            ]
+        ];
+
+        return $meta_map[$class] ?? null;
+    }
+
+    // ⚡ NUEVO: Validar si strategy es Lite
+    private function isLiteStrategy(string $strategy): bool {
+        $lite_strategies = [
+            'basic_discount',
+            'bulk_discount',
+            'buy_x_pay_y',
+            'attribute_quantity_discount',
+            'expiry_based'
+        ];
+
+        return in_array($strategy, $lite_strategies);
+    }
+
     public function ajaxSearchProducts(): void {
         check_ajax_referer('pwoa_nonce', 'nonce');
 
