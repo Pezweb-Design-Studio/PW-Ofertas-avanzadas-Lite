@@ -9,5 +9,8 @@
     "deploy:pro": "./build-deploy.sh deploy pro"
   },
   "author": "PezWeb",
-  "license": "PROPRIETARY"
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "ci": "^2.3.0"
+  }
 }
