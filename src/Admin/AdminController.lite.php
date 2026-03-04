@@ -82,6 +82,15 @@ class AdminController
 			"pwoa-new-campaign",
 			[$this, "renderWizard"],
 		);
+
+		add_submenu_page(
+			"pwoa-dashboard",
+			"Shortcodes",
+			"Shortcodes",
+			"manage_woocommerce",
+			"pwoa-shortcodes",
+			[$this, "renderShortcodes"],
+		);
 	}
 
 	public function renderDashboard(): void
@@ -114,6 +123,11 @@ class AdminController
 		}
 
 		include PWOA_PATH . "src/Admin/Views/wizard.php";
+	}
+
+	public function renderShortcodes(): void
+	{
+		include PWOA_PATH . "src/Admin/Views/shortcodes.php";
 	}
 
 	public function ajaxGetWizardData(): void

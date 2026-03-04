@@ -175,6 +175,7 @@ if [ "$edition" = "lite" ]; then
     cp src/Admin/AdminController.lite.php "$plugin_dir/src/Admin/AdminController.php"
     cp src/Admin/Views/dashboard.lite.php "$plugin_dir/src/Admin/Views/dashboard.php"
     cp src/Admin/Views/wizard.lite.php "$plugin_dir/src/Admin/Views/wizard.php"
+    cp src/Admin/Views/shortcodes.php "$plugin_dir/src/Admin/Views/"
     cp assets/js/wizard.lite-addon.js "$plugin_dir/assets/js/"
 
     # Core (LITE)
@@ -199,6 +200,10 @@ if [ "$edition" = "lite" ]; then
     cp src/Services/DiscountEngine.php "$plugin_dir/src/Services/"
     cp src/Services/ProductMatcher.php "$plugin_dir/src/Services/"
 
+    # Shortcodes (compartidos)
+    mkdir -p "$plugin_dir/src/Shortcodes"
+    cp src/Shortcodes/ProductsShortcode.php "$plugin_dir/src/Shortcodes/"
+
     # Strategies (SOLO LITE)
     mkdir -p "$plugin_dir/src/Strategies/Lite"
     cp src/Strategies/DiscountStrategy.php "$plugin_dir/src/Strategies/"
@@ -214,6 +219,7 @@ else
     cp src/Admin/Views/wizard.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/analytics.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/settings.php "$plugin_dir/src/Admin/Views/"
+    cp src/Admin/Views/shortcodes.php "$plugin_dir/src/Admin/Views/"
     cp assets/js/analytics.js "$plugin_dir/assets/js/"
 
     # Core (PRO)
@@ -233,6 +239,10 @@ else
     # Services (todos)
     mkdir -p "$plugin_dir/src/Services"
     cp src/Services/*.php "$plugin_dir/src/Services/"
+
+    # Shortcodes (compartidos)
+    mkdir -p "$plugin_dir/src/Shortcodes"
+    cp src/Shortcodes/ProductsShortcode.php "$plugin_dir/src/Shortcodes/"
 
     # Strategies (LITE + PRO)
     mkdir -p "$plugin_dir/src/Strategies/Lite"

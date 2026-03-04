@@ -6,6 +6,7 @@ use PW\OfertasAvanzadas\Handlers\CartHandler;
 use PW\OfertasAvanzadas\Handlers\ProductExpiryHandler;
 use PW\OfertasAvanzadas\Handlers\ProductBadgeHandler;
 use PW\OfertasAvanzadas\Handlers\OrderHandler;
+use PW\OfertasAvanzadas\Shortcodes\ProductsShortcode;
 
 class Plugin {
     private static $instance = null;
@@ -26,6 +27,7 @@ class Plugin {
         new CartHandler();
         new ProductBadgeHandler();
         new OrderHandler();
+        new ProductsShortcode();
         $this->loadAssets();
     }
 
