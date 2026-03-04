@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PW - Ofertas Avanzadas Lite
  * Description: Sistema de descuentos orientado a estrategias de marketing para WooCommerce (Versión Lite)
- * Version: 2.0.15
+ * Version: 2.0.17
  * Requires PHP: 7.4
  * Author: PezWeb
  * Plugin URI: https://pezweb.com/servicios/ofertas-avanzadas/
