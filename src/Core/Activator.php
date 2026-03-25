@@ -1,12 +1,13 @@
 <?php
 namespace PW\OfertasAvanzadas\Core;
 
+defined('ABSPATH') || exit;
+
 class Activator {
     public static function activate(): void {
         global $wpdb;
         $charset = $wpdb->get_charset_collate();
 
-        // Tabla de campañas
         $sql_campaigns = "CREATE TABLE {$wpdb->prefix}pwoa_campaigns (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
@@ -28,7 +29,6 @@ class Activator {
             INDEX idx_deleted (deleted_at)
         ) $charset;";
 
-        // Tabla de estadísticas
         $sql_stats = "CREATE TABLE {$wpdb->prefix}pwoa_stats (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             campaign_id BIGINT UNSIGNED NOT NULL,
@@ -40,11 +40,10 @@ class Activator {
             INDEX idx_campaign (campaign_id, applied_at)
         ) $charset;";
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql_campaigns);
         dbDelta($sql_stats);
 
-        // Guardar versión para futuras migraciones
         update_option('pwoa_db_version', PWOA_VERSION);
     }
 }

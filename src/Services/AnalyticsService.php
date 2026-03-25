@@ -1,19 +1,20 @@
 <?php
 namespace PW\OfertasAvanzadas\Services;
 
+defined('ABSPATH') || exit;
+
 use PW\OfertasAvanzadas\Repositories\StatsRepository;
 
 class AnalyticsService {
 
     public static function getPerformanceMetrics(int $days = 30): array {
         $summary = StatsRepository::getSummary($days);
-        $top_campaigns = StatsRepository::getTopCampaigns(5);
 
         return [
-            'summary' => $summary,
-            'top_campaigns' => $top_campaigns,
+            'summary'         => $summary,
+            'top_campaigns'   => StatsRepository::getTopCampaigns(5),
             'conversion_rate' => self::calculateConversionRate($days),
-            'roi' => self::calculateROI($summary)
+            'roi'             => self::calculateROI($summary),
         ];
     }
 
@@ -22,31 +23,27 @@ class AnalyticsService {
 
         $date_from = date('Y-m-d', strtotime("-{$days} days"));
 
-        $total_orders = $wpdb->get_var($wpdb->prepare("
-            SELECT COUNT(DISTINCT ID) 
-            FROM {$wpdb->prefix}posts 
-            WHERE post_type = 'shop_order' 
-            AND post_date >= %s
-        ", $date_from));
+        $total_orders = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT ID) FROM {$wpdb->prefix}posts WHERE post_type = 'shop_order' AND post_date >= %s",
+            $date_from
+        ));
 
-        $orders_with_discount = $wpdb->get_var($wpdb->prepare("
-            SELECT COUNT(DISTINCT order_id) 
-            FROM {$wpdb->prefix}pwoa_stats
-            WHERE applied_at >= %s
-        ", $date_from));
+        if ($total_orders === 0) return 0.0;
 
-        return $total_orders > 0
-            ? round(($orders_with_discount / $total_orders) * 100, 2)
-            : 0;
+        $orders_with_discount = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(DISTINCT order_id) FROM {$wpdb->prefix}pwoa_stats WHERE applied_at >= %s",
+            $date_from
+        ));
+
+        return round(($orders_with_discount / $total_orders) * 100, 2);
     }
 
     public static function calculateROI(array $summary): float {
-        if ($summary['total_discounted'] == 0) return 0;
+        if ($summary['total_discounted'] == 0) return 0.0;
 
-        $revenue_generated = $summary['total_revenue'] - $summary['total_discounted'];
-        $roi = (($revenue_generated - $summary['total_discounted']) / $summary['total_discounted']) * 100;
+        $revenue = $summary['total_revenue'] - $summary['total_discounted'];
 
-        return round($roi, 2);
+        return round((($revenue - $summary['total_discounted']) / $summary['total_discounted']) * 100, 2);
     }
 
     public static function getCampaignTrends(int $campaign_id, int $days = 30): array {
@@ -54,16 +51,14 @@ class AnalyticsService {
 
         $date_from = date('Y-m-d', strtotime("-{$days} days"));
 
-        return $wpdb->get_results($wpdb->prepare("
-            SELECT 
-                DATE(applied_at) as date,
-                COUNT(*) as uses,
-                SUM(discount_amount) as total_discount
-            FROM {$wpdb->prefix}pwoa_stats
-            WHERE campaign_id = %d
-            AND applied_at >= %s
-            GROUP BY DATE(applied_at)
-            ORDER BY date ASC
-        ", $campaign_id, $date_from));
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT DATE(applied_at) as date, COUNT(*) as uses, SUM(discount_amount) as total_discount
+             FROM {$wpdb->prefix}pwoa_stats
+             WHERE campaign_id = %d AND applied_at >= %s
+             GROUP BY DATE(applied_at)
+             ORDER BY date ASC",
+            $campaign_id,
+            $date_from
+        ));
     }
 }

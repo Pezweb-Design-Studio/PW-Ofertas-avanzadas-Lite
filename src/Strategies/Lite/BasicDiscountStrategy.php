@@ -1,13 +1,15 @@
 <?php
 namespace PW\OfertasAvanzadas\Strategies\Lite;
 
+defined('ABSPATH') || exit;
+
 use PW\OfertasAvanzadas\Strategies\DiscountStrategy;
+use PW\OfertasAvanzadas\Services\ProductMatcher;
 
 class BasicDiscountStrategy implements DiscountStrategy {
 
     public function canApply(array $cart, array $config, array $conditions): bool {
-        $filtered_cart = \PW\OfertasAvanzadas\Services\ProductMatcher::filterCart($cart, $conditions);
-        return !empty($filtered_cart);
+        return !empty(ProductMatcher::filterCart($cart, $conditions));
     }
 
     public function calculate(array $cart, array $config): array {
@@ -19,37 +21,37 @@ class BasicDiscountStrategy implements DiscountStrategy {
 
         return [
             'amount' => $amount,
-            'type' => $config['discount_type'],
-            'items' => array_keys($cart)
+            'type'   => $config['discount_type'],
+            'items'  => array_keys($cart),
         ];
     }
 
     public static function getMeta(): array {
         return [
-            'name' => 'Descuento Básico por Productos',
-            'description' => 'Aplica un descuento simple por porcentaje o monto fijo a productos seleccionados',
+            'name'          => 'Descuento Basico por Productos',
+            'description'   => 'Aplica un descuento simple por porcentaje o monto fijo a productos seleccionados',
             'effectiveness' => 4,
-            'when_to_use' => 'Promociones generales, descuentos estacionales, ofertas específicas por producto o categoría. Ideal cuando necesitas un descuento directo sin condiciones complejas.',
-            'objective' => 'basic'
+            'when_to_use'   => 'Promociones generales, descuentos estacionales, ofertas especificas por producto o categoria. Ideal cuando necesitas un descuento directo sin condiciones complejas.',
+            'objective'     => 'basic',
         ];
     }
 
     public static function getConfigFields(): array {
         return [
             [
-                'key' => 'discount_type',
-                'label' => 'Tipo de descuento',
-                'type' => 'select',
-                'options' => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo'],
-                'required' => true
+                'key'      => 'discount_type',
+                'label'    => 'Tipo de descuento',
+                'type'     => 'select',
+                'options'  => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo'],
+                'required' => true,
             ],
             [
-                'key' => 'discount_value',
-                'label' => 'Valor del descuento',
-                'type' => 'number',
-                'required' => true,
-                'description' => 'Porcentaje (ej: 15) o monto fijo en tu moneda local'
-            ]
+                'key'         => 'discount_value',
+                'label'       => 'Valor del descuento',
+                'type'        => 'number',
+                'required'    => true,
+                'description' => 'Porcentaje (ej: 15) o monto fijo en tu moneda local',
+            ],
         ];
     }
 }

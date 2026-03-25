@@ -1,9 +1,27 @@
 <?php
 namespace PW\OfertasAvanzadas\Shortcodes;
 
+defined('ABSPATH') || exit;
+
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
 
 class ProductsShortcode {
+
+    private const DEFAULTS = [
+        'campaign_id'        => '',
+        'strategy'           => '',
+        'category'           => '',
+        'tag'                => '',
+        'min_price'          => '',
+        'max_price'          => '',
+        'limit'              => 12,
+        'columns'            => 4,
+        'orderby'            => 'date',
+        'order'              => 'DESC',
+        'show_campaign_name' => 'false',
+        'paginate'           => 'false',
+        'per_page'           => 12,
+    ];
 
     public function __construct() {
         add_shortcode('pwoa_productos_oferta', [$this, 'render']);
@@ -14,21 +32,7 @@ class ProductsShortcode {
             return '';
         }
 
-        $atts = shortcode_atts([
-            'campaign_id'        => '',
-            'strategy'           => '',
-            'category'           => '',
-            'tag'                => '',
-            'min_price'          => '',
-            'max_price'          => '',
-            'limit'              => 12,
-            'columns'            => 4,
-            'orderby'            => 'date',
-            'order'              => 'DESC',
-            'show_campaign_name' => 'false',
-            'paginate'           => 'false',
-            'per_page'           => 12,
-        ], $atts, 'pwoa_productos_oferta');
+        $atts = shortcode_atts(self::DEFAULTS, $atts, 'pwoa_productos_oferta');
 
         $show_campaign_name = filter_var($atts['show_campaign_name'], FILTER_VALIDATE_BOOLEAN);
         $paginate           = filter_var($atts['paginate'], FILTER_VALIDATE_BOOLEAN);
@@ -74,34 +78,40 @@ class ProductsShortcode {
             $this->applyActiveCampaignsFilter($args);
         }
 
-        if (!empty($atts['category'])) {
-            $args['tax_query'][] = [
-                'taxonomy' => 'product_cat',
-                'field'    => 'slug',
-                'terms'    => array_map('trim', explode(',', $atts['category'])),
-            ];
-        }
-
-        if (!empty($atts['tag'])) {
-            $args['tax_query'][] = [
-                'taxonomy' => 'product_tag',
-                'field'    => 'slug',
-                'terms'    => array_map('trim', explode(',', $atts['tag'])),
-            ];
-        }
-
-        if (!empty($atts['min_price']) || !empty($atts['max_price'])) {
-            $meta_query = ['relation' => 'AND'];
-            if (!empty($atts['min_price'])) {
-                $meta_query[] = ['key' => '_price', 'value' => (float) $atts['min_price'], 'type' => 'NUMERIC', 'compare' => '>='];
-            }
-            if (!empty($atts['max_price'])) {
-                $meta_query[] = ['key' => '_price', 'value' => (float) $atts['max_price'], 'type' => 'NUMERIC', 'compare' => '<='];
-            }
-            $args['meta_query'] = $meta_query;
-        }
+        $this->applyTaxonomyFilter($args, 'product_cat', 'slug', $atts['category']);
+        $this->applyTaxonomyFilter($args, 'product_tag', 'slug', $atts['tag']);
+        $this->applyPriceMetaQuery($args, $atts['min_price'], $atts['max_price']);
 
         return $args;
+    }
+
+    private function applyTaxonomyFilter(array &$args, string $taxonomy, string $field, string $value): void {
+        if (empty($value)) {
+            return;
+        }
+
+        $args['tax_query'][] = [
+            'taxonomy' => $taxonomy,
+            'field'    => $field,
+            'terms'    => array_map('trim', explode(',', $value)),
+        ];
+    }
+
+    private function applyPriceMetaQuery(array &$args, $min_price, $max_price): void {
+        if (empty($min_price) && empty($max_price)) {
+            return;
+        }
+
+        $meta_query = ['relation' => 'AND'];
+
+        if (!empty($min_price)) {
+            $meta_query[] = ['key' => '_price', 'value' => (float) $min_price, 'type' => 'NUMERIC', 'compare' => '>='];
+        }
+        if (!empty($max_price)) {
+            $meta_query[] = ['key' => '_price', 'value' => (float) $max_price, 'type' => 'NUMERIC', 'compare' => '<='];
+        }
+
+        $args['meta_query'] = $meta_query;
     }
 
     private function applyConditionsToQuery(array &$args, array $conditions): void {
@@ -137,16 +147,7 @@ class ProductsShortcode {
             ];
         }
 
-        $meta_query = ['relation' => 'AND'];
-        if (!empty($conditions['min_price'])) {
-            $meta_query[] = ['key' => '_price', 'value' => (float) $conditions['min_price'], 'type' => 'NUMERIC', 'compare' => '>='];
-        }
-        if (!empty($conditions['max_price'])) {
-            $meta_query[] = ['key' => '_price', 'value' => (float) $conditions['max_price'], 'type' => 'NUMERIC', 'compare' => '<='];
-        }
-        if (count($meta_query) > 1) {
-            $args['meta_query'] = $meta_query;
-        }
+        $this->applyPriceMetaQuery($args, $conditions['min_price'] ?? '', $conditions['max_price'] ?? '');
     }
 
     private function applyActiveCampaignsFilter(array &$args): void {
@@ -165,7 +166,6 @@ class ProductsShortcode {
             return;
         }
 
-        // Múltiples campañas: resolver a IDs de cada una y unirlos
         $all_ids     = [];
         $unrestricted = false;
 
@@ -198,13 +198,15 @@ class ProductsShortcode {
         $all_ids   = [];
 
         foreach ($campaigns as $campaign) {
-            if ($campaign->strategy !== $strategy) continue;
+            if ($campaign->strategy !== $strategy) {
+                continue;
+            }
 
             $conditions = json_decode($campaign->conditions, true) ?? [];
             $ids = $this->resolveProductIds($conditions);
 
             if ($ids === null) {
-                return; // Campaña sin restricciones → mostrar todo
+                return;
             }
 
             $all_ids = array_merge($all_ids, $ids);
@@ -216,9 +218,6 @@ class ProductsShortcode {
     }
 
     /**
-     * Resuelve condiciones de campaña a IDs de producto.
-     * Retorna null si la campaña aplica a todo el catálogo (sin restricciones).
-     *
      * @return int[]|null
      */
     private function resolveProductIds(array $conditions): ?array {
@@ -271,16 +270,9 @@ class ProductsShortcode {
             ];
         }
 
-        $meta_query = ['relation' => 'AND'];
-        if (isset($conditions['min_price']) && $conditions['min_price'] !== '') {
-            $meta_query[] = ['key' => '_price', 'value' => (float) $conditions['min_price'], 'type' => 'NUMERIC', 'compare' => '>='];
-        }
-        if (isset($conditions['max_price']) && $conditions['max_price'] !== '') {
-            $meta_query[] = ['key' => '_price', 'value' => (float) $conditions['max_price'], 'type' => 'NUMERIC', 'compare' => '<='];
-        }
-        if (count($meta_query) > 1) {
-            $sub_args['meta_query'] = $meta_query;
-        }
+        $min = $conditions['min_price'] ?? '';
+        $max = $conditions['max_price'] ?? '';
+        $this->applyPriceMetaQuery($sub_args, $min, $max);
 
         $sub = new \WP_Query($sub_args);
         wp_reset_postdata();
@@ -325,7 +317,9 @@ class ProductsShortcode {
 
     public function renderCampaignName(): void {
         global $product;
-        if (!$product) return;
+        if (!$product) {
+            return;
+        }
 
         $product_id = $product->get_id();
 

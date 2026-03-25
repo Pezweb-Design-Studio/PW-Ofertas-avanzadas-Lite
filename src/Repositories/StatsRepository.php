@@ -1,15 +1,18 @@
 <?php
 namespace PW\OfertasAvanzadas\Repositories;
 
-class StatsRepository {
+defined('ABSPATH') || exit;
 
-    public static function getSummary(int $days = 30): array {
+class StatsRepository
+{
+    public static function getSummary(int $days = 30): array
+    {
         global $wpdb;
 
         $date_from = date('Y-m-d', strtotime("-{$days} days"));
 
-        $results = $wpdb->get_row($wpdb->prepare("
-            SELECT 
+        $row = $wpdb->get_row($wpdb->prepare("
+            SELECT
                 COUNT(DISTINCT order_id) as total_orders,
                 SUM(discount_amount) as total_discounted,
                 AVG(discount_amount) as avg_discount,
@@ -19,18 +22,19 @@ class StatsRepository {
         ", $date_from));
 
         return [
-            'total_orders' => intval($results->total_orders ?? 0),
-            'total_discounted' => floatval($results->total_discounted ?? 0),
-            'avg_discount' => floatval($results->avg_discount ?? 0),
-            'total_revenue' => floatval($results->total_revenue ?? 0)
+            'total_orders'     => (int) ($row->total_orders ?? 0),
+            'total_discounted' => (float) ($row->total_discounted ?? 0),
+            'avg_discount'     => (float) ($row->avg_discount ?? 0),
+            'total_revenue'    => (float) ($row->total_revenue ?? 0),
         ];
     }
 
-    public static function getTopCampaigns(int $limit = 10): array {
+    public static function getTopCampaigns(int $limit = 10): array
+    {
         global $wpdb;
 
         return $wpdb->get_results($wpdb->prepare("
-            SELECT 
+            SELECT
                 c.id,
                 c.name,
                 COUNT(s.id) as uses,
