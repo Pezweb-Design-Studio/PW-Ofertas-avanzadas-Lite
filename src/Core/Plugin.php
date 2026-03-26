@@ -26,10 +26,10 @@ class Plugin {
                 'slug'       => 'pwoa',
                 'screens'    => [
                     'toplevel_page_pwoa-dashboard',
-                    'pwoa-dashboard_page_pwoa-new-campaign',
-                    'pwoa-dashboard_page_pwoa-analytics',
-                    'pwoa-dashboard_page_pwoa-settings',
-                    'pwoa-dashboard_page_pwoa-shortcodes',
+                    'ofertas_page_pwoa-new-campaign',
+                    'ofertas_page_pwoa-analytics',
+                    'ofertas_page_pwoa-settings',
+                    'ofertas_page_pwoa-shortcodes',
                 ],
                 'brand' => ['name' => 'PW Ofertas Avanzadas'],
             ]);
