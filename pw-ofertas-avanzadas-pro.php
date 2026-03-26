@@ -2,7 +2,7 @@
 /**
  * Plugin Name: PW - Ofertas Avanzadas Pro
  * Description: Sistema de descuentos orientado a estrategias de marketing para WooCommerce (Versión Pro)
- * Version: 2.0.6
+ * Version: 2.0.7
  * Requires PHP: 7.4
  * Author: PezWeb
  * Plugin URI: https://pezweb.com/servicios/ofertas-avanzadas/
@@ -11,7 +11,7 @@
 
 defined('ABSPATH') || exit;
 
-define('PWOA_VERSION', '2.0.5');
+define('PWOA_VERSION', '2.0.7');
 define('PWOA_EDITION', 'pro');
 define('PWOA_PATH', plugin_dir_path(__FILE__));
 define('PWOA_URL', plugin_dir_url(__FILE__));
