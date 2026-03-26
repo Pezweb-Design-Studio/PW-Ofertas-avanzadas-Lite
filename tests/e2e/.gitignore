@@ -1,0 +1,6 @@
+.env
+node_modules/
+fixtures/auth.json
+fixtures/test-data.json
+playwright-report/
+test-results/

@@ -1,0 +1,16 @@
+{
+  "name": "pwoa-e2e-tests",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test",
+    "test:lite": "npx playwright test specs/lite",
+    "test:pro": "npx playwright test specs/pro",
+    "test:ui": "npx playwright test --ui",
+    "test:debug": "npx playwright test --debug",
+    "report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "dotenv": "^16.4.5"
+  }
+}

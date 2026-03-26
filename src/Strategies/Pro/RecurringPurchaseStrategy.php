@@ -15,7 +15,7 @@ class RecurringPurchaseStrategy implements DiscountStrategy {
         if (empty($filtered_cart)) return false;
 
         $user_id            = get_current_user_id();
-        $required_purchases = $config['required_purchases'] ?? 3;
+        $required_purchases = (int) ($config['required_purchases'] ?? 3);
 
         foreach ($filtered_cart as $item) {
             if ($this->getUserProductPurchases($user_id, $item['product_id']) >= $required_purchases) {
@@ -53,21 +53,37 @@ class RecurringPurchaseStrategy implements DiscountStrategy {
     private function getUserProductPurchases(int $user_id, int $product_id): int {
         global $wpdb;
 
+        // Detectar si HPOS esta activo (tabla wp_wc_orders existe, WC 7.1+)
+        $hpos_table = $wpdb->prefix . 'wc_orders';
+        if ($wpdb->get_var("SHOW TABLES LIKE '{$hpos_table}'") === $hpos_table) {
+            return (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT oi.order_id)
+                 FROM {$wpdb->prefix}woocommerce_order_items AS oi
+                 INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim
+                     ON oi.order_item_id = oim.order_item_id AND oim.meta_key = '_product_id'
+                 INNER JOIN {$wpdb->prefix}wc_orders AS o ON oi.order_id = o.id
+                 WHERE o.type = 'shop_order'
+                   AND o.status IN ('wc-completed', 'wc-processing')
+                   AND o.customer_id = %d
+                   AND oim.meta_value = %d",
+                $user_id,
+                $product_id
+            ));
+        }
+
+        // Fallback: tabla legacy wp_posts
         return (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(DISTINCT order_items.order_id)
-             FROM {$wpdb->prefix}woocommerce_order_items as order_items
-             LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta
-                 ON order_items.order_item_id = itemmeta.order_item_id
-             LEFT JOIN {$wpdb->prefix}posts as posts
-                 ON order_items.order_id = posts.ID
-             LEFT JOIN {$wpdb->prefix}postmeta as postmeta
-                 ON posts.ID = postmeta.post_id
-             WHERE posts.post_type = 'shop_order'
-             AND posts.post_status IN ('wc-completed', 'wc-processing')
-             AND postmeta.meta_key = '_customer_user'
-             AND postmeta.meta_value = %d
-             AND itemmeta.meta_key = '_product_id'
-             AND itemmeta.meta_value = %d",
+            "SELECT COUNT(DISTINCT oi.order_id)
+             FROM {$wpdb->prefix}woocommerce_order_items AS oi
+             INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS oim
+                 ON oi.order_item_id = oim.order_item_id AND oim.meta_key = '_product_id'
+             INNER JOIN {$wpdb->prefix}posts AS p ON oi.order_id = p.ID
+             INNER JOIN {$wpdb->prefix}postmeta AS pm
+                 ON p.ID = pm.post_id AND pm.meta_key = '_customer_user'
+             WHERE p.post_type = 'shop_order'
+               AND p.post_status IN ('wc-completed', 'wc-processing')
+               AND pm.meta_value = %d
+               AND oim.meta_value = %d",
             $user_id,
             $product_id
         ));
