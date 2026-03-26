@@ -213,13 +213,14 @@ else
     echo "  → Building PRO edition"
 
     # Admin (PRO)
-    mkdir -p "$plugin_dir/src/Admin/Views"
+    mkdir -p "$plugin_dir/src/Admin/Views/data"
     cp src/Admin/AdminController.php "$plugin_dir/src/Admin/"
     cp src/Admin/Views/dashboard.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/wizard.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/analytics.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/settings.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/shortcodes.php "$plugin_dir/src/Admin/Views/"
+    cp src/Admin/Views/data/stacking-options.php "$plugin_dir/src/Admin/Views/data/"
     cp assets/js/analytics.js "$plugin_dir/assets/js/"
 
     # Core (PRO)

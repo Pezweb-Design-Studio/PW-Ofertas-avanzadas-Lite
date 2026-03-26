@@ -118,7 +118,7 @@ $bui->render_page([
                     // Output
                     echo '<div style="display:flex;flex-direction:column;">';
                     echo '<label style="' . $label_style . '">Shortcode generado</label>';
-                    echo '<div style="background:#030712;border-radius:6px;padding:20px;flex:1;display:flex;flex-direction:column;justify-content:space-between;min-height:160px;">';
+                    echo '<div style="background:#030712;border-radius:6px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;min-height:160px;">';
                     echo '<code id="gen-output" style="color:#fff;font-family:monospace;font-size:13px;word-break:break-all;white-space:pre-wrap;">[pwoa_productos_oferta]</code>';
                     echo '<div style="margin-top:16px;text-align:right;">';
                     echo '<button id="gen-copy-btn" type="button"
