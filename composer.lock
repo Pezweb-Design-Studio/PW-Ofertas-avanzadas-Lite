@@ -4,8 +4,42 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7a588a8ce51f63045bc1ca9e82d26cbd",
-    "packages": [],
+    "content-hash": "6f122ef08b51f75c875e5fffc551535e",
+    "packages": [
+        {
+            "name": "pw/backend-ui",
+            "version": "v1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hizoka3/pw-backend-ui.git",
+                "reference": "b47a3a234694c8dbf4a2bbd93105cc1ce37f9d7b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hizoka3/pw-backend-ui/zipball/b47a3a234694c8dbf4a2bbd93105cc1ce37f9d7b",
+                "reference": "b47a3a234694c8dbf4a2bbd93105cc1ce37f9d7b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PW\\BackendUI\\": "src/"
+                }
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Design system for WordPress admin plugin pages — layout, buttons, inputs, cards, tabs, and more. Powered by Tailwind CSS 4.",
+            "support": {
+                "source": "https://github.com/hizoka3/pw-backend-ui/tree/v1.4.0",
+                "issues": "https://github.com/hizoka3/pw-backend-ui/issues"
+            },
+            "time": "2026-03-18T11:29:55+00:00"
+        }
+    ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
@@ -13,7 +47,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.4"
+        "php": ">=8.0"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

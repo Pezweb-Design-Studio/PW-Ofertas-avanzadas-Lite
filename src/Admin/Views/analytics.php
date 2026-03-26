@@ -1,63 +1,82 @@
 <?php
-if (!defined('ABSPATH')) exit;
-?>
+// src/Admin/Views/analytics.php
+defined("ABSPATH") || exit();
 
-<div class="wrap">
+use PW\BackendUI\BackendUI;
 
-    <h1 class="text-4xl font-bold mb-12">AnalÃ­ticas</h1>
+/**
+ * @var object $stats  StatsRepository::getSummary() — {total_orders, total_discounted, avg_discount, total_revenue}
+ */
 
-    <div class="grid grid-cols-4 gap-6 mb-12">
+$bui = BackendUI::init();
 
-        <div class="bg-white p-8 rounded-lg shadow">
-            <p class="text-gray-500 mb-2">Ã“rdenes con Descuento</p>
-            <p class="text-4xl font-bold"><?php echo number_format($stats['total_orders']); ?></p>
-        </div>
+$bui->render_page([
+    "title"       => "Analíticas",
+    "description" => "Resumen de rendimiento de tus campañas de descuentos.",
+    "content"     => function ($bui) use ($stats): void {
+        $ui = $bui->ui();
 
-        <div class="bg-white p-8 rounded-lg shadow">
-            <p class="text-gray-500 mb-2">Total Descontado</p>
-            <p class="text-4xl font-bold"><?php echo wc_price($stats['total_discounted']); ?></p>
-        </div>
+        // ── KPI cards ──────────────────────────────────────────────────────────
+        $kpis = [
+            ["label" => "Órdenes con Descuento", "value" => number_format($stats["total_orders"]),      "variant" => null],
+            ["label" => "Total Descontado",       "value" => wc_price($stats["total_discounted"]),      "variant" => "success"],
+            ["label" => "Descuento Promedio",     "value" => wc_price($stats["avg_discount"]),          "variant" => null],
+            ["label" => "Ingresos Totales",       "value" => wc_price($stats["total_revenue"]),         "variant" => "info"],
+        ];
 
-        <div class="bg-white p-8 rounded-lg shadow">
-            <p class="text-gray-500 mb-2">Descuento Promedio</p>
-            <p class="text-4xl font-bold"><?php echo wc_price($stats['avg_discount']); ?></p>
-        </div>
+        $variant_color = [
+            "success" => "var(--pw-color-success-fg)",
+            "warning" => "var(--pw-color-warning-fg)",
+            "danger"  => "var(--pw-color-danger-fg)",
+            "info"    => "var(--pw-color-info-fg)",
+        ];
 
-        <div class="bg-white p-8 rounded-lg shadow">
-            <p class="text-gray-500 mb-2">Ingresos Totales</p>
-            <p class="text-4xl font-bold"><?php echo wc_price($stats['total_revenue']); ?></p>
-        </div>
+        echo '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;">';
+        foreach ($kpis as $kpi) {
+            $color = $kpi["variant"]
+                ? ($variant_color[$kpi["variant"]] ?? "var(--pw-color-fg-default)")
+                : "var(--pw-color-fg-default)";
 
-    </div>
+            $ui->card([
+                "content" => function () use ($kpi, $color): void {
+                    echo '<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;'
+                        . 'color:var(--pw-color-fg-muted);margin-bottom:10px;">'
+                        . esc_html($kpi["label"]) . '</div>';
+                    echo '<div style="font-size:28px;font-weight:800;line-height:1;color:' . esc_attr($color) . ';">'
+                        . $kpi["value"] . '</div>';
+                },
+            ]);
+        }
+        echo '</div>';
 
-    <div class="bg-white p-8 rounded-lg shadow">
-        <h2 class="text-2xl font-bold mb-8">Top Campañas</h2>
-
-        <?php
+        // ── Top Campaigns ──────────────────────────────────────────────────────
         $top_campaigns = \PW\OfertasAvanzadas\Repositories\StatsRepository::getTopCampaigns();
-        if (empty($top_campaigns)):
-            ?>
-            <p class="text-gray-500 text-center py-8">Sin datos de campañas aún</p>
-        <?php else: ?>
-            <table class="w-full">
-                <thead>
-                <tr class="border-b">
-                    <th class="text-left py-4">Campaña</th>
-                    <th class="text-right py-4">Usos</th>
-                    <th class="text-right py-4">Total Descontado</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($top_campaigns as $campaign): ?>
-                    <tr class="border-b">
-                        <td class="py-4"><?php echo esc_html($campaign->name); ?></td>
-                        <td class="text-right py-4"><?php echo number_format($campaign->uses); ?></td>
-                        <td class="text-right py-4 font-bold"><?php echo wc_price($campaign->total_discounted); ?></td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
-    </div>
 
-</div>
+        $ui->card([
+            "title"   => "Top Campañas",
+            "content" => function () use ($ui, $top_campaigns): void {
+                if (empty($top_campaigns)) {
+                    $ui->notice(["type" => "info", "message" => "Sin datos de campañas aún."]);
+                    return;
+                }
+
+                echo '<table class="wp-list-table widefat" style="width:100%;">';
+                echo '<thead><tr>';
+                echo '<th>Campaña</th>';
+                echo '<th style="text-align:right;">Usos</th>';
+                echo '<th style="text-align:right;">Total Descontado</th>';
+                echo '</tr></thead><tbody>';
+
+                foreach ($top_campaigns as $campaign) {
+                    echo '<tr>';
+                    echo '<td><strong>' . esc_html($campaign->name) . '</strong></td>';
+                    echo '<td style="text-align:right;">' . number_format($campaign->uses) . '</td>';
+                    echo '<td style="text-align:right;font-weight:700;">' . wc_price($campaign->total_discounted) . '</td>';
+                    echo '</tr>';
+                }
+
+                echo '</tbody></table>';
+            },
+        ]);
+    },
+]);

@@ -3,6 +3,8 @@ if (!defined("ABSPATH")) {
     exit();
 }
 
+use PW\BackendUI\BackendUI;
+
 // ⚡ Detectar modo edición
 $is_edit_mode = isset($_GET["edit"]) && !empty($_GET["edit"]);
 
@@ -29,6 +31,12 @@ $objectives = [
         "desc" => "Genera urgencia y aumenta ventas inmediatas",
     ],
 ];
+?>
+<?php
+$bui = BackendUI::init();
+$bui->render_page([
+    "title"   => $is_edit_mode ? "Editar Campaña" : "Nueva Campaña",
+    "content" => function (BackendUI $bui) use ($is_edit_mode, $objectives) {
 ?>
 
 <style>
@@ -297,3 +305,7 @@ $objectives = [
     </div>
 
 </div>
+
+<?php
+    }, // end content
+]);  // end render_page

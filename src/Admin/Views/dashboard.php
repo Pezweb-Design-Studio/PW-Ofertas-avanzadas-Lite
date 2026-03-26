@@ -1,849 +1,420 @@
 <?php
-if (!defined("ABSPATH")) {
-    exit();
-}
+// src/Admin/Views/dashboard.php
+defined("ABSPATH") || exit();
 
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
+use PW\BackendUI\BackendUI;
 
-// Mapeo de estrategias a etiquetas legibles
+/**
+ * @var array $campaigns    Página actual de campañas (objetos).
+ * @var int   $page         Página actual.
+ * @var int   $total        Total de campañas.
+ * @var int   $total_pages  Total de páginas.
+ */
+
 $strategy_labels = [
-    "basic_discount" => "Básico",
-    "min_amount" => "Monto Mínimo",
-    "free_shipping" => "Envío Gratis",
-    "tiered_discount" => "Descuento Escalonado",
-    "bulk_discount" => "Volumen (Bulk)",
-    "expiry_based" => "Por Vencimiento",
-    "low_stock" => "Stock Bajo",
-    "recurring_purchase" => "Compra Recurrente",
-    "flash_sale" => "Flash Sale",
-    "buy_x_pay_y" => "Lleva X Paga Y",
+    "basic_discount"              => "Básico",
+    "min_amount"                  => "Monto Mínimo",
+    "free_shipping"               => "Envío Gratis",
+    "tiered_discount"             => "Descuento Escalonado",
+    "bulk_discount"               => "Volumen (Bulk)",
+    "expiry_based"                => "Por Vencimiento",
+    "low_stock"                   => "Stock Bajo",
+    "recurring_purchase"          => "Compra Recurrente",
+    "flash_sale"                  => "Flash Sale",
+    "buy_x_pay_y"                 => "Lleva X Paga Y",
     "attribute_quantity_discount" => "Por Atributos",
 ];
 
-// Mapeo de objetivos a colores y etiquetas
-$objective_config = [
-    "basic" => ["label" => "Básico", "color" => "gray", "icon" => "🎯"],
-    "aov" => ["label" => "AOV", "color" => "blue", "icon" => "📈"],
-    "liquidation" => [
-        "label" => "Liquidación",
-        "color" => "orange",
-        "icon" => "🏷️",
-    ],
-    "loyalty" => [
-        "label" => "Fidelización",
-        "color" => "purple",
-        "icon" => "💎",
-    ],
-    "urgency" => ["label" => "Urgencia", "color" => "red", "icon" => "⚡"],
+$objective_map = [
+    "basic"       => ["label" => "Básico",      "variant" => "default"],
+    "aov"         => ["label" => "AOV",          "variant" => "primary"],
+    "liquidation" => ["label" => "Liquidación",  "variant" => "warning"],
+    "loyalty"     => ["label" => "Fidelización", "variant" => "info"],
+    "urgency"     => ["label" => "Urgencia",     "variant" => "danger"],
 ];
-?>
 
-<div class="wrap bg-gray-50 -ml-5 -mr-2 p-8 min-h-screen">
+$behavior        = get_option("pwoa_stacking_behavior", "priority_first");
+$behavior_labels = [
+    "priority_first" => "Prioridad primero",
+    "stack_first"    => "Solo apilables",
+    "max_discount"   => "Mejor descuento",
+];
+$behavior_variant = [
+    "priority_first" => "success",
+    "stack_first"    => "primary",
+    "max_discount"   => "info",
+];
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-        <div class="flex items-center gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">Campañas de Descuentos</h1>
-                <p class="text-gray-600 mt-1">Gestiona tus estrategias de marketing</p>
-            </div>
-            <!-- Badge de modo activo -->
-            <?php
-            $behavior = get_option("pwoa_stacking_behavior", "priority_first");
-            $behavior_labels = [
-                "priority_first" => "Prioridad primero",
-                "stack_first" => "Solo apilables",
-                "max_discount" => "Mejor descuento",
-            ];
-            $behavior_colors = [
-                "priority_first" => "bg-green-100 text-green-800",
-                "stack_first" => "bg-blue-100 text-blue-800",
-                "max_discount" => "bg-purple-100 text-purple-800",
-            ];
-            ?>
-            <div class="flex items-center gap-2">
-                <span class="px-3 py-1 <?php echo $behavior_colors[
-                    $behavior
-                ]; ?> text-xs font-semibold rounded-full">
-                    Modo: <?php echo $behavior_labels[$behavior]; ?>
-                </span>
-                <button id="help-button"
-                        class="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-700 font-bold transition"
-                        title="Ayuda">
-                    ?
-                </button>
-            </div>
-        </div>
-        <a href="<?php echo admin_url("admin.php?page=pwoa-new-campaign"); ?>"
-           class="bg-blue-600 hover:bg-blue-700 !text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg inline-flex items-center gap-2">
-            <span class="text-xl">+</span>
-            Nueva Campaña
-        </a>
-    </div>
+$bui = BackendUI::init();
 
-    <?php if (empty($campaigns)): ?>
+$bui->render_page([
+    "title"       => "Campañas de Descuentos",
+    "description" => "Gestiona tus estrategias de marketing.",
+    "content"     => function ($bui) use (
+        $campaigns, $page, $total, $total_pages,
+        $strategy_labels, $objective_map,
+        $behavior, $behavior_labels, $behavior_variant
+    ): void {
+        $ui = $bui->ui();
 
-        <!-- Empty State -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-16 text-center">
+        // ── Action bar ────────────────────────────────────────────────────────
+        echo '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">';
 
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">No hay campañas activas</h3>
-            <p class="text-gray-500 mb-8 max-w-md mx-auto">
-                Crea tu primera campaña de descuentos para aumentar ventas y optimizar tu inventario
-            </p>
-            <a href="<?php echo admin_url(
-                "admin.php?page=pwoa-new-campaign",
-            ); ?>"
-               class="bg-blue-600 hover:bg-blue-700 !text-white px-8 py-3 rounded-lg inline-flex items-center gap-2 font-medium transition-all hover:shadow-lg">
-                <span class="text-xl">+</span>
-                Crear Primera Campaña
-            </a>
-        </div>
+        echo '<div style="display:flex;align-items:center;gap:10px;">';
+        $ui->badge([
+            "label"   => "Modo: " . ($behavior_labels[$behavior] ?? $behavior),
+            "variant" => $behavior_variant[$behavior] ?? "default",
+        ]);
+        echo '<button id="help-button" type="button"
+            style="width:28px;height:28px;border-radius:50%;border:1px solid var(--pw-color-border-default);
+                   background:var(--pw-color-bg-subtle);color:var(--pw-color-fg-muted);
+                   font-weight:700;cursor:pointer;font-size:13px;"
+            title="Ayuda">?</button>';
+        echo '</div>';
 
-    <?php
-        // Calcular estadísticas reales considerando fechas
-        // Mostrar hasta 5 números de página
-        // Calcular estadísticas reales considerando fechas
-        // Mostrar hasta 5 números de página
-        else: ?>
+        $ui->button([
+            "label"   => "+ Nueva Campaña",
+            "variant" => "primary",
+            "href"    => admin_url("admin.php?page=pwoa-new-campaign"),
+        ]);
 
-        <!-- Stats Summary -->
-        <?php
-        $now = current_time("timestamp");
+        echo '</div>';
+
+        if (empty($campaigns)) {
+            // ── Empty state ──────────────────────────────────────────────────
+            $ui->card([
+                "content" => function () use ($ui): void {
+                    echo '<div style="text-align:center;padding:48px 0;">';
+                    echo '<p style="font-size:18px;font-weight:600;color:var(--pw-color-fg-default);margin:0 0 8px;">No hay campañas activas</p>';
+                    echo '<p style="font-size:13px;color:var(--pw-color-fg-muted);margin:0 0 24px;">Crea tu primera campaña de descuentos para aumentar ventas y optimizar tu inventario</p>';
+                    $ui->button([
+                        "label"   => "+ Crear Primera Campaña",
+                        "variant" => "primary",
+                        "href"    => admin_url("admin.php?page=pwoa-new-campaign"),
+                    ]);
+                    echo '</div>';
+                },
+            ]);
+            return;
+        }
+
+        // ── Stats ─────────────────────────────────────────────────────────────
+        $now         = current_time("timestamp");
         $truly_active = array_filter($campaigns, function ($c) use ($now) {
-            if ($c->active != 1) {
-                return false;
-            }
-            if ($c->start_date && strtotime($c->start_date) > $now) {
-                return false;
-            }
-            if ($c->end_date && strtotime($c->end_date) < $now) {
-                return false;
-            }
+            if ($c->active != 1) return false;
+            if ($c->start_date && strtotime($c->start_date) > $now) return false;
+            if ($c->end_date   && strtotime($c->end_date)   < $now) return false;
             return true;
         });
-        $scheduled = array_filter($campaigns, function ($c) use ($now) {
-            return $c->start_date && strtotime($c->start_date) > $now;
-        });
-        $expired = array_filter($campaigns, function ($c) use ($now) {
-            return $c->end_date && strtotime($c->end_date) < $now;
-        });
-        $paused = array_filter($campaigns, function ($c) use ($expired) {
-            $is_expired = in_array($c->id, array_column($expired, "id"));
-            return $c->active == 0 && !$is_expired;
-        });
-        ?>
-        <div class="grid grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600">Total Campañas</p>
-                        <p class="text-2xl font-bold text-gray-900 mt-1"><?php echo number_format(
-                            $total,
-                        ); ?></p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600">Activas</p>
-                        <p class="text-2xl font-bold text-green-600 mt-1">
-                            <?php echo count($truly_active); ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600">Pausadas</p>
-                        <p class="text-2xl font-bold text-gray-400 mt-1">
-                            <?php echo count($paused); ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600">Programadas</p>
-                        <p class="text-2xl font-bold text-blue-600 mt-1">
-                            <?php echo count($scheduled); ?>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        $scheduled   = array_filter($campaigns, fn($c) => $c->start_date && strtotime($c->start_date) > $now);
+        $expired     = array_filter($campaigns, fn($c) => $c->end_date   && strtotime($c->end_date)   < $now);
+        $expired_ids = array_column($expired, "id");
+        $paused      = array_filter($campaigns, fn($c) => $c->active == 0 && !in_array($c->id, $expired_ids));
 
-        <!-- Campaigns List -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        $stat_items = [
+            ["label" => "Total",      "value" => number_format($total),     "color" => "var(--pw-color-fg-default)"],
+            ["label" => "Activas",    "value" => count($truly_active),      "color" => "var(--pw-color-success-fg)"],
+            ["label" => "Pausadas",   "value" => count($paused),            "color" => "var(--pw-color-fg-muted)"],
+            ["label" => "Programadas","value" => count($scheduled),         "color" => "var(--pw-color-info-fg)"],
+        ];
 
-            <!-- Table Header -->
-            <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
-                <div class="grid grid-cols-11 gap-4 items-center text-sm font-semibold text-gray-700">
-                    <div class="col-span-4">Campaña</div>
-                    <div class="col-span-2">Objetivo</div>
-                    <div class="col-span-2 text-center">Periodo</div>
-                    <div class="col-span-2 text-center">Estado</div>
-                    <div class="col-span-1 text-right">Acciones</div>
-                </div>
-            </div>
+        echo '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">';
+        foreach ($stat_items as $s) {
+            $ui->card([
+                "content" => function () use ($s): void {
+                    echo '<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;'
+                        . 'color:var(--pw-color-fg-muted);margin-bottom:8px;">' . esc_html($s["label"]) . '</div>';
+                    echo '<div style="font-size:26px;font-weight:800;line-height:1;color:' . esc_attr($s["color"]) . ';">'
+                        . esc_html($s["value"]) . '</div>';
+                },
+            ]);
+        }
+        echo '</div>';
 
-            <!-- Table Body -->
-            <div class="divide-y divide-gray-100">
-                <?php foreach ($campaigns as $campaign):
+        // ── Campaigns table ───────────────────────────────────────────────────
+        $ui->card([
+            "content" => function () use ($ui, $campaigns, $strategy_labels, $objective_map, $page, $total, $total_pages): void {
 
-                    $obj_config = $objective_config[$campaign->objective] ?? [
-                        "label" => "N/A",
-                        "color" => "gray",
-                        "icon" => "📌",
-                    ];
-                    $is_scheduled =
-                        $campaign->start_date &&
-                        strtotime($campaign->start_date) >
-                            current_time("timestamp");
-                    $is_expired =
-                        $campaign->end_date &&
-                        strtotime($campaign->end_date) <
-                            current_time("timestamp");
-                    ?>
-                    <div class="px-6 py-5 hover:bg-gray-50 transition-colors">
-                        <div class="grid grid-cols-11 gap-4 items-center">
+                echo '<table class="wp-list-table widefat" style="width:100%;">';
+                echo '<thead><tr>';
+                echo '<th>Campaña</th>';
+                echo '<th>Objetivo</th>';
+                echo '<th style="text-align:center;">Periodo</th>';
+                echo '<th style="text-align:center;">Estado</th>';
+                echo '<th style="text-align:right;">Acciones</th>';
+                echo '</tr></thead><tbody>';
 
-                            <!-- Campaign Name & Strategy -->
-                            <div class="col-span-4">
-                                <h3 class="font-semibold text-gray-900 mb-1 text-base">
-                                    <?php echo esc_html($campaign->name); ?>
-                                </h3>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sm text-gray-500">
-                                        <?php echo $strategy_labels[
-                                            $campaign->strategy
-                                        ] ?? esc_html($campaign->strategy); ?>
-                                    </span>
-                                    <?php if (
-                                        $campaign->discount_type !==
-                                        "free_shipping"
-                                    ): ?>
-                                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                                            <?php echo $campaign->discount_type ===
-                                            "percentage"
-                                                ? "%"
-                                                : '$'; ?>
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
+                foreach ($campaigns as $campaign) {
+                    $obj          = $objective_map[$campaign->objective] ?? ["label" => "N/A", "variant" => "default"];
+                    $is_scheduled = $campaign->start_date && strtotime($campaign->start_date) > current_time("timestamp");
+                    $is_expired   = $campaign->end_date   && strtotime($campaign->end_date)   < current_time("timestamp");
 
-                                <?php if (
-                                    $campaign->strategy === "bulk_discount"
-                                ):
-                                    $config = json_decode(
-                                        $campaign->config,
-                                        true,
-                                    );
-                                    $units_sold = $campaign->units_sold
-                                        ? json_decode(
-                                            $campaign->units_sold,
-                                            true,
-                                        )
-                                        : [];
-                                    $bulk_items = $config["bulk_items"] ?? [];
+                    echo '<tr>';
 
-                                    if (!empty($bulk_items)):
+                    // ── Name / Strategy ──────────────────────────────────────
+                    echo '<td>';
+                    echo '<strong style="color:var(--pw-color-fg-default);">' . esc_html($campaign->name) . '</strong><br>';
+                    echo '<span style="font-size:12px;color:var(--pw-color-fg-muted);">'
+                        . esc_html($strategy_labels[$campaign->strategy] ?? $campaign->strategy);
+                    if ($campaign->discount_type !== "free_shipping") {
+                        echo ' &nbsp;<span style="font-size:11px;background:var(--pw-color-bg-subtle);'
+                            . 'border:1px solid var(--pw-color-border-muted);border-radius:3px;padding:1px 4px;">'
+                            . ($campaign->discount_type === "percentage" ? "%" : "$")
+                            . '</span>';
+                    }
+                    echo '</span>';
 
-                                        $total_sold = 0;
-                                        $total_max = 0;
+                    // Bulk discount progress
+                    if ($campaign->strategy === "bulk_discount") {
+                        $config     = json_decode($campaign->config, true);
+                        $units_sold = $campaign->units_sold ? json_decode($campaign->units_sold, true) : [];
+                        $bulk_items = $config["bulk_items"] ?? [];
+                        if (!empty($bulk_items)) {
+                            $total_sold = 0; $total_max = 0;
+                            foreach ($bulk_items as $item) {
+                                $total_sold += intval($units_sold[$item["product_id"] ?? 0] ?? 0);
+                                $total_max  += intval($item["max_quantity"] ?? 0);
+                            }
+                            $pct     = $total_max > 0 ? min(100, ($total_sold / $total_max) * 100) : 0;
+                            $variant = $pct >= 80 ? "danger" : ($pct >= 50 ? "warning" : "success");
+                            echo '<div style="margin-top:6px;font-size:11px;color:var(--pw-color-fg-muted);">'
+                                . number_format($total_sold) . ' / ' . number_format($total_max) . ' unidades</div>';
+                            echo '<div style="margin-top:4px;">';
+                            $ui->progress_bar(["value" => (int) $pct, "variant" => $variant, "size" => "sm", "show_value" => true]);
+                            echo '</div>';
+                        }
+                    }
+                    echo '</td>';
 
-                                        foreach ($bulk_items as $item) {
-                                            $product_id =
-                                                $item["product_id"] ?? 0;
-                                            $max_qty = intval(
-                                                $item["max_quantity"] ?? 0,
-                                            );
-                                            $sold = intval(
-                                                $units_sold[$product_id] ?? 0,
-                                            );
+                    // ── Objective badge ──────────────────────────────────────
+                    echo '<td>';
+                    $ui->badge(["label" => $obj["label"], "variant" => $obj["variant"]]);
+                    echo '</td>';
 
-                                            $total_sold += $sold;
-                                            $total_max += $max_qty;
-                                        }
+                    // ── Period ───────────────────────────────────────────────
+                    echo '<td style="text-align:center;font-size:12px;">';
+                    if ($campaign->start_date || $campaign->end_date) {
+                        $start = $campaign->start_date ? date_i18n(get_option("date_format"), strtotime($campaign->start_date)) : "—";
+                        $end   = $campaign->end_date   ? date_i18n(get_option("date_format"), strtotime($campaign->end_date))   : "—";
+                        echo esc_html($start) . '<br>'
+                            . '<span style="font-size:11px;color:var(--pw-color-fg-muted);">hasta</span><br>'
+                            . esc_html($end);
+                    } else {
+                        echo '<span style="color:var(--pw-color-fg-muted);">Permanente</span>';
+                    }
+                    echo '</td>';
 
-                                        $percentage =
-                                            $total_max > 0
-                                                ? min(
-                                                    100,
-                                                    ($total_sold / $total_max) *
-                                                        100,
-                                                )
-                                                : 0;
-                                        $color =
-                                            $percentage >= 80
-                                                ? "red"
-                                                : ($percentage >= 50
-                                                    ? "yellow"
-                                                    : "green");
-                                        ?>
-                                        <div class="mt-2">
-                                            <div class="flex items-center gap-2 text-xs">
-                                                <span class="text-gray-600">Unidades vendidas:</span>
-                                                <span class="font-semibold text-<?php echo $color; ?>-700">
-                                            <?php echo number_format(
-                                                $total_sold,
-                                            ); ?> / <?php echo number_format(
-     $total_max,
- ); ?>
-                                        </span>
-                                                <span class="text-gray-400">(<?php echo number_format(
-                                                    $percentage,
-                                                    1,
-                                                ); ?>%)</span>
-                                            </div>
-                                            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                                                <div class="bg-<?php echo $color; ?>-500 h-1.5 rounded-full transition-all"
-                                                     style="width: <?php echo min(
-                                                         100,
-                                                         $percentage,
-                                                     ); ?>%"></div>
-                                            </div>
-                                        </div>
-                                    <?php
-                                    endif;
-                                endif; ?>
-                            </div>
+                    // ── Status ───────────────────────────────────────────────
+                    echo '<td style="text-align:center;">';
+                    if ($is_expired) {
+                        $ui->badge(["label" => "Expirada",   "variant" => "default"]);
+                    } elseif ($is_scheduled) {
+                        $ui->badge(["label" => "Programada", "variant" => "primary"]);
+                    } else {
+                        echo '<label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">';
+                        echo '<input type="checkbox" class="toggle-campaign"
+                            data-campaign-id="'   . esc_attr($campaign->id)   . '"
+                            data-campaign-name="' . esc_attr($campaign->name) . '"
+                            style="width:0;height:0;opacity:0;position:absolute;"'
+                            . ($campaign->active ? ' checked' : '') . '>';
+                        $active_style = $campaign->active
+                            ? "background:var(--pw-color-success-emphasis);"
+                            : "background:var(--pw-color-border-default);";
+                        echo '<span class="pwoa-toggle-track" style="display:inline-block;width:36px;height:20px;border-radius:10px;' . $active_style . 'position:relative;transition:background .2s;">'
+                            . '<span style="position:absolute;top:2px;' . ($campaign->active ? 'right:2px;' : 'left:2px;')
+                            . 'width:16px;height:16px;border-radius:50%;background:#fff;transition:all .2s;"></span>'
+                            . '</span>';
+                        echo '<span class="pwoa-toggle-label" style="font-size:12px;color:' . ($campaign->active ? 'var(--pw-color-success-fg)' : 'var(--pw-color-fg-muted)') . ';">'
+                            . ($campaign->active ? "Activa" : "Pausada") . '</span>';
+                        echo '</label>';
+                    }
+                    echo '</td>';
 
-                            <!-- Objective Badge -->
-                            <div class="col-span-2">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-<?php echo $obj_config[
-                                    "color"
-                                ]; ?>-50 text-<?php echo $obj_config[
-    "color"
-]; ?>-700 border border-<?php echo $obj_config["color"]; ?>-200">
-                                    <span><?php echo $obj_config[
-                                        "icon"
-                                    ]; ?></span>
-                                    <?php echo $obj_config["label"]; ?>
-                                </span>
-                            </div>
+                    // ── Actions ───────────────────────────────────────────────
+                    echo '<td style="text-align:right;white-space:nowrap;">';
+                    if ($campaign->strategy === "bulk_discount") {
+                        echo '<button class="btn-reset" type="button"
+                            data-campaign-id="'   . esc_attr($campaign->id)   . '"
+                            data-campaign-name="' . esc_attr($campaign->name) . '"
+                            title="Resetear contador"
+                            style="background:none;border:none;cursor:pointer;color:var(--pw-color-success-fg);padding:4px 6px;">'
+                            . '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>'
+                            . '</button>';
+                    }
+                    echo '<button class="btn-edit" type="button"
+                        data-campaign-id="' . esc_attr($campaign->id) . '"
+                        title="Editar campaña"
+                        style="background:none;border:none;cursor:pointer;color:var(--pw-color-accent-fg);padding:4px 6px;">'
+                        . '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>'
+                        . '</button>';
+                    echo '<button class="btn-delete" type="button"
+                        data-campaign-id="'   . esc_attr($campaign->id)   . '"
+                        data-campaign-name="' . esc_attr($campaign->name) . '"
+                        data-has-stats="'     . (CampaignRepository::hasStats($campaign->id) ? "1" : "0") . '"
+                        title="Eliminar campaña"
+                        style="background:none;border:none;cursor:pointer;color:var(--pw-color-danger-fg);padding:4px 6px;">'
+                        . '<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>'
+                        . '</button>';
+                    echo '</td>';
 
-                            <!-- Period -->
-                            <div class="col-span-2 text-center text-sm">
-                                <?php if (
-                                    $campaign->start_date ||
-                                    $campaign->end_date
-                                ): ?>
-                                    <div class="text-gray-700">
-                                        <?php echo $campaign->start_date
-                                            ? date(
-                                                "d/m/Y",
-                                                strtotime(
-                                                    $campaign->start_date,
-                                                ),
-                                            )
-                                            : "—"; ?>
-                                    </div>
-                                    <div class="text-gray-400 text-xs">hasta</div>
-                                    <div class="text-gray-700">
-                                        <?php echo $campaign->end_date
-                                            ? date(
-                                                "d/m/Y",
-                                                strtotime($campaign->end_date),
-                                            )
-                                            : "—"; ?>
-                                    </div>
-                                <?php else: ?>
-                                    <span class="text-gray-400">Permanente</span>
-                                <?php endif; ?>
-                            </div>
+                    echo '</tr>';
+                }
 
-                            <!-- Status Toggle -->
-                            <div class="col-span-2 text-center">
-                                <?php if ($is_expired): ?>
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
-                                        <span>⏱️</span> Expirada
-                                    </span>
-                                <?php elseif ($is_scheduled): ?>
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
-                                        <span>📅</span> Programada
-                                    </span>
-                                <?php else: ?>
-                                    <label class="relative inline-flex items-center cursor-pointer group">
-                                        <input type="checkbox"
-                                               class="sr-only peer toggle-campaign"
-                                               data-campaign-id="<?php echo esc_attr(
-                                                   $campaign->id,
-                                               ); ?>"
-                                               data-campaign-name="<?php echo esc_attr(
-                                                   $campaign->name,
-                                               ); ?>"
-                                                <?php checked(
-                                                    $campaign->active,
-                                                    1,
-                                                ); ?>>
-                                        <div class="w-14 h-7 bg-gray-300 rounded-full peer
-                                                    peer-checked:bg-green-500
-                                                    peer-focus:ring-4 peer-focus:ring-green-200
-                                                    transition-all duration-200
-                                                    relative">
-                                            <div class="absolute top-0.5 left-0.5 bg-white w-6 h-6 rounded-full
-                                                        transition-transform duration-200
-                                                        peer-checked:translate-x-7"></div>
-                                        </div>
-                                        <span class="ml-3 text-sm font-medium text-gray-700 peer-checked:text-green-700">
-                                            <?php echo $campaign->active
-                                                ? "Activa"
-                                                : "Pausada"; ?>
-                                        </span>
-                                    </label>
-                                <?php endif; ?>
-                            </div>
+                echo '</tbody></table>';
 
-                            <!-- Actions -->
-                            <div class="col-span-1 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <?php if (
-                                        $campaign->strategy === "bulk_discount"
-                                    ): ?>
-                                        <button class="btn-reset text-green-600 hover:text-green-800 hover:bg-green-50 p-2 rounded-lg transition-colors"
-                                                data-campaign-id="<?php echo esc_attr(
-                                                    $campaign->id,
-                                                ); ?>"
-                                                data-campaign-name="<?php echo esc_attr(
-                                                    $campaign->name,
-                                                ); ?>"
-                                                title="Resetear contador">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                            </svg>
-                                        </button>
-                                    <?php endif; ?>
-                                    <button class="btn-edit text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-2 rounded-lg transition-colors"
-                                            data-campaign-id="<?php echo esc_attr(
-                                                $campaign->id,
-                                            ); ?>"
-                                            title="Editar campaña">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    <button class="btn-delete text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
-                                            data-campaign-id="<?php echo esc_attr(
-                                                $campaign->id,
-                                            ); ?>"
-                                            data-campaign-name="<?php echo esc_attr(
-                                                $campaign->name,
-                                            ); ?>"
-                                            data-has-stats="<?php echo CampaignRepository::hasStats(
-                                                $campaign->id,
-                                            )
-                                                ? "1"
-                                                : "0"; ?>"
-                                            title="Eliminar campaña">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
+                // Pagination
+                if ($total_pages > 1) {
+                    echo '<div style="margin-top:16px;">';
+                    $ui->pagination([
+                        "current"  => $page,
+                        "total"    => $total_pages,
+                        "base_url" => admin_url("admin.php?page=pwoa-dashboard"),
+                        "param"    => "paged",
+                        "window"   => 2,
+                    ]);
+                    echo '</div>';
+                }
 
-                        </div>
-                    </div>
-                <?php
-                endforeach; ?>
-            </div>
-
-        </div>
-
-        <!-- ⚡ Paginación -->
-        <?php if ($total_pages > 1): ?>
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 mt-6">
-                <div class="flex items-center justify-between">
-                    <div class="text-sm text-gray-600">
-                        Mostrando <span class="font-semibold"><?php echo ($page -
-                            1) *
-                            20 +
-                            1; ?></span>
-                        a <span class="font-semibold"><?php echo min(
-                            $page * 20,
-                            $total,
-                        ); ?></span>
-                        de <span class="font-semibold"><?php echo number_format(
-                            $total,
-                        ); ?></span> campañas
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <?php if ($page > 1): ?>
-                            <a href="?page=pwoa-dashboard&paged=<?php echo $page -
-                                1; ?>"
-                               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
-                                ← Anterior
-                            </a>
-                        <?php endif; ?>
-
-                        <?php
-                        $start = max(1, $page - 2);
-                        $end = min($total_pages, $page + 2);
-
-                        if ($start > 1): ?>
-                            <a href="?page=pwoa-dashboard&paged=1"
-                               class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
-                                1
-                            </a>
-                            <?php if ($start > 2): ?>
-                                <span class="px-2 text-gray-500">...</span>
-                            <?php endif; ?>
-                        <?php endif;
-                        ?>
-
-                        <?php for ($i = $start; $i <= $end; $i++): ?>
-                            <a href="?page=pwoa-dashboard&paged=<?php echo $i; ?>"
-                               class="px-3 py-2 <?php echo $i === $page
-                                   ? "bg-blue-600 text-white"
-                                   : "bg-gray-100 hover:bg-gray-200 text-gray-700"; ?> rounded-lg transition">
-                                <?php echo $i; ?>
-                            </a>
-                        <?php endfor; ?>
-
-                        <?php if ($end < $total_pages): ?>
-                            <?php if ($end < $total_pages - 1): ?>
-                                <span class="px-2 text-gray-500">...</span>
-                            <?php endif; ?>
-                            <a href="?page=pwoa-dashboard&paged=<?php echo $total_pages; ?>"
-                               class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
-                                <?php echo $total_pages; ?>
-                            </a>
-                        <?php endif; ?>
-
-                        <?php if ($page < $total_pages): ?>
-                            <a href="?page=pwoa-dashboard&paged=<?php echo $page +
-                                1; ?>"
-                               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
-                                Siguiente →
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
-    <?php endif; ?>
-
-</div>
+                echo '<div style="margin-top:8px;font-size:12px;color:var(--pw-color-fg-muted);">'
+                    . number_format($total) . ' campaña' . ($total !== 1 ? 's' : '') . ' en total</div>';
+            },
+        ]);
+    },
+]);
+?>
 
 <script>
-    document.querySelectorAll('.toggle-campaign').forEach(toggle => {
-        toggle.addEventListener('change', async function() {
-            const campaignId = this.dataset.campaignId;
-            const campaignName = this.dataset.campaignName;
-            const active = this.checked ? 1 : 0;
-            const statusText = this.nextElementSibling?.nextElementSibling;
+document.querySelectorAll('.toggle-campaign').forEach(function (input) {
+    input.addEventListener('change', async function () {
+        const campaignId = this.dataset.campaignId;
+        const active     = this.checked ? 1 : 0;
+        const label      = this.parentElement.querySelector('.pwoa-toggle-label');
+        const track      = this.parentElement.querySelector('.pwoa-toggle-track');
+        const dot        = track ? track.querySelector('span') : null;
 
-            if (statusText) {
-                statusText.textContent = active ? 'Activa' : 'Pausada';
-                statusText.classList.toggle('text-green-700', active);
-                statusText.classList.toggle('text-gray-700', !active);
-            }
+        if (label) {
+            label.textContent = active ? 'Activa' : 'Pausada';
+            label.style.color = active ? 'var(--pw-color-success-fg)' : 'var(--pw-color-fg-muted)';
+        }
+        if (track) track.style.background = active ? 'var(--pw-color-success-emphasis)' : 'var(--pw-color-border-default)';
+        if (dot)   dot.style[active ? 'right' : 'left'] = '2px', dot.style[active ? 'left' : 'right'] = 'auto';
 
-            try {
-                const response = await fetch(ajaxurl, {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        action: 'pwoa_toggle_campaign',
-                        campaign_id: campaignId,
-                        active: active,
-                        nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>'
-                    })
-                });
+        try {
+            const res  = await fetch(ajaxurl, { method: 'POST', body: new URLSearchParams({ action: 'pwoa_toggle_campaign', campaign_id: campaignId, active: active, nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>' }) });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.data || 'Error desconocido');
+        } catch (err) {
+            this.checked = !this.checked;
+            alert('Error al actualizar campaña: ' + err.message);
+        }
+    });
+});
 
-                const data = await response.json();
+document.querySelectorAll('.btn-edit').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        window.location.href = '<?php echo admin_url("admin.php?page=pwoa-new-campaign"); ?>&edit=' + this.dataset.campaignId;
+    });
+});
 
-                if (!data.success) {
-                    throw new Error(data.data || 'Error desconocido');
-                }
+document.querySelectorAll('.btn-delete').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+        const campaignId = this.dataset.campaignId;
+        let msg = '¿Estás seguro de eliminar la campaña "' + this.dataset.campaignName + '"?';
+        if (this.dataset.hasStats === '1') msg += '\n\n⚠️ Esta campaña tiene estadísticas asociadas.';
+        if (!confirm(msg)) return;
 
-            } catch (error) {
-                this.checked = !this.checked;
-                if (statusText) {
-                    statusText.textContent = !active ? 'Activa' : 'Pausada';
-                    statusText.classList.toggle('text-green-700', !active);
-                    statusText.classList.toggle('text-gray-700', active);
-                }
-                alert('Error al actualizar campaña: ' + error.message);
-            }
+        this.disabled = true; this.style.opacity = '0.4';
+        try {
+            const res  = await fetch(ajaxurl, { method: 'POST', body: new URLSearchParams({ action: 'pwoa_delete_campaign', campaign_id: campaignId, nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>' }) });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.data || 'Error al eliminar');
+            const row = this.closest('tr');
+            if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .3s'; }
+            setTimeout(() => window.location.reload(), 300);
+        } catch (err) {
+            this.disabled = false; this.style.opacity = '1';
+            alert('Error: ' + err.message);
+        }
+    });
+});
+
+document.querySelectorAll('.btn-reset').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+        if (!confirm('¿Resetear contador de unidades vendidas de "' + this.dataset.campaignName + '"?\n\nEsto pondrá en 0 el contador.')) return;
+        this.disabled = true; this.style.opacity = '0.4';
+        try {
+            const res  = await fetch(ajaxurl, { method: 'POST', body: new URLSearchParams({ action: 'pwoa_reset_units_sold', campaign_id: this.dataset.campaignId, nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>' }) });
+            const data = await res.json();
+            if (!data.success) throw new Error(data.data || 'Error');
+            alert('✓ ' + data.data.message);
+            window.location.reload();
+        } catch (err) {
+            this.disabled = false; this.style.opacity = '1';
+            alert('Error: ' + err.message);
+        }
+    });
+});
+
+(function () {
+    var helpBtn = document.getElementById('help-button');
+    var modal   = document.getElementById('help-modal');
+    if (!helpBtn || !modal) return;
+    helpBtn.addEventListener('click', function () { modal.style.display = 'flex'; });
+    document.getElementById('close-help')?.addEventListener('click',     function () { modal.style.display = 'none'; });
+    document.getElementById('close-help-btn')?.addEventListener('click', function () { modal.style.display = 'none'; });
+    modal.addEventListener('click', function (e) { if (e.target === modal) modal.style.display = 'none'; });
+    document.querySelectorAll('.help-accordion-header').forEach(function (h) {
+        h.addEventListener('click', function () {
+            var content = h.nextElementSibling;
+            var icon    = h.querySelector('.accordion-icon');
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            if (icon) icon.textContent = content.style.display === 'none' ? '▶' : '▼';
         });
     });
-
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const campaignId = this.dataset.campaignId;
-            window.location.href = '<?php echo admin_url(
-                "admin.php?page=pwoa-new-campaign",
-            ); ?>&edit=' + campaignId;
-        });
-    });
-
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const campaignId = this.dataset.campaignId;
-            const campaignName = this.dataset.campaignName;
-            const hasStats = this.dataset.hasStats === '1';
-
-            let confirmMessage = `¿Estás seguro de eliminar la campaña "${campaignName}"?`;
-
-            if (hasStats) {
-                confirmMessage += '\n\n⚠️ Esta campaña tiene estadísticas asociadas. Los datos históricos se mantendrán para reportes.';
-            }
-
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-
-            this.disabled = true;
-            this.style.opacity = '0.5';
-
-            try {
-                const response = await fetch(ajaxurl, {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        action: 'pwoa_delete_campaign',
-                        campaign_id: campaignId,
-                        nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!data.success) {
-                    throw new Error(data.data || 'Error al eliminar');
-                }
-
-                const row = this.closest('.px-6');
-                row.style.transition = 'opacity 0.3s, transform 0.3s';
-                row.style.opacity = '0';
-                row.style.transform = 'translateX(20px)';
-
-                setTimeout(() => {
-                    window.location.reload();
-                }, 300);
-
-            } catch (error) {
-                this.disabled = false;
-                this.style.opacity = '1';
-                alert('Error: ' + error.message);
-            }
-        });
-    });
-
-    document.querySelectorAll('.btn-reset').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const campaignId = this.dataset.campaignId;
-            const campaignName = this.dataset.campaignName;
-
-            if (!confirm(`¿Resetear contador de unidades vendidas de "${campaignName}"?\n\nEsto pondrá en 0 el contador de todas las unidades vendidas.`)) {
-                return;
-            }
-
-            this.disabled = true;
-            this.style.opacity = '0.5';
-
-            try {
-                const response = await fetch(ajaxurl, {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        action: 'pwoa_reset_units_sold',
-                        campaign_id: campaignId,
-                        nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!data.success) {
-                    throw new Error(data.data || 'Error al resetear');
-                }
-
-                alert('✓ ' + data.data.message);
-                window.location.reload();
-
-            } catch (error) {
-                this.disabled = false;
-                this.style.opacity = '1';
-                alert('Error: ' + error.message);
-            }
-        });
-    });
+}());
 </script>
 
 <!-- Modal de Ayuda -->
-<div id="help-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[85vh] flex flex-col m-4">
-        <!-- Header -->
-        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 class="text-2xl font-bold text-gray-900">Ayuda - Configuración de Campañas</h2>
-            <button id="close-help" class="text-gray-400 hover:text-gray-600 text-3xl font-bold leading-none">&times;</button>
+<div id="help-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);align-items:center;justify-content:center;">
+    <div style="background:var(--pw-color-bg-canvas);border:1px solid var(--pw-color-border-default);border-radius:6px;padding:0;width:680px;max-width:90vw;max-height:85vh;display:flex;flex-direction:column;">
+        <div style="padding:20px 24px;border-bottom:1px solid var(--pw-color-border-muted);display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:16px;color:var(--pw-color-fg-default);">Ayuda — Modo de Descuentos</strong>
+            <button id="close-help" type="button" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--pw-color-fg-muted);">&times;</button>
         </div>
-
-        <!-- Body -->
-        <div class="p-6 overflow-y-auto flex-1 space-y-4">
-
-            <!-- Accordion 1 -->
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
-                <button class="help-accordion-header w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition text-left">
-                    <h3 class="text-lg font-semibold text-gray-900">¿Qué es "Prioritario" vs "Apilable"?</h3>
-                    <span class="accordion-icon text-gray-600 font-bold">▶</span>
-                </button>
-                <div class="help-accordion-content hidden p-4 bg-white">
-                    <div class="space-y-3 text-gray-700">
-                        <div>
-                            <h4 class="font-bold text-gray-900 mb-1">Modo Prioritario</h4>
-                            <p>Las campañas con modo "Prioritario" compiten entre sí. Solo se aplica UNA campaña prioritaria: la que genere mayor descuento.</p>
-                            <p class="text-sm text-gray-600 mt-1"><strong>Ejemplo:</strong> Si tienes dos campañas prioritarias (5% y 10% de descuento), solo se aplicará la de 10%.</p>
-                        </div>
-                        <div class="mt-4">
-                            <h4 class="font-bold text-gray-900 mb-1">Modo Apilable</h4>
-                            <p>Las campañas "Apilables" se SUMAN entre sí. Si tienes varias campañas apilables activas, sus descuentos se acumulan.</p>
-                            <p class="text-sm text-gray-600 mt-1"><strong>Ejemplo:</strong> Si tienes dos campañas apilables (5% y 3% de descuento), se aplicarán ambas sumando un total de 8%.</p>
-                        </div>
+        <div style="padding:20px 24px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:10px;">
+            <?php
+            $help_items = [
+                [
+                    "title"   => "¿Qué es \"Prioritario\" vs \"Apilable\"?",
+                    "content" => "<p><strong>Modo Prioritario:</strong> Solo se aplica una campaña prioritaria — la de mayor descuento.<br><em>Ejemplo:</em> Dos campañas (5% y 10%), solo aplica el 10%.</p><p><strong>Modo Apilable:</strong> Las campañas apilables se suman entre sí.<br><em>Ejemplo:</em> 5% + 3% = 8%.</p>",
+                ],
+                [
+                    "title"   => "¿Cómo funcionan con múltiples campañas?",
+                    "content" => sprintf(
+                        "<p>Comportamiento activo: <strong>%s</strong></p>",
+                        esc_html($behavior_labels[$behavior] ?? $behavior)
+                    ) . "<p><a href='" . admin_url("admin.php?page=pwoa-settings") . "'>→ Ir a Ajustes</a></p>",
+                ],
+            ];
+            foreach ($help_items as $item): ?>
+                <div style="border:1px solid var(--pw-color-border-muted);border-radius:4px;overflow:hidden;">
+                    <button type="button" class="help-accordion-header"
+                        style="width:100%;display:flex;justify-content:space-between;padding:14px 16px;background:var(--pw-color-bg-subtle);border:none;cursor:pointer;text-align:left;">
+                        <strong style="font-size:13px;color:var(--pw-color-fg-default);"><?php echo esc_html($item["title"]); ?></strong>
+                        <span class="accordion-icon" style="color:var(--pw-color-fg-muted);">▶</span>
+                    </button>
+                    <div style="display:none;padding:16px;background:var(--pw-color-bg-canvas);font-size:13px;color:var(--pw-color-fg-muted);">
+                        <?php echo $item["content"]; ?>
                     </div>
                 </div>
-            </div>
-
-            <!-- Accordion 2 -->
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
-                <button class="help-accordion-header w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition text-left">
-                    <h3 class="text-lg font-semibold text-gray-900">¿Cómo funcionan cuando hay múltiples campañas?</h3>
-                    <span class="accordion-icon text-gray-600 font-bold">▶</span>
-                </button>
-                <div class="help-accordion-content hidden p-4 bg-white">
-                    <div class="space-y-3 text-gray-700">
-                        <p>El comportamiento depende de la configuración activa en <strong>Ajustes</strong>:</p>
-
-                        <div class="bg-green-50 border-l-4 border-green-400 p-3">
-                            <h4 class="font-bold text-green-900 mb-1">Modo actual: <?php echo $behavior_labels[
-                                $behavior
-                            ]; ?></h4>
-                            <?php if ($behavior === "priority_first"): ?>
-                                <p class="text-sm text-green-900">Si hay campañas prioritarias aplicables, se elige la mejor. Solo si NO hay prioritarias se suman las apilables.</p>
-                            <?php elseif ($behavior === "stack_first"): ?>
-                                <p class="text-sm text-blue-900">Si hay al menos una campaña apilable, se suman todas las apilables e ignora las prioritarias. Solo usa prioritarias si no hay apilables.</p>
-                            <?php else: ?>
-                                <p class="text-sm text-purple-900">El sistema calcula ambos escenarios y aplica automáticamente el que genere mayor descuento para el cliente.</p>
-                            <?php endif; ?>
-                        </div>
-
-                        <a href="<?php echo admin_url(
-                            "admin.php?page=pwoa-settings",
-                        ); ?>"
-                           class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition mt-2">
-                            Ir a Ajustes
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Accordion 3 -->
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
-                <button class="help-accordion-header w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition text-left">
-                    <h3 class="text-lg font-semibold text-gray-900">Ejemplos prácticos</h3>
-                    <span class="accordion-icon text-gray-600 font-bold">▶</span>
-                </button>
-                <div class="help-accordion-content hidden p-4 bg-white">
-                    <div class="space-y-4 text-gray-700">
-
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-bold text-gray-900 mb-2">Escenario 1: Black Friday especial</h4>
-                            <p class="text-sm"><strong>Campañas:</strong></p>
-                            <ul class="list-disc ml-5 text-sm space-y-1 mb-2">
-                                <li>Campaña A: 20% OFF Black Friday (Prioritario)</li>
-                                <li>Campaña B: 5% OFF General (Apilable)</li>
-                            </ul>
-                            <p class="text-sm"><strong>Modo "Prioridad primero":</strong> Se aplica solo el 20% del Black Friday.</p>
-                            <p class="text-sm"><strong>Modo "Solo apilables":</strong> Se aplica solo el 5% general.</p>
-                            <p class="text-sm"><strong>Modo "Mejor descuento":</strong> Se aplica el 20% del Black Friday (mayor ahorro).</p>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-bold text-gray-900 mb-2">Escenario 2: Combinación de descuentos</h4>
-                            <p class="text-sm"><strong>Campañas:</strong></p>
-                            <ul class="list-disc ml-5 text-sm space-y-1 mb-2">
-                                <li>Campaña A: 10% OFF Categoría Electrónica (Apilable)</li>
-                                <li>Campaña B: 5% OFF Cliente VIP (Apilable)</li>
-                            </ul>
-                            <p class="text-sm"><strong>Resultado:</strong> Se aplican ambos descuentos sumando 15% en total (en todos los modos, ya que no hay prioritarios).</p>
-                        </div>
-
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-bold text-gray-900 mb-2">Escenario 3: Bulk vs General</h4>
-                            <p class="text-sm"><strong>Campañas:</strong></p>
-                            <ul class="list-disc ml-5 text-sm space-y-1 mb-2">
-                                <li>Campaña A: 10% OFF Descuento Bulk (Prioritario)</li>
-                                <li>Campaña B: 5% OFF General (Apilable)</li>
-                            </ul>
-                            <p class="text-sm"><strong>Modo "Prioridad primero":</strong> Se aplica el 10% del Bulk.</p>
-                            <p class="text-sm"><strong>Modo "Solo apilables":</strong> Se aplica solo el 5% general.</p>
-                            <p class="text-sm"><strong>Modo "Mejor descuento":</strong> Se aplica el 10% del Bulk (mayor ahorro).</p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
+            <?php endforeach; ?>
         </div>
-
-        <!-- Footer -->
-        <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
-            <button id="close-help-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition">
+        <div style="padding:16px 24px;border-top:1px solid var(--pw-color-border-muted);text-align:right;">
+            <button id="close-help-btn" type="button"
+                style="padding:8px 18px;background:var(--pw-color-bg-subtle);border:1px solid var(--pw-color-border-default);border-radius:4px;cursor:pointer;font-size:13px;color:var(--pw-color-fg-default);">
                 Cerrar
             </button>
         </div>
     </div>
 </div>
-
-<script>
-// Modal de ayuda
-document.addEventListener('DOMContentLoaded', function() {
-    const helpBtn = document.getElementById('help-button');
-    const helpModal = document.getElementById('help-modal');
-    const closeHelp = document.getElementById('close-help');
-    const closeHelpBtn = document.getElementById('close-help-btn');
-
-    if (helpBtn) {
-        helpBtn.addEventListener('click', () => {
-            helpModal.classList.remove('hidden');
-        });
-    }
-
-    if (closeHelp) {
-        closeHelp.addEventListener('click', () => {
-            helpModal.classList.add('hidden');
-        });
-    }
-
-    if (closeHelpBtn) {
-        closeHelpBtn.addEventListener('click', () => {
-            helpModal.classList.add('hidden');
-        });
-    }
-
-    if (helpModal) {
-        helpModal.addEventListener('click', (e) => {
-            if (e.target === helpModal) {
-                helpModal.classList.add('hidden');
-            }
-        });
-    }
-
-    // Accordions de ayuda
-    document.querySelectorAll('.help-accordion-header').forEach(header => {
-        header.addEventListener('click', () => {
-            const content = header.nextElementSibling;
-            const icon = header.querySelector('.accordion-icon');
-
-            if (content && icon) {
-                content.classList.toggle('hidden');
-                icon.textContent = content.classList.contains('hidden') ? '▶' : '▼';
-            }
-        });
-    });
-});
-</script>
