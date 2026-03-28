@@ -49,19 +49,20 @@ class LowStockStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Descuento por Stock Bajo',
-            'description'   => 'Aplica descuentos automaticos a productos con pocas unidades disponibles',
+            'key'           => 'low_stock',
+            'name'          => __('Low stock discount', 'pw-ofertas-avanzadas'),
+            'description'   => __('Automatically discount products when on-hand quantity falls below a threshold.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 4,
-            'when_to_use'   => 'Liquidacion de inventario, cambio de temporada, discontinuacion de productos. Genera urgencia al mostrar escasez.',
+            'when_to_use'   => __('Seasonal clearance, end-of-line, or when you want urgency from scarcity.', 'pw-ofertas-avanzadas'),
             'objective'     => 'liquidation',
         ];
     }
 
     public static function getConfigFields(): array {
         return [
-            ['key' => 'stock_threshold', 'label' => 'Umbral de stock',     'type' => 'number', 'default' => 10, 'required' => true, 'description' => 'Cantidad de unidades o menos para activar descuento'],
-            ['key' => 'discount_type',   'label' => 'Tipo de descuento',   'type' => 'select', 'options' => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo por unidad'], 'required' => true],
-            ['key' => 'discount_value',  'label' => 'Valor del descuento', 'type' => 'number', 'required' => true],
+            ['key' => 'stock_threshold', 'label' => __('Stock threshold', 'pw-ofertas-avanzadas'),     'type' => 'number', 'default' => 10, 'required' => true, 'description' => __('Discount applies when stock is at or below this quantity.', 'pw-ofertas-avanzadas')],
+            ['key' => 'discount_type',   'label' => __('Discount type', 'pw-ofertas-avanzadas'),   'type' => 'select', 'options' => ['percentage' => __('Percentage', 'pw-ofertas-avanzadas'), 'fixed' => __('Fixed per unit', 'pw-ofertas-avanzadas')], 'required' => true],
+            ['key' => 'discount_value',  'label' => __('Discount value', 'pw-ofertas-avanzadas'), 'type' => 'number', 'required' => true],
         ];
     }
 }

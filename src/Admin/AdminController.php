@@ -54,6 +54,8 @@ class AdminController
 
     public function __construct()
     {
+        AdminAssets::register();
+
         add_action('admin_menu', [$this, 'addMenuPages']);
 
         foreach (self::AJAX_HOOKS as $hook => $method) {
@@ -66,7 +68,7 @@ class AdminController
         check_ajax_referer('pwoa_nonce', 'nonce');
 
         if (!current_user_can('manage_woocommerce')) {
-            wp_send_json_error('Permisos insuficientes');
+            wp_send_json_error(__('Insufficient permissions.', 'pw-ofertas-avanzadas'));
         }
     }
 
@@ -133,8 +135,8 @@ class AdminController
     public function addMenuPages(): void
     {
         add_menu_page(
-            'Ofertas Avanzadas',
-            'Ofertas',
+            __('PW - Ofertas Avanzadas', 'pw-ofertas-avanzadas'),
+            __('Offers', 'pw-ofertas-avanzadas'),
             'manage_woocommerce',
             'pwoa-dashboard',
             [$this, 'renderDashboard'],
@@ -144,8 +146,8 @@ class AdminController
 
         add_submenu_page(
             'pwoa-dashboard',
-            'Nueva Campana',
-            'Nueva Campana',
+            __('New campaign', 'pw-ofertas-avanzadas'),
+            __('New campaign', 'pw-ofertas-avanzadas'),
             'manage_woocommerce',
             'pwoa-new-campaign',
             [$this, 'renderWizard'],
@@ -153,8 +155,8 @@ class AdminController
 
         add_submenu_page(
             'pwoa-dashboard',
-            'Analiticas',
-            'Analiticas',
+            __('Analytics', 'pw-ofertas-avanzadas'),
+            __('Analytics', 'pw-ofertas-avanzadas'),
             'manage_woocommerce',
             'pwoa-analytics',
             [$this, 'renderAnalytics'],
@@ -162,8 +164,8 @@ class AdminController
 
         add_submenu_page(
             'pwoa-dashboard',
-            'Ajustes',
-            'Ajustes',
+            __('Settings', 'pw-ofertas-avanzadas'),
+            __('Settings', 'pw-ofertas-avanzadas'),
             'manage_woocommerce',
             'pwoa-settings',
             [$this, 'renderSettings'],
@@ -171,8 +173,8 @@ class AdminController
 
         add_submenu_page(
             'pwoa-dashboard',
-            'Shortcodes',
-            'Shortcodes',
+            __('Shortcodes', 'pw-ofertas-avanzadas'),
+            __('Shortcodes', 'pw-ofertas-avanzadas'),
             'manage_woocommerce',
             'pwoa-shortcodes',
             [$this, 'renderShortcodes'],
@@ -221,12 +223,12 @@ class AdminController
         $valid_behaviors = ['priority_first', 'stack_first', 'max_discount'];
 
         if (!in_array($stacking_behavior, $valid_behaviors, true)) {
-            wp_send_json_error('Valor invalido');
+            wp_send_json_error(__('Invalid value.', 'pw-ofertas-avanzadas'));
         }
 
         update_option('pwoa_stacking_behavior', $stacking_behavior);
 
-        wp_send_json_success(['message' => 'Configuracion guardada correctamente']);
+        wp_send_json_success(['message' => __('Settings saved successfully.', 'pw-ofertas-avanzadas')]);
     }
 
     public function ajaxGetWizardData(): void
@@ -245,7 +247,7 @@ class AdminController
             $campaign = CampaignRepository::getById($campaign_id);
 
             if (!$campaign) {
-                wp_send_json_error('Campana no encontrada');
+                wp_send_json_error(__('Campaign not found.', 'pw-ofertas-avanzadas'));
             }
 
             $campaign->config = json_decode($campaign->config, true);
@@ -304,11 +306,13 @@ class AdminController
 
         if (!$campaign_id) {
             global $wpdb;
-            wp_send_json_error('Error al crear campana: ' . esc_html($wpdb->last_error));
+            wp_send_json_error(
+                __('Could not create campaign.', 'pw-ofertas-avanzadas') . ' ' . esc_html($wpdb->last_error),
+            );
         }
 
         wp_send_json_success([
-            'message'     => 'Campana creada correctamente',
+            'message'     => __('Campaign created successfully.', 'pw-ofertas-avanzadas'),
             'campaign_id' => $campaign_id,
         ]);
     }
@@ -322,7 +326,7 @@ class AdminController
 
         CampaignRepository::updateStatus($campaign_id, $active);
 
-        wp_send_json_success(['message' => 'Estado actualizado']);
+        wp_send_json_success(['message' => __('Status updated.', 'pw-ofertas-avanzadas')]);
     }
 
     public function ajaxGetCampaign(): void
@@ -333,7 +337,7 @@ class AdminController
         $campaign = CampaignRepository::getById($campaign_id);
 
         if (!$campaign) {
-            wp_send_json_error('Campana no encontrada');
+            wp_send_json_error(__('Campaign not found.', 'pw-ofertas-avanzadas'));
         }
 
         $campaign->config = json_decode($campaign->config, true);
@@ -359,11 +363,11 @@ class AdminController
         $success = CampaignRepository::update($campaign_id, $data);
 
         if (!$success) {
-            wp_send_json_error('Error al actualizar campana');
+            wp_send_json_error(__('Could not update the campaign.', 'pw-ofertas-avanzadas'));
         }
 
         wp_send_json_success([
-            'message'     => 'Campana actualizada correctamente',
+            'message'     => __('Campaign updated successfully.', 'pw-ofertas-avanzadas'),
             'campaign_id' => $campaign_id,
         ]);
     }
@@ -376,15 +380,15 @@ class AdminController
         $success = CampaignRepository::softDelete($campaign_id);
 
         if (!$success) {
-            wp_send_json_error('Error al eliminar campana');
+            wp_send_json_error(__('Could not delete the campaign.', 'pw-ofertas-avanzadas'));
         }
 
-        wp_send_json_success(['message' => 'Campana eliminada correctamente']);
+        wp_send_json_success(['message' => __('Campaign deleted successfully.', 'pw-ofertas-avanzadas')]);
     }
 
     private function getCachedStrategies(string $objective): array
     {
-        $cache_key = 'pwoa_strategies_' . $objective;
+        $cache_key = 'pwoa_strategies_v2_' . $objective;
         $strategies = get_transient($cache_key);
 
         if ($strategies === false) {
@@ -616,7 +620,7 @@ class AdminController
         $attribute_slug = sanitize_text_field($_POST['attribute_slug'] ?? '');
 
         if (empty($attribute_slug)) {
-            wp_send_json_error('Atributo no especificado');
+            wp_send_json_error(__('Attribute not specified.', 'pw-ofertas-avanzadas'));
         }
 
         $terms = get_terms([
@@ -625,7 +629,7 @@ class AdminController
         ]);
 
         if (is_wp_error($terms)) {
-            wp_send_json_error('Error al obtener terminos');
+            wp_send_json_error(__('Could not load attribute terms.', 'pw-ofertas-avanzadas'));
         }
 
         $result = array_map(static function ($term) {
@@ -687,19 +691,19 @@ class AdminController
         $campaign_id = intval($_POST['campaign_id'] ?? 0);
 
         if (!$campaign_id) {
-            wp_send_json_error('ID de campana invalido');
+            wp_send_json_error(__('Invalid campaign ID.', 'pw-ofertas-avanzadas'));
         }
 
         $success = CampaignRepository::resetUnitsSold($campaign_id);
 
         if (!$success) {
-            wp_send_json_error('Error al resetear contador');
+            wp_send_json_error(__('Could not reset the counter.', 'pw-ofertas-avanzadas'));
         }
 
         if (class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
             \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
         }
 
-        wp_send_json_success(['message' => 'Contador reseteado correctamente']);
+        wp_send_json_success(['message' => __('Counter reset successfully.', 'pw-ofertas-avanzadas')]);
     }
 }

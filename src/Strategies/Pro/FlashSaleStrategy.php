@@ -34,20 +34,21 @@ class FlashSaleStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Flash Sale (Oferta Relampago)',
-            'description'   => 'Descuento por tiempo limitado para generar urgencia',
+            'key'           => 'flash_sale',
+            'name'          => __('Flash sale', 'pw-ofertas-avanzadas'),
+            'description'   => __('Time-limited discount to create urgency.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 5,
-            'when_to_use'   => 'Black Friday, Cyber Monday, lanzamientos de productos. Maxima efectividad en ventanas de 6-24 horas.',
+            'when_to_use'   => __('Peak events and launches; often strongest in 6–24 hour windows.', 'pw-ofertas-avanzadas'),
             'objective'     => 'urgency',
         ];
     }
 
     public static function getConfigFields(): array {
         return [
-            ['key' => 'start_time',     'label' => 'Hora de inicio',      'type' => 'datetime', 'required' => true],
-            ['key' => 'end_time',       'label' => 'Hora de fin',         'type' => 'datetime', 'required' => true],
-            ['key' => 'discount_type',  'label' => 'Tipo de descuento',   'type' => 'select', 'options' => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo'], 'required' => true],
-            ['key' => 'discount_value', 'label' => 'Valor del descuento', 'type' => 'number',   'required' => true],
+            ['key' => 'start_time',     'label' => __('Start time', 'pw-ofertas-avanzadas'),      'type' => 'datetime', 'required' => true],
+            ['key' => 'end_time',       'label' => __('End time', 'pw-ofertas-avanzadas'),         'type' => 'datetime', 'required' => true],
+            ['key' => 'discount_type',  'label' => __('Discount type', 'pw-ofertas-avanzadas'),   'type' => 'select', 'options' => ['percentage' => __('Percentage', 'pw-ofertas-avanzadas'), 'fixed' => __('Fixed amount', 'pw-ofertas-avanzadas')], 'required' => true],
+            ['key' => 'discount_value', 'label' => __('Discount value', 'pw-ofertas-avanzadas'), 'type' => 'number',   'required' => true],
         ];
     }
 }

@@ -7,34 +7,34 @@ use PW\OfertasAvanzadas\Repositories\CampaignRepository;
 
 // Mapeo de estrategias a etiquetas legibles
 $strategy_labels = [
-    "basic_discount" => "Básico",
-    "min_amount" => "Monto Mínimo",
-    "free_shipping" => "Envío Gratis",
-    "tiered_discount" => "Descuento Escalonado",
-    "bulk_discount" => "Volumen (Bulk)",
-    "expiry_based" => "Por Vencimiento",
-    "low_stock" => "Stock Bajo",
-    "recurring_purchase" => "Compra Recurrente",
-    "flash_sale" => "Flash Sale",
-    "buy_x_pay_y" => "Lleva X Paga Y",
-    "attribute_quantity_discount" => "Por Atributos",
+    "basic_discount" => __('Basic', 'pw-ofertas-avanzadas'),
+    "min_amount" => __('Minimum amount', 'pw-ofertas-avanzadas'),
+    "free_shipping" => __('Free shipping', 'pw-ofertas-avanzadas'),
+    "tiered_discount" => __('Tiered discount', 'pw-ofertas-avanzadas'),
+    "bulk_discount" => __('Volume (bulk)', 'pw-ofertas-avanzadas'),
+    "expiry_based" => __('Expiry based', 'pw-ofertas-avanzadas'),
+    "low_stock" => __('Low stock', 'pw-ofertas-avanzadas'),
+    "recurring_purchase" => __('Recurring purchase', 'pw-ofertas-avanzadas'),
+    "flash_sale" => __('Flash sale', 'pw-ofertas-avanzadas'),
+    "buy_x_pay_y" => __('Buy X pay Y', 'pw-ofertas-avanzadas'),
+    "attribute_quantity_discount" => __('By attributes', 'pw-ofertas-avanzadas'),
 ];
 
 // Mapeo de objetivos a colores y etiquetas
 $objective_config = [
-    "basic" => ["label" => "Básico", "color" => "gray", "icon" => "🎯"],
-    "aov" => ["label" => "AOV", "color" => "blue", "icon" => "📈"],
+    "basic" => ["label" => __('Basic', 'pw-ofertas-avanzadas'), "color" => "gray", "icon" => "🎯"],
+    "aov" => ["label" => __('AOV', 'pw-ofertas-avanzadas'), "color" => "blue", "icon" => "📈"],
     "liquidation" => [
-        "label" => "Liquidación",
+        "label" => __('Liquidation', 'pw-ofertas-avanzadas'),
         "color" => "orange",
         "icon" => "🏷️",
     ],
     "loyalty" => [
-        "label" => "Fidelización",
+        "label" => __('Loyalty', 'pw-ofertas-avanzadas'),
         "color" => "purple",
         "icon" => "💎",
     ],
-    "urgency" => ["label" => "Urgencia", "color" => "red", "icon" => "⚡"],
+    "urgency" => ["label" => __('Urgency', 'pw-ofertas-avanzadas'), "color" => "red", "icon" => "⚡"],
 ];
 ?>
 
@@ -43,13 +43,13 @@ $objective_config = [
     <!-- Header -->
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900">Campañas de Descuentos</h1>
-            <p class="text-gray-600 mt-1">Gestiona tus estrategias de marketing</p>
+            <h1 class="text-3xl font-bold text-gray-900"><?php esc_html_e('Discount campaigns', 'pw-ofertas-avanzadas'); ?></h1>
+            <p class="text-gray-600 mt-1"><?php esc_html_e('Manage your marketing strategies.', 'pw-ofertas-avanzadas'); ?></p>
         </div>
         <a href="<?php echo admin_url("admin.php?page=pwoa-new-campaign"); ?>"
            class="bg-blue-600 hover:bg-blue-700 !text-white px-6 py-3 rounded-lg font-medium transition-all hover:shadow-lg inline-flex items-center gap-2">
             <span class="text-xl">+</span>
-            Nueva Campaña
+            <?php esc_html_e('New campaign', 'pw-ofertas-avanzadas'); ?>
         </a>
     </div>
 
@@ -58,16 +58,16 @@ $objective_config = [
         <!-- Empty State -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-16 text-center">
 
-            <h3 class="text-xl font-semibold text-gray-900 mb-2">No hay campañas activas</h3>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2"><?php esc_html_e('No active campaigns', 'pw-ofertas-avanzadas'); ?></h3>
             <p class="text-gray-500 mb-8 max-w-md mx-auto">
-                Crea tu primera campaña de descuentos para aumentar ventas y optimizar tu inventario
+                <?php esc_html_e('Create your first discount campaign to boost sales and optimize inventory.', 'pw-ofertas-avanzadas'); ?>
             </p>
             <a href="<?php echo admin_url(
                 "admin.php?page=pwoa-new-campaign",
             ); ?>"
                class="bg-blue-600 hover:bg-blue-700 !text-white px-8 py-3 rounded-lg inline-flex items-center gap-2 font-medium transition-all hover:shadow-lg">
                 <span class="text-xl">+</span>
-                Crear Primera Campaña
+                <?php esc_html_e('Create first campaign', 'pw-ofertas-avanzadas'); ?>
             </a>
         </div>
 
@@ -108,7 +108,7 @@ $objective_config = [
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-600">Total Campañas</p>
+                        <p class="text-sm text-gray-600"><?php esc_html_e('Total campaigns', 'pw-ofertas-avanzadas'); ?></p>
                         <p class="text-2xl font-bold text-gray-900 mt-1"><?php echo number_format(
                             $total,
                         ); ?></p>
@@ -118,7 +118,7 @@ $objective_config = [
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-600">Activas</p>
+                        <p class="text-sm text-gray-600"><?php esc_html_e('Active', 'pw-ofertas-avanzadas'); ?></p>
                         <p class="text-2xl font-bold text-green-600 mt-1">
                             <?php echo count($truly_active); ?>
                         </p>
@@ -128,7 +128,7 @@ $objective_config = [
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-600">Pausadas</p>
+                        <p class="text-sm text-gray-600"><?php esc_html_e('Paused', 'pw-ofertas-avanzadas'); ?></p>
                         <p class="text-2xl font-bold text-gray-400 mt-1">
                             <?php echo count($paused); ?>
                         </p>
@@ -138,7 +138,7 @@ $objective_config = [
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-600">Programadas</p>
+                        <p class="text-sm text-gray-600"><?php esc_html_e('Scheduled', 'pw-ofertas-avanzadas'); ?></p>
                         <p class="text-2xl font-bold text-blue-600 mt-1">
                             <?php echo count($scheduled); ?>
                         </p>
@@ -153,11 +153,11 @@ $objective_config = [
             <!-- Table Header -->
             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
                 <div class="grid grid-cols-11 gap-4 items-center text-sm font-semibold text-gray-700">
-                    <div class="col-span-4">Campaña</div>
-                    <div class="col-span-2">Objetivo</div>
-                    <div class="col-span-2 text-center">Periodo</div>
-                    <div class="col-span-2 text-center">Estado</div>
-                    <div class="col-span-1 text-right">Acciones</div>
+                    <div class="col-span-4"><?php esc_html_e('Campaign', 'pw-ofertas-avanzadas'); ?></div>
+                    <div class="col-span-2"><?php esc_html_e('Objective', 'pw-ofertas-avanzadas'); ?></div>
+                    <div class="col-span-2 text-center"><?php esc_html_e('Period', 'pw-ofertas-avanzadas'); ?></div>
+                    <div class="col-span-2 text-center"><?php esc_html_e('Status', 'pw-ofertas-avanzadas'); ?></div>
+                    <div class="col-span-1 text-right"><?php esc_html_e('Actions', 'pw-ofertas-avanzadas'); ?></div>
                 </div>
             </div>
 
@@ -166,7 +166,7 @@ $objective_config = [
                 <?php foreach ($campaigns as $campaign):
 
                     $obj_config = $objective_config[$campaign->objective] ?? [
-                        "label" => "N/A",
+                        "label" => __('N/A', 'pw-ofertas-avanzadas'),
                         "color" => "gray",
                         "icon" => "📌",
                     ];
@@ -189,9 +189,9 @@ $objective_config = [
                                 </h3>
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm text-gray-500">
-                                        <?php echo $strategy_labels[
+                                        <?php echo esc_html($strategy_labels[
                                             $campaign->strategy
-                                        ] ?? esc_html($campaign->strategy); ?>
+                                        ] ?? $campaign->strategy); ?>
                                     </span>
                                     <?php if (
                                         $campaign->discount_type !==
@@ -257,7 +257,7 @@ $objective_config = [
                                         ?>
                                         <div class="mt-2">
                                             <div class="flex items-center gap-2 text-xs">
-                                                <span class="text-gray-600">Unidades vendidas:</span>
+                                                <span class="text-gray-600"><?php esc_html_e('Units sold:', 'pw-ofertas-avanzadas'); ?></span>
                                                 <span class="font-semibold text-<?php echo $color; ?>-700">
                                             <?php echo number_format(
                                                 $total_sold,
@@ -293,7 +293,7 @@ $objective_config = [
                                     <span><?php echo $obj_config[
                                         "icon"
                                     ]; ?></span>
-                                    <?php echo $obj_config["label"]; ?>
+                                    <?php echo esc_html($obj_config["label"]); ?>
                                 </span>
                             </div>
 
@@ -313,7 +313,7 @@ $objective_config = [
                                             )
                                             : "—"; ?>
                                     </div>
-                                    <div class="text-gray-400 text-xs">hasta</div>
+                                    <div class="text-gray-400 text-xs"><?php esc_html_e('through', 'pw-ofertas-avanzadas'); ?></div>
                                     <div class="text-gray-700">
                                         <?php echo $campaign->end_date
                                             ? date(
@@ -323,7 +323,7 @@ $objective_config = [
                                             : "—"; ?>
                                     </div>
                                 <?php else: ?>
-                                    <span class="text-gray-400">Permanente</span>
+                                    <span class="text-gray-400"><?php esc_html_e('Ongoing', 'pw-ofertas-avanzadas'); ?></span>
                                 <?php endif; ?>
                             </div>
 
@@ -331,11 +331,11 @@ $objective_config = [
                             <div class="col-span-2 text-center">
                                 <?php if ($is_expired): ?>
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
-                                        <span>⏱️</span> Expirada
+                                        <span>⏱️</span> <?php esc_html_e('Expired', 'pw-ofertas-avanzadas'); ?>
                                     </span>
                                 <?php elseif ($is_scheduled): ?>
                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-blue-50 text-blue-700">
-                                        <span>📅</span> Programada
+                                        <span>📅</span> <?php esc_html_e('Scheduled', 'pw-ofertas-avanzadas'); ?>
                                     </span>
                                 <?php else: ?>
                                     <label class="relative inline-flex items-center cursor-pointer group">
@@ -362,8 +362,8 @@ $objective_config = [
                                         </div>
                                         <span class="ml-3 text-sm font-medium text-gray-700 peer-checked:text-green-700">
                                             <?php echo $campaign->active
-                                                ? "Activa"
-                                                : "Pausada"; ?>
+                                                ? esc_html__('Active', 'pw-ofertas-avanzadas')
+                                                : esc_html__('Paused', 'pw-ofertas-avanzadas'); ?>
                                         </span>
                                     </label>
                                 <?php endif; ?>
@@ -382,7 +382,7 @@ $objective_config = [
                                                 data-campaign-name="<?php echo esc_attr(
                                                     $campaign->name,
                                                 ); ?>"
-                                                title="Resetear contador">
+                                                title="<?php echo esc_attr(__('Reset counter', 'pw-ofertas-avanzadas')); ?>">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                             </svg>
@@ -392,7 +392,7 @@ $objective_config = [
                                             data-campaign-id="<?php echo esc_attr(
                                                 $campaign->id,
                                             ); ?>"
-                                            title="Editar campaña">
+                                            title="<?php echo esc_attr(__('Edit campaign', 'pw-ofertas-avanzadas')); ?>">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
@@ -409,7 +409,7 @@ $objective_config = [
                                             )
                                                 ? "1"
                                                 : "0"; ?>"
-                                            title="Eliminar campaña">
+                                            title="<?php echo esc_attr(__('Delete campaign', 'pw-ofertas-avanzadas')); ?>">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -430,17 +430,15 @@ $objective_config = [
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-6 py-4 mt-6">
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-600">
-                        Mostrando <span class="font-semibold"><?php echo ($page -
-                            1) *
-                            20 +
-                            1; ?></span>
-                        a <span class="font-semibold"><?php echo min(
-                            $page * 20,
-                            $total,
-                        ); ?></span>
-                        de <span class="font-semibold"><?php echo number_format(
-                            $total,
-                        ); ?></span> campañas
+                        <?php
+                        echo esc_html(sprintf(
+                            /* translators: 1: first row number, 2: last row number, 3: total campaigns */
+                            __('Showing %1$s–%2$s of %3$s campaigns', 'pw-ofertas-avanzadas'),
+                            number_format_i18n(($page - 1) * 20 + 1),
+                            number_format_i18n(min($page * 20, $total)),
+                            number_format_i18n($total)
+                        ));
+                        ?>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -448,7 +446,7 @@ $objective_config = [
                             <a href="?page=pwoa-dashboard&paged=<?php echo $page -
                                 1; ?>"
                                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
-                                ← Anterior
+                                <?php esc_html_e('← Previous', 'pw-ofertas-avanzadas'); ?>
                             </a>
                         <?php endif; ?>
 
@@ -490,7 +488,7 @@ $objective_config = [
                             <a href="?page=pwoa-dashboard&paged=<?php echo $page +
                                 1; ?>"
                                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
-                                Siguiente →
+                                <?php esc_html_e('Next →', 'pw-ofertas-avanzadas'); ?>
                             </a>
                         <?php endif; ?>
                     </div>
@@ -501,147 +499,3 @@ $objective_config = [
     <?php endif; ?>
 
 </div>
-
-<script>
-    document.querySelectorAll('.toggle-campaign').forEach(toggle => {
-        toggle.addEventListener('change', async function() {
-            const campaignId = this.dataset.campaignId;
-            const campaignName = this.dataset.campaignName;
-            const active = this.checked ? 1 : 0;
-            const statusText = this.nextElementSibling?.nextElementSibling;
-
-            if (statusText) {
-                statusText.textContent = active ? 'Activa' : 'Pausada';
-                statusText.classList.toggle('text-green-700', active);
-                statusText.classList.toggle('text-gray-700', !active);
-            }
-
-            try {
-                const response = await fetch(ajaxurl, {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        action: 'pwoa_toggle_campaign',
-                        campaign_id: campaignId,
-                        active: active,
-                        nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!data.success) {
-                    throw new Error(data.data || 'Error desconocido');
-                }
-
-            } catch (error) {
-                this.checked = !this.checked;
-                if (statusText) {
-                    statusText.textContent = !active ? 'Activa' : 'Pausada';
-                    statusText.classList.toggle('text-green-700', !active);
-                    statusText.classList.toggle('text-gray-700', active);
-                }
-                alert('Error al actualizar campaña: ' + error.message);
-            }
-        });
-    });
-
-    document.querySelectorAll('.btn-edit').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const campaignId = this.dataset.campaignId;
-            window.location.href = '<?php echo admin_url(
-                "admin.php?page=pwoa-new-campaign",
-            ); ?>&edit=' + campaignId;
-        });
-    });
-
-    document.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const campaignId = this.dataset.campaignId;
-            const campaignName = this.dataset.campaignName;
-            const hasStats = this.dataset.hasStats === '1';
-
-            let confirmMessage = `¿Estás seguro de eliminar la campaña "${campaignName}"?`;
-
-            if (hasStats) {
-                confirmMessage += '\n\n⚠️ Esta campaña tiene estadísticas asociadas. Los datos históricos se mantendrán para reportes.';
-            }
-
-            if (!confirm(confirmMessage)) {
-                return;
-            }
-
-            this.disabled = true;
-            this.style.opacity = '0.5';
-
-            try {
-                const response = await fetch(ajaxurl, {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        action: 'pwoa_delete_campaign',
-                        campaign_id: campaignId,
-                        nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!data.success) {
-                    throw new Error(data.data || 'Error al eliminar');
-                }
-
-                const row = this.closest('.px-6');
-                row.style.transition = 'opacity 0.3s, transform 0.3s';
-                row.style.opacity = '0';
-                row.style.transform = 'translateX(20px)';
-
-                setTimeout(() => {
-                    window.location.reload();
-                }, 300);
-
-            } catch (error) {
-                this.disabled = false;
-                this.style.opacity = '1';
-                alert('Error: ' + error.message);
-            }
-        });
-    });
-
-    document.querySelectorAll('.btn-reset').forEach(btn => {
-        btn.addEventListener('click', async function() {
-            const campaignId = this.dataset.campaignId;
-            const campaignName = this.dataset.campaignName;
-
-            if (!confirm(`¿Resetear contador de unidades vendidas de "${campaignName}"?\n\nEsto pondrá en 0 el contador de todas las unidades vendidas.`)) {
-                return;
-            }
-
-            this.disabled = true;
-            this.style.opacity = '0.5';
-
-            try {
-                const response = await fetch(ajaxurl, {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        action: 'pwoa_reset_units_sold',
-                        campaign_id: campaignId,
-                        nonce: '<?php echo wp_create_nonce("pwoa_nonce"); ?>'
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!data.success) {
-                    throw new Error(data.data || 'Error al resetear');
-                }
-
-                alert('✓ ' + data.data.message);
-                window.location.reload();
-
-            } catch (error) {
-                this.disabled = false;
-                this.style.opacity = '1';
-                alert('Error: ' + error.message);
-            }
-        });
-    });
-</script>

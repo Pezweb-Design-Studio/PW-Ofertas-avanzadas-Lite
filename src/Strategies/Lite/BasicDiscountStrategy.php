@@ -28,10 +28,11 @@ class BasicDiscountStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Descuento Basico por Productos',
-            'description'   => 'Aplica un descuento simple por porcentaje o monto fijo a productos seleccionados',
+            'key'           => 'basic_discount',
+            'name'          => __('Basic product discount', 'pw-ofertas-avanzadas'),
+            'description'   => __('Apply a simple percentage or fixed amount discount to selected products.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 4,
-            'when_to_use'   => 'Promociones generales, descuentos estacionales, ofertas especificas por producto o categoria. Ideal cuando necesitas un descuento directo sin condiciones complejas.',
+            'when_to_use'   => __('General promotions, seasonal sales, product- or category-specific offers. Use when you want a straightforward discount without complex rules.', 'pw-ofertas-avanzadas'),
             'objective'     => 'basic',
         ];
     }
@@ -40,17 +41,20 @@ class BasicDiscountStrategy implements DiscountStrategy {
         return [
             [
                 'key'      => 'discount_type',
-                'label'    => 'Tipo de descuento',
+                'label'    => __('Discount type', 'pw-ofertas-avanzadas'),
                 'type'     => 'select',
-                'options'  => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo'],
+                'options'  => [
+                    'percentage' => __('Percentage', 'pw-ofertas-avanzadas'),
+                    'fixed'      => __('Fixed amount', 'pw-ofertas-avanzadas'),
+                ],
                 'required' => true,
             ],
             [
                 'key'         => 'discount_value',
-                'label'       => 'Valor del descuento',
+                'label'       => __('Discount value', 'pw-ofertas-avanzadas'),
                 'type'        => 'number',
                 'required'    => true,
-                'description' => 'Porcentaje (ej: 15) o monto fijo en tu moneda local',
+                'description' => __('Percentage (e.g. 15) or fixed amount in your store currency.', 'pw-ofertas-avanzadas'),
             ],
         ];
     }

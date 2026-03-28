@@ -56,19 +56,20 @@ class BuyXPayYStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Lleva X Paga Y',
-            'description'   => 'Descuento tipo "2x1", "3x2", etc. El cliente lleva X unidades pero paga solo Y unidades',
+            'key'           => 'buy_x_pay_y',
+            'name'          => __('Buy X pay Y', 'pw-ofertas-avanzadas'),
+            'description'   => __('“2 for 1”, “3 for 2”, etc. The customer takes X units but pays for only Y.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 5,
-            'when_to_use'   => 'Altamente efectivo para mover inventario rapido. Ideal para productos de consumo frecuente, stock excedente, o promociones agresivas. Ejemplos: 3x2 en shampoo, 2x1 en bebidas, lleva 5 paga 4 en snacks.',
+            'when_to_use'   => __('Very effective for fast-moving stock: consumables, overstocks, or aggressive promos (e.g. 3-for-2, 2-for-1, buy 5 pay 4).', 'pw-ofertas-avanzadas'),
             'objective'     => 'aov',
         ];
     }
 
     public static function getConfigFields(): array {
         return [
-            ['key' => 'buy_quantity', 'label' => 'Llevas (cantidad)', 'type' => 'number', 'required' => true, 'description' => 'Cantidad de unidades que el cliente lleva'],
-            ['key' => 'pay_quantity', 'label' => 'Pagas (cantidad)',  'type' => 'number', 'required' => true, 'description' => 'Cantidad de unidades que el cliente paga'],
-            ['key' => 'max_sets',    'label' => 'Limite de aplicaciones (opcional)', 'type' => 'number', 'required' => false, 'description' => 'Maximo de sets que se pueden aplicar. Dejalo vacio para ilimitado'],
+            ['key' => 'buy_quantity', 'label' => __('Buy quantity', 'pw-ofertas-avanzadas'), 'type' => 'number', 'required' => true, 'description' => __('Units the customer receives in each set.', 'pw-ofertas-avanzadas')],
+            ['key' => 'pay_quantity', 'label' => __('Pay quantity', 'pw-ofertas-avanzadas'),  'type' => 'number', 'required' => true, 'description' => __('Units the customer pays for in each set.', 'pw-ofertas-avanzadas')],
+            ['key' => 'max_sets',    'label' => __('Max applications (optional)', 'pw-ofertas-avanzadas'), 'type' => 'number', 'required' => false, 'description' => __('Maximum sets per order. Leave empty for unlimited.', 'pw-ofertas-avanzadas')],
         ];
     }
 }

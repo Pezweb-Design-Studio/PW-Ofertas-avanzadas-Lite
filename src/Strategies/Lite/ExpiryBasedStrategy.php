@@ -73,10 +73,11 @@ class ExpiryBasedStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Descuento por Fecha de Vencimiento',
-            'description'   => 'Aplica descuentos progresivos a productos proximos a vencer',
+            'key'           => 'expiry_based',
+            'name'          => __('Expiry-based discount', 'pw-ofertas-avanzadas'),
+            'description'   => __('Progressive discounts for products approaching their expiry date.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 5,
-            'when_to_use'   => 'Productos perecederos, alimentos, medicamentos. El descuento aumenta conforme se acerca la fecha de vencimiento.',
+            'when_to_use'   => __('Perishables, food, pharmacy. Increase the discount as the expiry date gets closer.', 'pw-ofertas-avanzadas'),
             'objective'     => 'liquidation',
         ];
     }
@@ -85,19 +86,22 @@ class ExpiryBasedStrategy implements DiscountStrategy {
         return [
             [
                 'key'      => 'discount_type',
-                'label'    => 'Tipo de descuento',
+                'label'    => __('Discount type', 'pw-ofertas-avanzadas'),
                 'type'     => 'select',
-                'options'  => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo'],
+                'options'  => [
+                    'percentage' => __('Percentage', 'pw-ofertas-avanzadas'),
+                    'fixed'      => __('Fixed amount', 'pw-ofertas-avanzadas'),
+                ],
                 'required' => true,
             ],
             [
                 'key'         => 'tiers',
-                'label'       => 'Niveles de descuento',
+                'label'       => __('Discount tiers', 'pw-ofertas-avanzadas'),
                 'type'        => 'repeater',
-                'description' => 'Define descuentos segun dias restantes hasta vencimiento. La campana se activara automaticamente para productos dentro del rango del tier mas alto. Ejemplo: si defines "30 dias -> 10%" y "15 dias -> 20%", productos con 25 dias recibiran 10%, productos con 10 dias recibiran 20%.',
+                'description' => __('Set discounts by days until expiry. Products use the best matching tier. Example: 30 days → 10%, 15 days → 20%.', 'pw-ofertas-avanzadas'),
                 'fields'      => [
-                    ['key' => 'days',     'label' => 'Dias restantes', 'type' => 'number'],
-                    ['key' => 'discount', 'label' => 'Descuento',     'type' => 'number'],
+                    ['key' => 'days',     'label' => __('Days until expiry', 'pw-ofertas-avanzadas'), 'type' => 'number'],
+                    ['key' => 'discount', 'label' => __('Discount', 'pw-ofertas-avanzadas'),     'type' => 'number'],
                 ],
             ],
         ];

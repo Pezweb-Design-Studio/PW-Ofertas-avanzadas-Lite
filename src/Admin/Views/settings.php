@@ -14,8 +14,8 @@ $current_behavior = $stacking_behavior ?? "priority_first";
 require __DIR__ . '/data/stacking-options.php';
 
 $bui->render_page([
-    "title"       => "Ajustes",
-    "description" => "Configura el comportamiento global de Ofertas Avanzadas.",
+    "title"       => __('Settings', 'pw-ofertas-avanzadas'),
+    "description" => __('Configure global behavior for PW - Ofertas Avanzadas.', 'pw-ofertas-avanzadas'),
     "content"     => function ($bui) use ($current_behavior, $stacking_options): void {
         $ui = $bui->ui();
 
@@ -23,8 +23,8 @@ $bui->render_page([
         wp_nonce_field("pwoa_nonce", "pwoa_nonce");
 
         $ui->card([
-            "title"       => "Comportamiento de Descuentos Múltiples",
-            "description" => "Define cómo se aplicarán los descuentos cuando hay múltiples campañas activas simultáneamente.",
+            "title"       => __('Multiple discount behavior', 'pw-ofertas-avanzadas'),
+            "description" => __('Define how discounts are applied when several campaigns are active at the same time.', 'pw-ofertas-avanzadas'),
             "content"     => function () use ($current_behavior, $stacking_options, $ui): void {
                 echo '<div style="display:flex;flex-direction:column;gap:12px;">';
 
@@ -47,13 +47,13 @@ $bui->render_page([
                             <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
                                 <strong style="font-size:14px;color:var(--pw-color-fg-default);"><?php echo esc_html($opt["title"]); ?></strong>
                                 <?php if ($opt["recommended"]): ?>
-                                    <?php $ui->badge(["label" => "Recomendado", "variant" => "success", "size" => "sm"]); ?>
+                                    <?php $ui->badge(["label" => __('Recommended', 'pw-ofertas-avanzadas'), "variant" => "success", "size" => "sm"]); ?>
                                 <?php endif; ?>
                             </div>
                             <p style="font-size:13px;color:var(--pw-color-fg-muted);margin:0 0 10px;"><?php echo esc_html($opt["description"]); ?></p>
                             <?php
                             $note_type = $opt["note_type"] === "warning" ? "warning" : "info";
-                            $ui->notice(["type" => $note_type, "message" => $opt["note"]]);
+                            $ui->notice(["type" => $note_type, "message" => wp_kses_post($opt["note"])]);
                             ?>
                         </div>
                     </label>
@@ -64,7 +64,7 @@ $bui->render_page([
             },
             "footer" => function () use ($ui): void {
                 $ui->button([
-                    "label"   => "Guardar Cambios",
+                    "label"   => __('Save changes', 'pw-ofertas-avanzadas'),
                     "type"    => "submit",
                     "variant" => "primary",
                 ]);
@@ -74,38 +74,3 @@ $bui->render_page([
         echo '</form>';
     },
 ]);
-?>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('pwoa-settings-form');
-    if (!form) return;
-
-    form.addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        const formData = new FormData(form);
-        formData.append('action', 'pwoa_save_settings');
-        formData.append('nonce', '<?php echo wp_create_nonce("pwoa_nonce"); ?>');
-
-        try {
-            const res  = await fetch(ajaxurl, { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                const notice = document.createElement('div');
-                notice.className = 'notice notice-success is-dismissible';
-                notice.innerHTML = '<p>' + data.data.message + '</p>';
-                const main = document.querySelector('.pw-bui-main');
-                if (main) main.insertBefore(notice, main.firstChild);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                setTimeout(() => notice.remove(), 3000);
-            } else {
-                alert('Error: ' + (data.data || 'No se pudo guardar'));
-            }
-        } catch (err) {
-            alert('Error al guardar la configuración');
-        }
-    });
-});
-</script>

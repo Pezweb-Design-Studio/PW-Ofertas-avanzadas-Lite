@@ -6,68 +6,37 @@ if (!defined("ABSPATH")) {
 use PW\BackendUI\BackendUI;
 
 // ⚡ Detectar modo edición
-$is_edit_mode = isset($_GET["edit"]) && !empty($_GET["edit"]);
+$is_edit_mode = isset($_GET['edit']) && absint(wp_unslash((string) ($_GET['edit'] ?? ''))) > 0;
 
 $objectives = [
     "basic" => [
-        "title" => "Básico",
-        "desc" =>
-            "Descuento simple por porcentaje o monto fijo a productos seleccionados",
+        "title" => __('Basic', 'pw-ofertas-avanzadas'),
+        "desc" => __('Simple percentage or fixed amount discount on selected products.', 'pw-ofertas-avanzadas'),
     ],
     "aov" => [
-        "title" => "Aumentar Valor del Carrito",
-        "desc" => "Incrementa el ticket promedio con descuentos estratégicos",
+        "title" => __('Increase cart value', 'pw-ofertas-avanzadas'),
+        "desc" => __('Raise average order value with strategic discounts.', 'pw-ofertas-avanzadas'),
     ],
     "liquidation" => [
-        "title" => "Liquidar Inventario",
-        "desc" => "Mueve stock que no rota o está próximo a vencer",
+        "title" => __('Clear inventory', 'pw-ofertas-avanzadas'),
+        "desc" => __('Move slow-moving or soon-to-expire stock.', 'pw-ofertas-avanzadas'),
     ],
     "loyalty" => [
-        "title" => "Fidelización",
-        "desc" => "Recompensa clientes recurrentes y genera lealtad",
+        "title" => __('Loyalty', 'pw-ofertas-avanzadas'),
+        "desc" => __('Reward repeat customers and build loyalty.', 'pw-ofertas-avanzadas'),
     ],
     "urgency" => [
-        "title" => "Conversión Rápida",
-        "desc" => "Genera urgencia y aumenta ventas inmediatas",
+        "title" => __('Quick conversion', 'pw-ofertas-avanzadas'),
+        "desc" => __('Create urgency and drive immediate sales.', 'pw-ofertas-avanzadas'),
     ],
 ];
 ?>
 <?php
 $bui = BackendUI::init();
 $bui->render_page([
-    "title"   => $is_edit_mode ? "Editar Campaña" : "Nueva Campaña",
+    "title"   => $is_edit_mode ? __('Edit campaign', 'pw-ofertas-avanzadas') : __('New campaign', 'pw-ofertas-avanzadas'),
     "content" => function (BackendUI $bui) use ($is_edit_mode, $objectives) {
 ?>
-
-<style>
-    .pwoa-wizard input[type="text"],
-    .pwoa-wizard input[type="number"],
-    .pwoa-wizard input[type="datetime-local"],
-    .pwoa-wizard select {
-        height: 48px !important;
-        font-size: 15px !important;
-    }
-
-    .pwoa-btn-primary {
-        background-color: #3b82f6 !important;
-        color: white !important;
-        transition: all 0.2s ease !important;
-    }
-    .pwoa-btn-primary:hover {
-        background-color: #2563eb !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
-    }
-
-    .pwoa-btn-secondary {
-        background-color: #e5e7eb !important;
-        color: #374151 !important;
-        transition: all 0.2s ease !important;
-    }
-    .pwoa-btn-secondary:hover {
-        background-color: #d1d5db !important;
-    }
-</style>
 
 <div class="pwoa-wizard max-w-5xl mx-auto p-12">
 
@@ -76,18 +45,18 @@ $bui->render_page([
         <ol class="flex items-center space-x-2 text-sm text-gray-500">
             <li>
                 <button type="button" id="crumb-objective" class="hover:text-blue-600 transition">
-                    Objetivo
+                    <?php esc_html_e('Objective', 'pw-ofertas-avanzadas'); ?>
                 </button>
             </li>
             <li id="crumb-strategy-wrapper" class="hidden">
                 <span class="mx-2">/</span>
                 <button type="button" id="crumb-strategy" class="hover:text-blue-600 transition">
-                    Estrategia
+                    <?php esc_html_e('Strategy', 'pw-ofertas-avanzadas'); ?>
                 </button>
             </li>
             <li id="crumb-config-wrapper" class="hidden">
                 <span class="mx-2">/</span>
-                <span id="crumb-config" class="text-gray-900 font-medium">Configuración</span>
+                <span id="crumb-config" class="text-gray-900 font-medium"><?php esc_html_e('Configuration', 'pw-ofertas-avanzadas'); ?></span>
             </li>
         </ol>
     </nav>
@@ -96,7 +65,7 @@ $bui->render_page([
     <div id="step-objective" class="<?php echo $is_edit_mode
         ? "hidden"
         : ""; ?>">
-        <h1 class="text-4xl font-bold mb-12">¿Qué quieres lograr?</h1>
+        <h1 class="text-4xl font-bold mb-12"><?php esc_html_e('What do you want to achieve?', 'pw-ofertas-avanzadas'); ?></h1>
 
         <div class="grid grid-cols-2 gap-8">
             <?php foreach ($objectives as $key => $obj): ?>
@@ -119,7 +88,7 @@ $bui->render_page([
     <!-- Step 2: Estrategia -->
     <div id="step-strategy" class="hidden">
         <h1 class="text-4xl font-bold mb-3" id="selected-objective-title"></h1>
-        <p class="text-lg text-gray-500 mb-12">Selecciona una estrategia</p>
+        <p class="text-lg text-gray-500 mb-12"><?php esc_html_e('Choose a strategy', 'pw-ofertas-avanzadas'); ?></p>
 
         <div id="strategies-list"></div>
     </div>
@@ -127,27 +96,27 @@ $bui->render_page([
     <!-- Step 3: Configuración -->
     <div id="step-config" class="<?php echo $is_edit_mode ? "" : "hidden"; ?>">
         <h1 class="text-4xl font-bold mb-3" id="selected-strategy-title"></h1>
-        <p class="text-lg text-gray-500 mb-12">Configura los parámetros de tu campaña</p>
+        <p class="text-lg text-gray-500 mb-12"><?php esc_html_e('Configure your campaign settings', 'pw-ofertas-avanzadas'); ?></p>
 
         <form id="campaign-form" class="bg-white p-8 rounded-lg shadow space-y-6">
 
             <div>
-                <label class="block text-sm font-bold mb-2">Nombre de la campaña</label>
+                <label class="block text-sm font-bold mb-2"><?php esc_html_e('Campaign name', 'pw-ofertas-avanzadas'); ?></label>
                 <input type="text" name="name" id="form-name" required
                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                       placeholder="Ej: Black Friday 2024 - Descuento por volumen">
+                       placeholder="<?php echo esc_attr(__('e.g. Black Friday 2024 — volume discount', 'pw-ofertas-avanzadas')); ?>">
             </div>
 
             <div id="dynamic-fields"></div>
 
             <div class="grid grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-bold mb-2">Fecha de inicio (opcional)</label>
+                    <label class="block text-sm font-bold mb-2"><?php esc_html_e('Start date (optional)', 'pw-ofertas-avanzadas'); ?></label>
                     <input type="datetime-local" name="start_date" id="form-start-date"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold mb-2">Fecha de fin (opcional)</label>
+                    <label class="block text-sm font-bold mb-2"><?php esc_html_e('End date (optional)', 'pw-ofertas-avanzadas'); ?></label>
                     <input type="datetime-local" name="end_date" id="form-end-date"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                 </div>
@@ -155,44 +124,51 @@ $bui->render_page([
 
             <div>
                 <label class="block text-sm font-bold mb-2">
-                    Modo de aplicación
+                    <?php esc_html_e('Application mode', 'pw-ofertas-avanzadas'); ?>
                     <a href="#" id="stacking-help" class="ml-2 text-blue-600 hover:text-blue-800 text-xs font-normal">
-                        ¿Qué significa esto?
+                        <?php esc_html_e('What does this mean?', 'pw-ofertas-avanzadas'); ?>
                     </a>
                 </label>
                 <select name="stacking_mode" id="form-stacking-mode" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                    <option value="priority">Prioridad (mejor descuento)</option>
-                    <option value="stack">Apilar descuentos</option>
+                    <option value="priority"><?php esc_html_e('Priority (best discount wins)', 'pw-ofertas-avanzadas'); ?></option>
+                    <option value="stack"><?php esc_html_e('Stack discounts', 'pw-ofertas-avanzadas'); ?></option>
                 </select>
-                <p class="text-sm text-gray-500 mt-1">Si hay múltiples campañas activas, ¿aplicar solo la mejor o sumarlas?</p>
+                <p class="text-sm text-gray-500 mt-1"><?php esc_html_e('When several campaigns are active, apply only the best one or combine them?', 'pw-ofertas-avanzadas'); ?></p>
 
                 <!-- Tooltip de ayuda -->
                 <div id="stacking-tooltip" class="hidden mt-3 p-4 bg-blue-50 border-l-4 border-blue-400 rounded text-sm">
-                    <p class="font-bold text-blue-900 mb-2">Explicación:</p>
+                    <p class="font-bold text-blue-900 mb-2"><?php esc_html_e('Explanation:', 'pw-ofertas-avanzadas'); ?></p>
                     <ul class="space-y-2 text-blue-800">
-                        <li><strong>Prioridad:</strong> Compite con otras campañas prioritarias. Solo se aplica la de mayor descuento.</li>
-                        <li><strong>Apilar:</strong> Se suma con otras campañas apilables disponibles.</li>
+                        <li><strong><?php esc_html_e('Priority:', 'pw-ofertas-avanzadas'); ?></strong> <?php esc_html_e('Competes with other priority campaigns. Only the highest discount applies.', 'pw-ofertas-avanzadas'); ?></li>
+                        <li><strong><?php esc_html_e('Stack:', 'pw-ofertas-avanzadas'); ?></strong> <?php esc_html_e('Adds together with other stackable campaigns when available.', 'pw-ofertas-avanzadas'); ?></li>
                     </ul>
                     <p class="mt-3 text-blue-900">
-                        <strong>Nota:</strong> El comportamiento exacto depende de la configuración global en
-                        <a href="<?php echo admin_url(
-                            "admin.php?page=pwoa-settings",
-                        ); ?>" class="underline font-bold">Ajustes</a>.
+                        <strong><?php esc_html_e('Note:', 'pw-ofertas-avanzadas'); ?></strong>
+                        <?php
+                        $pwoa_settings_url = admin_url('admin.php?page=pwoa-settings');
+                        echo wp_kses_post(
+                            sprintf(
+                                /* translators: %s: URL to Settings screen */
+                                __('The exact behavior depends on the global configuration in <a href="%s" class="underline font-bold">Settings</a>.', 'pw-ofertas-avanzadas'),
+                                esc_url($pwoa_settings_url)
+                            )
+                        );
+                        ?>
                     </p>
                 </div>
             </div>
 
             <!-- FILTRADO DE PRODUCTOS -->
             <div id="product-filters-section" class="border-t pt-6 mt-6">
-                <h3 class="text-lg font-bold mb-4">Filtrar productos (opcional)</h3>
-                <p class="text-sm text-gray-600 mb-6">Si no configuras filtros, el descuento se aplicará a todos los productos del carrito</p>
+                <h3 class="text-lg font-bold mb-4"><?php esc_html_e('Filter products (optional)', 'pw-ofertas-avanzadas'); ?></h3>
+                <p class="text-sm text-gray-600 mb-6"><?php esc_html_e('If you set no filters, the discount applies to all products in the cart.', 'pw-ofertas-avanzadas'); ?></p>
 
                 <!-- Búsqueda de productos -->
                 <div class="mb-4">
-                    <label class="block text-sm font-bold mb-2">Productos específicos</label>
+                    <label class="block text-sm font-bold mb-2"><?php esc_html_e('Specific products', 'pw-ofertas-avanzadas'); ?></label>
                     <input type="text"
                            id="product-search"
-                           placeholder="Buscar por nombre, SKU o ID..."
+                           placeholder="<?php echo esc_attr(__('Search by name, SKU or ID…', 'pw-ofertas-avanzadas')); ?>"
                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                     <div id="product-search-results" class="mt-2 max-h-48 overflow-y-auto border rounded-lg hidden"></div>
                     <div id="selected-products" class="mt-3 flex flex-wrap gap-2"></div>
@@ -201,7 +177,7 @@ $bui->render_page([
 
                 <!-- Categorías -->
                 <div class="mb-4">
-                    <label class="block text-sm font-bold mb-2">Categorías</label>
+                    <label class="block text-sm font-bold mb-2"><?php esc_html_e('Categories', 'pw-ofertas-avanzadas'); ?></label>
                     <select id="form-categories" multiple class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" style="height: 120px;">
                         <?php
                         $categories = get_terms([
@@ -217,13 +193,13 @@ $bui->render_page([
                         }
                         ?>
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">Mantén presionado Ctrl/Cmd para seleccionar múltiples</p>
+                    <p class="text-xs text-gray-500 mt-1"><?php esc_html_e('Hold Ctrl/Cmd to select multiple.', 'pw-ofertas-avanzadas'); ?></p>
                 </div>
 
                 <!-- Rango de precio -->
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-bold mb-2">Precio mínimo</label>
+                        <label class="block text-sm font-bold mb-2"><?php esc_html_e('Minimum price', 'pw-ofertas-avanzadas'); ?></label>
                         <input type="number"
                                id="form-min-price"
                                placeholder="0"
@@ -231,7 +207,7 @@ $bui->render_page([
                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold mb-2">Precio máximo</label>
+                        <label class="block text-sm font-bold mb-2"><?php esc_html_e('Maximum price', 'pw-ofertas-avanzadas'); ?></label>
                         <input type="number"
                                id="form-max-price"
                                placeholder="999999"
@@ -243,14 +219,14 @@ $bui->render_page([
                 <!-- Validación de productos -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p class="text-sm text-blue-900">
-                        <span class="font-bold">Productos que cumplen criterios:</span>
+                        <span class="font-bold"><?php esc_html_e('Products matching criteria:', 'pw-ofertas-avanzadas'); ?></span>
                         <span id="matching-count" class="ml-2 font-mono">-</span>
                     </p>
                     <div class="mt-3">
                         <button type="button"
                                 id="btn-show-products"
                                 class="text-sm bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                            Ver productos filtrados
+                            <?php esc_html_e('View filtered products', 'pw-ofertas-avanzadas'); ?>
                         </button>
                     </div>
                 </div>
@@ -264,11 +240,11 @@ $bui->render_page([
             <div class="flex gap-4 pt-4">
                 <button type="submit" id="submit-btn"
                         class="pwoa-btn-primary px-8 py-3 rounded-lg font-bold">
-                    Crear Campaña
+                    <?php echo $is_edit_mode ? esc_html__('Update campaign', 'pw-ofertas-avanzadas') : esc_html__('Create campaign', 'pw-ofertas-avanzadas'); ?>
                 </button>
                 <button type="button" id="btn-cancel"
                         class="pwoa-btn-secondary px-8 py-3 rounded-lg font-semibold">
-                    Cancelar
+                    <?php esc_html_e('Cancel', 'pw-ofertas-avanzadas'); ?>
                 </button>
             </div>
 
@@ -281,7 +257,7 @@ $bui->render_page([
         <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] flex flex-col">
             <!-- Header -->
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 class="text-xl font-bold text-gray-900">Productos que coinciden con el filtro</h3>
+                <h3 class="text-xl font-bold text-gray-900"><?php esc_html_e('Products matching the filter', 'pw-ofertas-avanzadas'); ?></h3>
                 <button type="button" id="close-modal" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">×</button>
             </div>
 
@@ -295,10 +271,12 @@ $bui->render_page([
             <!-- Footer -->
             <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
                 <p class="text-sm text-gray-600">
-                    Total: <span id="modal-count" class="font-bold text-gray-900">0</span> productos
+                    <?php esc_html_e('Total:', 'pw-ofertas-avanzadas'); ?>
+                    <span id="modal-count" class="font-bold text-gray-900">0</span>
+                    <?php esc_html_e('products', 'pw-ofertas-avanzadas'); ?>
                 </p>
                 <button type="button" id="close-modal-btn" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
-                    Cerrar
+                    <?php esc_html_e('Close', 'pw-ofertas-avanzadas'); ?>
                 </button>
             </div>
         </div>

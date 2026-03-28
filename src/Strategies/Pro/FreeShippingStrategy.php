@@ -25,10 +25,11 @@ class FreeShippingStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Envio Gratis sobre Monto Minimo',
-            'description'   => 'Elimina costo de envio cuando el carrito supera un monto especifico',
+            'key'           => 'free_shipping',
+            'name'          => __('Free shipping threshold', 'pw-ofertas-avanzadas'),
+            'description'   => __('Waive shipping when the cart reaches a minimum subtotal.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 5,
-            'when_to_use'   => 'Estrategia permanente altamente efectiva. Incrementa ticket promedio 20-35%. Ideal para todo tipo de e-commerce.',
+            'when_to_use'   => __('A strong always-on tactic; often lifts average order value by 20–35% across many stores.', 'pw-ofertas-avanzadas'),
             'objective'     => 'aov',
         ];
     }
@@ -37,10 +38,10 @@ class FreeShippingStrategy implements DiscountStrategy {
         return [
             [
                 'key'         => 'min_amount',
-                'label'       => 'Monto minimo para envio gratis',
+                'label'       => __('Minimum subtotal for free shipping', 'pw-ofertas-avanzadas'),
                 'type'        => 'number',
                 'required'    => true,
-                'description' => 'Monto en tu moneda local',
+                'description' => __('Amount in your store currency.', 'pw-ofertas-avanzadas'),
             ],
         ];
     }

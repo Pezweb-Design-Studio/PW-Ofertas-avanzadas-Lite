@@ -16,11 +16,11 @@ $tab       = sanitize_key($_GET["tab"] ?? "generador");
 $bui = BackendUI::init();
 
 $bui->render_page([
-    "title"     => "Shortcodes",
+    "title"     => __('Shortcodes', 'pw-ofertas-avanzadas'),
     "tabs"      => [
-        ["slug" => "generador",  "label" => "Generador",   "href" => add_query_arg("tab", "generador",  $base_url), "active" => $tab === "generador"],
-        ["slug" => "referencia", "label" => "Referencia",  "href" => add_query_arg("tab", "referencia", $base_url), "active" => $tab === "referencia"],
-        ["slug" => "ejemplos",   "label" => "Ejemplos",    "href" => add_query_arg("tab", "ejemplos",   $base_url), "active" => $tab === "ejemplos"],
+        ["slug" => "generador",  "label" => __('Generator', 'pw-ofertas-avanzadas'),   "href" => add_query_arg("tab", "generador",  $base_url), "active" => $tab === "generador"],
+        ["slug" => "referencia", "label" => __('Reference', 'pw-ofertas-avanzadas'),  "href" => add_query_arg("tab", "referencia", $base_url), "active" => $tab === "referencia"],
+        ["slug" => "ejemplos",   "label" => __('Examples', 'pw-ofertas-avanzadas'),    "href" => add_query_arg("tab", "ejemplos",   $base_url), "active" => $tab === "ejemplos"],
     ],
     "tabs_mode" => "url",
     "content"   => function ($bui) use ($campaigns, $tab, $base_url): void {
@@ -29,7 +29,13 @@ $bui->render_page([
         // ── Intro notice ──────────────────────────────────────────────────────
         $ui->notice([
             "type"    => "info",
-            "message" => 'Shortcode principal: <code>[pwoa_productos_oferta]</code> — Insértalo en cualquier página, entrada o widget de texto.',
+            "message" => wp_kses_post(
+                sprintf(
+                    /* translators: %s: shortcode tag */
+                    __('Main shortcode: <code>%s</code> — Place it on any page, post, or text widget.', 'pw-ofertas-avanzadas'),
+                    '[pwoa_productos_oferta]'
+                )
+            ),
         ]);
 
         echo '<div style="margin-bottom:20px;"></div>';
@@ -38,8 +44,8 @@ $bui->render_page([
 
             // ── Generator ────────────────────────────────────────────────────
             $ui->card([
-                "title"       => "Generador de shortcode",
-                "description" => "Configurá los parámetros y copiá el resultado.",
+                "title"       => __('Shortcode generator', 'pw-ofertas-avanzadas'),
+                "description" => __('Set the parameters and copy the result.', 'pw-ofertas-avanzadas'),
                 "content"     => function () use ($campaigns): void {
                     echo '<div id="pwoa-generator" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">';
 
@@ -48,9 +54,9 @@ $bui->render_page([
 
                     if (!empty($campaigns)) {
                         echo '<div>';
-                        echo '<label style="display:block;font-size:12px;font-weight:600;color:var(--pw-color-fg-default);margin-bottom:6px;">Campaña específica <span style="color:var(--pw-color-fg-muted);font-weight:400;">(opcional)</span></label>';
+                        echo '<label style="display:block;font-size:12px;font-weight:600;color:var(--pw-color-fg-default);margin-bottom:6px;">' . esc_html__('Specific campaign', 'pw-ofertas-avanzadas') . ' <span style="color:var(--pw-color-fg-muted);font-weight:400;">(' . esc_html__('optional', 'pw-ofertas-avanzadas') . ')</span></label>';
                         echo '<select id="gen-campaign_id" style="width:100%;border:1px solid var(--pw-color-border-default);border-radius:4px;padding:8px 10px;background:var(--pw-color-bg-canvas);color:var(--pw-color-fg-default);font-size:13px;">';
-                        echo '<option value="">— Todas las campañas activas —</option>';
+                        echo '<option value="">' . esc_html__('— All active campaigns —', 'pw-ofertas-avanzadas') . '</option>';
                         foreach ($campaigns as $c) {
                             echo '<option value="' . esc_attr($c->id) . '">' . esc_html($c->name) . ' (ID: ' . (int) $c->id . ')</option>';
                         }
@@ -59,19 +65,33 @@ $bui->render_page([
                     }
 
                     $fields = [
-                        ["gen-limit",    "number", "Cantidad de productos", "12",   "1",  "100"],
-                        ["gen-columns",  "select", "Columnas",              "4",    null, null],
-                        ["gen-orderby",  "select", "Ordenar por",           "date", null, null],
-                        ["gen-order",    "select", "Orden",                 "DESC", null, null],
-                        ["gen-category", "text",   "Categoría (slug)",      "",     null, null],
-                        ["gen-min_price","number", "Precio mínimo",         "",     null, null],
-                        ["gen-max_price","number", "Precio máximo",         "",     null, null],
+                        ["gen-limit",    "number", __('Number of products', 'pw-ofertas-avanzadas'), "12",   "1",  "100"],
+                        ["gen-columns",  "select", __('Columns', 'pw-ofertas-avanzadas'),              "4",    null, null],
+                        ["gen-orderby",  "select", __('Order by', 'pw-ofertas-avanzadas'),           "date", null, null],
+                        ["gen-order",    "select", __('Order', 'pw-ofertas-avanzadas'),                 "DESC", null, null],
+                        ["gen-category", "text",   __('Category (slug)', 'pw-ofertas-avanzadas'),      "",     null, null],
+                        ["gen-min_price","number", __('Minimum price', 'pw-ofertas-avanzadas'),         "",     null, null],
+                        ["gen-max_price","number", __('Maximum price', 'pw-ofertas-avanzadas'),         "",     null, null],
                     ];
 
                     $select_options = [
-                        "gen-columns" => ["2" => "2", "3" => "3", "4" => "4 (default)", "5" => "5", "6" => "6"],
-                        "gen-orderby" => ["date" => "Fecha", "price" => "Precio", "name" => "Nombre", "rand" => "Aleatorio"],
-                        "gen-order"   => ["DESC" => "Descendente", "ASC" => "Ascendente"],
+                        "gen-columns" => [
+                            "2" => "2",
+                            "3" => "3",
+                            "4" => __('4 (default)', 'pw-ofertas-avanzadas'),
+                            "5" => "5",
+                            "6" => "6",
+                        ],
+                        "gen-orderby" => [
+                            "date"  => __('Date', 'pw-ofertas-avanzadas'),
+                            "price" => __('Price', 'pw-ofertas-avanzadas'),
+                            "name"  => __('Name', 'pw-ofertas-avanzadas'),
+                            "rand"  => __('Random', 'pw-ofertas-avanzadas'),
+                        ],
+                        "gen-order"   => [
+                            "DESC" => __('Descending', 'pw-ofertas-avanzadas'),
+                            "ASC"  => __('Ascending', 'pw-ofertas-avanzadas'),
+                        ],
                     ];
 
                     $input_style = "width:100%;border:1px solid var(--pw-color-border-default);border-radius:4px;padding:8px 10px;"
@@ -96,9 +116,9 @@ $bui->render_page([
 
                     // Checkboxes
                     $checks = [
-                        ["gen-show_badge",         true,  "Mostrar badge de descuento"],
-                        ["gen-show_campaign_name", false, "Mostrar nombre de campaña"],
-                        ["gen-paginate",           false, "Activar paginación"],
+                        ["gen-show_badge",         true,  __('Show discount badge', 'pw-ofertas-avanzadas')],
+                        ["gen-show_campaign_name", false, __('Show campaign name', 'pw-ofertas-avanzadas')],
+                        ["gen-paginate",           false, __('Enable pagination', 'pw-ofertas-avanzadas')],
                     ];
                     echo '<div style="display:flex;flex-direction:column;gap:8px;">';
                     foreach ($checks as [$id, $checked, $label]) {
@@ -109,7 +129,7 @@ $bui->render_page([
                     echo '</div>';
 
                     echo '<div id="gen-per_page-wrap" style="display:none;">';
-                    echo '<label for="gen-per_page" style="' . $label_style . '">Productos por página</label>';
+                    echo '<label for="gen-per_page" style="' . $label_style . '">' . esc_html__('Products per page', 'pw-ofertas-avanzadas') . '</label>';
                     echo '<input type="number" id="gen-per_page" value="12" min="1" max="100" style="' . $input_style . '">';
                     echo '</div>';
 
@@ -117,13 +137,13 @@ $bui->render_page([
 
                     // Output
                     echo '<div style="display:flex;flex-direction:column;">';
-                    echo '<label style="' . $label_style . '">Shortcode generado</label>';
+                    echo '<label style="' . $label_style . '">' . esc_html__('Generated shortcode', 'pw-ofertas-avanzadas') . '</label>';
                     echo '<div style="background:#030712;border-radius:6px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;min-height:160px;">';
                     echo '<code id="gen-output" style="color:#fff;font-family:monospace;font-size:13px;word-break:break-all;white-space:pre-wrap;">[pwoa_productos_oferta]</code>';
                     echo '<div style="margin-top:16px;text-align:right;">';
                     echo '<button id="gen-copy-btn" type="button"
                         style="padding:8px 16px;background:var(--pw-color-accent-emphasis);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;">';
-                    echo '<span id="gen-copy-label">Copiar</span></button>';
+                    echo '<span id="gen-copy-label">' . esc_html__('Copy', 'pw-ofertas-avanzadas') . '</span></button>';
                     echo '</div>';
                     echo '</div>';
                     echo '</div>';
@@ -137,37 +157,37 @@ $bui->render_page([
             // ── Parameters reference ──────────────────────────────────────────
             $sections = [
                 [
-                    "title"  => "Filtros de campaña",
+                    "title"  => __('Campaign filters', 'pw-ofertas-avanzadas'),
                     "params" => [
-                        ["campaign_id", "número", "—",   "Filtra por ID de campaña. Si se omite, usa todas las campañas activas."],
-                        ["strategy",    "texto",  "—",   "Filtra por tipo de estrategia: basic_discount, bulk_discount, buy_x_pay_y, etc."],
+                        ["campaign_id", __('number', 'pw-ofertas-avanzadas'), "—",   __('Filter by campaign ID. If omitted, all active campaigns are used.', 'pw-ofertas-avanzadas')],
+                        ["strategy",    __('text', 'pw-ofertas-avanzadas'),  "—",   __('Filter by strategy type: basic_discount, bulk_discount, buy_x_pay_y, etc.', 'pw-ofertas-avanzadas')],
                     ],
                 ],
                 [
-                    "title"  => "Filtros de producto",
+                    "title"  => __('Product filters', 'pw-ofertas-avanzadas'),
                     "params" => [
-                        ["category",  "texto",  "—", "Slug(s) de categoría separados por coma."],
-                        ["tag",       "texto",  "—", "Slug(s) de etiqueta separados por coma."],
-                        ["min_price", "número", "—", "Precio mínimo del producto."],
-                        ["max_price", "número", "—", "Precio máximo del producto."],
+                        ["category",  __('text', 'pw-ofertas-avanzadas'),  "—", __('Category slug(s), comma-separated.', 'pw-ofertas-avanzadas')],
+                        ["tag",       __('text', 'pw-ofertas-avanzadas'),  "—", __('Tag slug(s), comma-separated.', 'pw-ofertas-avanzadas')],
+                        ["min_price", __('number', 'pw-ofertas-avanzadas'), "—", __('Minimum product price.', 'pw-ofertas-avanzadas')],
+                        ["max_price", __('number', 'pw-ofertas-avanzadas'), "—", __('Maximum product price.', 'pw-ofertas-avanzadas')],
                     ],
                 ],
                 [
-                    "title"  => "Visualización",
+                    "title"  => __('Display', 'pw-ofertas-avanzadas'),
                     "params" => [
-                        ["limit",              "número",   "12",    "Cantidad total de productos (sin paginación)."],
-                        ["columns",            "número",   "4",     "Columnas de la grilla (1–6)."],
-                        ["orderby",            "texto",    "date",  "Orden: date, price, name, rand."],
-                        ["order",              "texto",    "DESC",  "ASC o DESC."],
-                        ["show_badge",         "booleano", "true",  "Muestra el badge de descuento sobre la imagen."],
-                        ["show_campaign_name", "booleano", "false", "Muestra el nombre de la campaña bajo el título."],
+                        ["limit",              __('number', 'pw-ofertas-avanzadas'),   "12",    __('Total products when pagination is off.', 'pw-ofertas-avanzadas')],
+                        ["columns",            __('number', 'pw-ofertas-avanzadas'),   "4",     __('Grid columns (1–6).', 'pw-ofertas-avanzadas')],
+                        ["orderby",            __('text', 'pw-ofertas-avanzadas'),    "date",  __('Sort by: date, price, name, rand.', 'pw-ofertas-avanzadas')],
+                        ["order",              __('text', 'pw-ofertas-avanzadas'),    "DESC",  __('ASC or DESC.', 'pw-ofertas-avanzadas')],
+                        ["show_badge",         __('boolean', 'pw-ofertas-avanzadas'), "true",  __('Show the discount badge on the image.', 'pw-ofertas-avanzadas')],
+                        ["show_campaign_name", __('boolean', 'pw-ofertas-avanzadas'), "false", __('Show the campaign name under the title.', 'pw-ofertas-avanzadas')],
                     ],
                 ],
                 [
-                    "title"  => "Paginación",
+                    "title"  => __('Pagination', 'pw-ofertas-avanzadas'),
                     "params" => [
-                        ["paginate", "booleano", "false", "Activa la paginación. Usa per_page en lugar de limit."],
-                        ["per_page", "número",   "12",    "Productos por página cuando paginate=\"true\"."],
+                        ["paginate", __('boolean', 'pw-ofertas-avanzadas'), "false", __('Enable pagination. Use per_page instead of limit.', 'pw-ofertas-avanzadas')],
+                        ["per_page", __('number', 'pw-ofertas-avanzadas'),   "12",    __('Products per page when paginate="true".', 'pw-ofertas-avanzadas')],
                     ],
                 ],
             ];
@@ -177,7 +197,7 @@ $bui->render_page([
                     "title"   => $section["title"],
                     "content" => function () use ($section): void {
                         echo '<table class="wp-list-table widefat" style="width:100%;">';
-                        echo '<thead><tr><th>Parámetro</th><th>Tipo</th><th>Default</th><th>Descripción</th></tr></thead><tbody>';
+                        echo '<thead><tr><th>' . esc_html__('Parameter', 'pw-ofertas-avanzadas') . '</th><th>' . esc_html__('Type', 'pw-ofertas-avanzadas') . '</th><th>' . esc_html__('Default', 'pw-ofertas-avanzadas') . '</th><th>' . esc_html__('Description', 'pw-ofertas-avanzadas') . '</th></tr></thead><tbody>';
                         foreach ($section["params"] as $p) {
                             echo '<tr>';
                             echo '<td><code>' . esc_html($p[0]) . '</code></td>';
@@ -196,17 +216,17 @@ $bui->render_page([
 
             // ── Examples ──────────────────────────────────────────────────────
             $examples = [
-                ["Todos los productos en oferta",                                         "[pwoa_productos_oferta]"],
-                ["Grilla de 3 columnas con 6 productos",                                  "[pwoa_productos_oferta limit=\"6\" columns=\"3\"]"],
-                ["Categoría específica, precio ascendente",                               "[pwoa_productos_oferta category=\"ropa\" orderby=\"price\" order=\"ASC\" columns=\"4\"]"],
-                ["Con nombre de campaña visible",                                          "[pwoa_productos_oferta show_campaign_name=\"true\" limit=\"8\" columns=\"4\"]"],
-                ["Con paginación, 9 productos por página",                                 "[pwoa_productos_oferta paginate=\"true\" per_page=\"9\" columns=\"3\"]"],
-                ["Campaña específica por ID",                                              "[pwoa_productos_oferta campaign_id=\"1\" columns=\"4\" show_badge=\"true\"]"],
-                ["Por rango de precio con etiqueta de campaña",                           "[pwoa_productos_oferta min_price=\"1000\" max_price=\"10000\" show_campaign_name=\"true\" columns=\"3\"]"],
+                [__('All products on sale', 'pw-ofertas-avanzadas'),                                         "[pwoa_productos_oferta]"],
+                [__('3-column grid with 6 products', 'pw-ofertas-avanzadas'),                                  "[pwoa_productos_oferta limit=\"6\" columns=\"3\"]"],
+                [__('Specific category, price ascending', 'pw-ofertas-avanzadas'),                               "[pwoa_productos_oferta category=\"ropa\" orderby=\"price\" order=\"ASC\" columns=\"4\"]"],
+                [__('Campaign name visible', 'pw-ofertas-avanzadas'),                                          "[pwoa_productos_oferta show_campaign_name=\"true\" limit=\"8\" columns=\"4\"]"],
+                [__('Pagination, 9 products per page', 'pw-ofertas-avanzadas'),                                 "[pwoa_productos_oferta paginate=\"true\" per_page=\"9\" columns=\"3\"]"],
+                [__('Specific campaign by ID', 'pw-ofertas-avanzadas'),                                              "[pwoa_productos_oferta campaign_id=\"1\" columns=\"4\" show_badge=\"true\"]"],
+                [__('Price range with campaign label', 'pw-ofertas-avanzadas'),                           "[pwoa_productos_oferta min_price=\"1000\" max_price=\"10000\" show_campaign_name=\"true\" columns=\"3\"]"],
             ];
 
             $ui->card([
-                "title"   => "Ejemplos de uso",
+                "title"   => __('Usage examples', 'pw-ofertas-avanzadas'),
                 "content" => function () use ($examples): void {
                     echo '<div style="display:flex;flex-direction:column;gap:12px;">';
                     foreach ($examples as $ex) {
@@ -214,7 +234,7 @@ $bui->render_page([
                         echo '<div style="padding:10px 14px;background:var(--pw-color-bg-subtle);display:flex;justify-content:space-between;align-items:center;">';
                         echo '<span style="font-size:13px;font-weight:600;color:var(--pw-color-fg-default);">' . esc_html($ex[0]) . '</span>';
                         echo '<button class="pwoa-copy-btn" type="button" data-code="' . esc_attr($ex[1]) . '"
-                            style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px;background:var(--pw-color-bg-canvas);border:1px solid var(--pw-color-border-default);border-radius:3px;cursor:pointer;color:var(--pw-color-fg-default);">Copiar</button>';
+                            style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px;background:var(--pw-color-bg-canvas);border:1px solid var(--pw-color-border-default);border-radius:3px;cursor:pointer;color:var(--pw-color-fg-default);">' . esc_html__('Copy', 'pw-ofertas-avanzadas') . '</button>';
                         echo '</div>';
                         echo '<div style="padding:10px 14px;background:#030712;">';
                         echo '<code style="color:#fff;font-family:monospace;font-size:13px;">' . esc_html($ex[1]) . '</code>';
@@ -227,105 +247,3 @@ $bui->render_page([
         }
     },
 ]);
-?>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    // ── Copy examples ──────────────────────────────────────────────────────
-    document.querySelectorAll('.pwoa-copy-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            navigator.clipboard.writeText(btn.dataset.code).then(function () {
-                const orig = btn.textContent;
-                btn.textContent = '¡Copiado!';
-                btn.style.background = 'var(--pw-color-success-subtle)';
-                btn.style.borderColor = 'var(--pw-color-success-muted)';
-                btn.style.color = 'var(--pw-color-success-fg)';
-                setTimeout(function () {
-                    btn.textContent = orig;
-                    btn.style.background = '';
-                    btn.style.borderColor = '';
-                    btn.style.color = '';
-                }, 1500);
-            });
-        });
-    });
-
-    // ── Generator ──────────────────────────────────────────────────────────
-    var output      = document.getElementById('gen-output');
-    var copyBtn     = document.getElementById('gen-copy-btn');
-    var copyLbl     = document.getElementById('gen-copy-label');
-    var paginateChk = document.getElementById('gen-paginate');
-    var perPageWrap = document.getElementById('gen-per_page-wrap');
-
-    if (!output) return;
-
-    var defaults = { limit: '12', columns: '4', orderby: 'date', order: 'DESC', show_badge: true, show_campaign_name: false, paginate: false, per_page: '12' };
-
-    function getVal(id) {
-        var el = document.getElementById(id);
-        if (!el) return null;
-        return el.type === 'checkbox' ? el.checked : el.value.trim();
-    }
-
-    function build() {
-        var sc = '[pwoa_productos_oferta';
-        var campaign_id = getVal('gen-campaign_id');
-        if (campaign_id) sc += ' campaign_id="' + campaign_id + '"';
-        var limit = getVal('gen-limit');
-        if (limit && limit !== defaults.limit) sc += ' limit="' + limit + '"';
-        var columns = getVal('gen-columns');
-        if (columns && columns !== defaults.columns) sc += ' columns="' + columns + '"';
-        var orderby = getVal('gen-orderby');
-        if (orderby && orderby !== defaults.orderby) sc += ' orderby="' + orderby + '"';
-        var order = getVal('gen-order');
-        if (order && order !== defaults.order) sc += ' order="' + order + '"';
-        var category = getVal('gen-category');
-        if (category) sc += ' category="' + category + '"';
-        var min_p = getVal('gen-min_price');
-        if (min_p) sc += ' min_price="' + min_p + '"';
-        var max_p = getVal('gen-max_price');
-        if (max_p) sc += ' max_price="' + max_p + '"';
-        if (!getVal('gen-show_badge')) sc += ' show_badge="false"';
-        if (getVal('gen-show_campaign_name')) sc += ' show_campaign_name="true"';
-        if (getVal('gen-paginate')) {
-            sc += ' paginate="true"';
-            var pp = getVal('gen-per_page');
-            if (pp && pp !== defaults.per_page) sc += ' per_page="' + pp + '"';
-        }
-        return sc + ']';
-    }
-
-    function refresh() { if (output) output.textContent = build(); }
-
-    if (paginateChk) {
-        paginateChk.addEventListener('change', function () {
-            if (perPageWrap) perPageWrap.style.display = paginateChk.checked ? 'block' : 'none';
-            refresh();
-        });
-    }
-
-    var gen = document.getElementById('pwoa-generator');
-    if (gen) {
-        gen.querySelectorAll('input, select').forEach(function (el) {
-            el.addEventListener('change', refresh);
-            el.addEventListener('input', refresh);
-        });
-    }
-
-    if (copyBtn) {
-        copyBtn.addEventListener('click', function () {
-            navigator.clipboard.writeText(output.textContent).then(function () {
-                copyLbl.textContent = '¡Copiado!';
-                copyBtn.style.background = 'var(--pw-color-success-emphasis)';
-                setTimeout(function () {
-                    copyLbl.textContent = 'Copiar';
-                    copyBtn.style.background = '';
-                }, 1500);
-            });
-        });
-    }
-
-    refresh();
-});
-</script>

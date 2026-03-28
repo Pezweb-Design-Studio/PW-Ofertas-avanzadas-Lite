@@ -4,6 +4,7 @@ namespace PW\OfertasAvanzadas\Core;
 defined('ABSPATH') || exit;
 
 use PW\OfertasAvanzadas\Admin\AdminController;
+use PW\OfertasAvanzadas\Core\I18n;
 use PW\OfertasAvanzadas\Handlers\CartHandler;
 use PW\OfertasAvanzadas\Handlers\ProductExpiryHandler;
 use PW\OfertasAvanzadas\Handlers\ProductBadgeHandler;
@@ -19,6 +20,8 @@ class Plugin {
     }
 
     public function init(): void {
+        I18n::register();
+
         if (is_admin()) {
             BackendUI::init([
                 'assets_url' => PWOA_URL . 'vendor/pw/backend-ui/assets/',
@@ -31,7 +34,7 @@ class Plugin {
                     'ofertas_page_pwoa-settings',
                     'ofertas_page_pwoa-shortcodes',
                 ],
-                'brand' => ['name' => 'PW Ofertas Avanzadas'],
+                'brand' => ['name' => __('PW - Ofertas Avanzadas', 'pw-ofertas-avanzadas')],
             ]);
             new AdminController();
             new ProductExpiryHandler();
@@ -54,6 +57,7 @@ class Plugin {
                 'ajaxUrl'  => admin_url('admin-ajax.php'),
                 'nonce'    => wp_create_nonce('pwoa_nonce'),
                 'adminUrl' => admin_url(),
+                'i18n'     => I18n::wizardScriptI18n(),
             ]);
         });
     }

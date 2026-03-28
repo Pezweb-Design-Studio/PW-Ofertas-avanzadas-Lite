@@ -83,8 +83,6 @@ class CampaignRepository
         $result = $wpdb->insert("{$wpdb->prefix}pwoa_campaigns", $insert_data);
 
         if ($result === false) {
-            error_log('PWOA Campaign Insert Error: ' . $wpdb->last_error);
-            error_log('PWOA Campaign Data: ' . print_r($insert_data, true));
             return 0;
         }
 
@@ -120,7 +118,6 @@ class CampaignRepository
         );
 
         if ($result === false) {
-            error_log('PWOA Campaign Update Error: ' . $wpdb->last_error);
             return false;
         }
 
@@ -235,6 +232,7 @@ class CampaignRepository
     private static function clearStrategiesCache(): void
     {
         foreach (self::OBJECTIVES as $obj) {
+            delete_transient('pwoa_strategies_v2_' . $obj);
             delete_transient('pwoa_strategies_' . $obj);
         }
 

@@ -91,19 +91,20 @@ class RecurringPurchaseStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Descuento por Compras Recurrentes',
-            'description'   => 'Recompensa a clientes que compran el mismo producto multiples veces',
+            'key'           => 'recurring_purchase',
+            'name'          => __('Repeat purchase reward', 'pw-ofertas-avanzadas'),
+            'description'   => __('Reward customers who have bought the same product multiple times.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 5,
-            'when_to_use'   => 'Productos de recompra: cosmeticos, suplementos, alimentos. Aumenta retencion 40-60%. Ideal para suscripciones o productos consumibles.',
+            'when_to_use'   => __('Consumables, supplements, cosmetics—any repurchase SKU. Often improves retention for subscribe-and-save style catalogs.', 'pw-ofertas-avanzadas'),
             'objective'     => 'loyalty',
         ];
     }
 
     public static function getConfigFields(): array {
         return [
-            ['key' => 'required_purchases', 'label' => 'Numero de compras previas requeridas', 'type' => 'number', 'default' => 3, 'required' => true, 'description' => 'Cuantas veces debe haber comprado el producto para obtener descuento'],
-            ['key' => 'discount_type',      'label' => 'Tipo de descuento',                    'type' => 'select', 'options' => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo por unidad'], 'required' => true],
-            ['key' => 'discount_value',     'label' => 'Valor del descuento',                  'type' => 'number', 'required' => true],
+            ['key' => 'required_purchases', 'label' => __('Prior purchases required', 'pw-ofertas-avanzadas'), 'type' => 'number', 'default' => 3, 'required' => true, 'description' => __('How many completed purchases of the product unlock the discount.', 'pw-ofertas-avanzadas')],
+            ['key' => 'discount_type',      'label' => __('Discount type', 'pw-ofertas-avanzadas'),                    'type' => 'select', 'options' => ['percentage' => __('Percentage', 'pw-ofertas-avanzadas'), 'fixed' => __('Fixed per unit', 'pw-ofertas-avanzadas')], 'required' => true],
+            ['key' => 'discount_value',     'label' => __('Discount value', 'pw-ofertas-avanzadas'),                  'type' => 'number', 'required' => true],
         ];
     }
 }

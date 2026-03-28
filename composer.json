@@ -1,6 +1,7 @@
 {
 	"name": "pw/ofertas-avanzadas",
 	"description": "Sistema avanzado de descuentos orientado a marketing para WooCommerce",
+	"license": "GPL-2.0-or-later",
 	"type": "wordpress-plugin",
 	"repositories": [
 		{

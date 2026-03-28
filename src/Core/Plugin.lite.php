@@ -4,6 +4,8 @@ namespace PW\OfertasAvanzadas\Core;
 defined('ABSPATH') || exit;
 
 use PW\OfertasAvanzadas\Admin\AdminController;
+use PW\OfertasAvanzadas\Core\I18n;
+use PW\OfertasAvanzadas\Core\UpgradeUrl;
 use PW\OfertasAvanzadas\Handlers\CartHandler;
 use PW\OfertasAvanzadas\Handlers\ProductExpiryHandler;
 use PW\OfertasAvanzadas\Handlers\ProductBadgeHandler;
@@ -18,6 +20,8 @@ class Plugin {
     }
 
     public function init(): void {
+        I18n::register();
+
         if (is_admin()) {
             new AdminController();
             new ProductExpiryHandler();
@@ -38,10 +42,12 @@ class Plugin {
             wp_enqueue_script('pwoa-wizard', PWOA_URL . 'assets/js/wizard.js', ['jquery'], PWOA_VERSION, true);
             wp_enqueue_script('pwoa-wizard-lite-addon', PWOA_URL . 'assets/js/wizard.lite-addon.js', ['pwoa-wizard'], PWOA_VERSION, true);
             wp_localize_script('pwoa-wizard', 'pwoaData', [
-                'ajaxUrl'  => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('pwoa_nonce'),
-                'adminUrl' => admin_url(),
-                'edition'  => PWOA_EDITION,
+                'ajaxUrl'    => admin_url('admin-ajax.php'),
+                'nonce'      => wp_create_nonce('pwoa_nonce'),
+                'adminUrl'   => admin_url(),
+                'edition'    => PWOA_EDITION,
+                'upgradeUrl' => UpgradeUrl::get(),
+                'i18n'       => I18n::wizardScriptI18n(),
             ]);
         });
     }

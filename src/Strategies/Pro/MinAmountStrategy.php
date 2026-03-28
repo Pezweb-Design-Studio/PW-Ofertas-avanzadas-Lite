@@ -31,19 +31,20 @@ class MinAmountStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Descuento por Monto Minimo',
-            'description'   => 'Aplica descuento cuando el carrito supera un monto especifico',
+            'key'           => 'min_amount',
+            'name'          => __('Minimum order discount', 'pw-ofertas-avanzadas'),
+            'description'   => __('Apply a discount when the cart subtotal reaches a minimum amount.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 5,
-            'when_to_use'   => 'Efectivo todo el ano. Ideal para aumentar ticket promedio. Recomendado en pre-navidad y fechas comerciales.',
+            'when_to_use'   => __('Works year-round to lift average order value. Especially strong before holidays and peak sales periods.', 'pw-ofertas-avanzadas'),
             'objective'     => 'aov',
         ];
     }
 
     public static function getConfigFields(): array {
         return [
-            ['key' => 'min_amount',     'label' => 'Monto minimo',        'type' => 'number', 'required' => true],
-            ['key' => 'discount_type',  'label' => 'Tipo de descuento',   'type' => 'select', 'options' => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo'], 'required' => true],
-            ['key' => 'discount_value', 'label' => 'Valor del descuento', 'type' => 'number', 'required' => true],
+            ['key' => 'min_amount',     'label' => __('Minimum amount', 'pw-ofertas-avanzadas'),        'type' => 'number', 'required' => true],
+            ['key' => 'discount_type',  'label' => __('Discount type', 'pw-ofertas-avanzadas'),   'type' => 'select', 'options' => ['percentage' => __('Percentage', 'pw-ofertas-avanzadas'), 'fixed' => __('Fixed amount', 'pw-ofertas-avanzadas')], 'required' => true],
+            ['key' => 'discount_value', 'label' => __('Discount value', 'pw-ofertas-avanzadas'), 'type' => 'number', 'required' => true],
         ];
     }
 }

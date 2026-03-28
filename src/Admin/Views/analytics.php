@@ -11,17 +11,17 @@ use PW\BackendUI\BackendUI;
 $bui = BackendUI::init();
 
 $bui->render_page([
-    "title"       => "Analíticas",
-    "description" => "Resumen de rendimiento de tus campañas de descuentos.",
+    "title"       => __('Analytics', 'pw-ofertas-avanzadas'),
+    "description" => __('Performance summary for your discount campaigns.', 'pw-ofertas-avanzadas'),
     "content"     => function ($bui) use ($stats): void {
         $ui = $bui->ui();
 
         // ── KPI cards ──────────────────────────────────────────────────────────
         $kpis = [
-            ["label" => "Órdenes con Descuento", "value" => number_format($stats["total_orders"]),      "variant" => null],
-            ["label" => "Total Descontado",       "value" => wc_price($stats["total_discounted"]),      "variant" => "success"],
-            ["label" => "Descuento Promedio",     "value" => wc_price($stats["avg_discount"]),          "variant" => null],
-            ["label" => "Ingresos Totales",       "value" => wc_price($stats["total_revenue"]),         "variant" => "info"],
+            ["label" => __('Orders with discount', 'pw-ofertas-avanzadas'), "value" => number_format($stats["total_orders"]),      "variant" => null],
+            ["label" => __('Total discounted', 'pw-ofertas-avanzadas'),       "value" => wc_price($stats["total_discounted"]),      "variant" => "success"],
+            ["label" => __('Average discount', 'pw-ofertas-avanzadas'),     "value" => wc_price($stats["avg_discount"]),          "variant" => null],
+            ["label" => __('Total revenue', 'pw-ofertas-avanzadas'),       "value" => wc_price($stats["total_revenue"]),         "variant" => "info"],
         ];
 
         $variant_color = [
@@ -53,18 +53,18 @@ $bui->render_page([
         $top_campaigns = \PW\OfertasAvanzadas\Repositories\StatsRepository::getTopCampaigns();
 
         $ui->card([
-            "title"   => "Top Campañas",
+            "title"   => __('Top campaigns', 'pw-ofertas-avanzadas'),
             "content" => function () use ($ui, $top_campaigns): void {
                 if (empty($top_campaigns)) {
-                    $ui->notice(["type" => "info", "message" => "Sin datos de campañas aún."]);
+                    $ui->notice(["type" => "info", "message" => __('No campaign data yet.', 'pw-ofertas-avanzadas')]);
                     return;
                 }
 
                 echo '<table class="wp-list-table widefat" style="width:100%;">';
                 echo '<thead><tr>';
-                echo '<th>Campaña</th>';
-                echo '<th style="text-align:right;">Usos</th>';
-                echo '<th style="text-align:right;">Total Descontado</th>';
+                echo '<th>' . esc_html__('Campaign', 'pw-ofertas-avanzadas') . '</th>';
+                echo '<th style="text-align:right;">' . esc_html__('Uses', 'pw-ofertas-avanzadas') . '</th>';
+                echo '<th style="text-align:right;">' . esc_html__('Total discounted', 'pw-ofertas-avanzadas') . '</th>';
                 echo '</tr></thead><tbody>';
 
                 foreach ($top_campaigns as $campaign) {

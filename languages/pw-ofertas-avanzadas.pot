@@ -1,0 +1,1661 @@
+# Copyright (C) 2026 PezWeb
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: PW - Ofertas Avanzadas Pro 2.0.7\n"
+"Report-Msgid-Bugs-To: https://pezweb.com/\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-03-28T06:33:42+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: pw-ofertas-avanzadas\n"
+
+#. Plugin Name of the plugin
+#: pw-ofertas-avanzadas-pro.php
+msgid "PW - Ofertas Avanzadas Pro"
+msgstr ""
+
+#. Plugin URI of the plugin
+#. Author URI of the plugin
+#: pw-ofertas-avanzadas-pro.php
+msgid "https://pezweb.com/"
+msgstr ""
+
+#. Description of the plugin
+#: pw-ofertas-avanzadas-pro.php
+msgid "Sistema de descuentos orientado a estrategias de marketing para WooCommerce (versión Pro)."
+msgstr ""
+
+#. Author of the plugin
+#: pw-ofertas-avanzadas-pro.php
+msgid "PezWeb"
+msgstr ""
+
+#: pw-ofertas-avanzadas-pro.php:32
+#: pw-ofertas-avanzadas.lite.php:32
+msgid "PW Ofertas Avanzadas Lite was deactivated automatically because the Pro edition is already installed."
+msgstr ""
+
+#: pw-ofertas-avanzadas-pro.php:50
+#: pw-ofertas-avanzadas.lite.php:50
+msgid "PW - Ofertas Avanzadas requires WooCommerce to be active."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:33
+#: src/Admin/Views/dashboard.lite.php:121
+#: src/Admin/Views/dashboard.lite.php:365
+#: src/Admin/Views/dashboard.php:156
+#: src/Admin/Views/dashboard.php:261
+msgid "Active"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:34
+#: src/Admin/Views/dashboard.lite.php:131
+#: src/Admin/Views/dashboard.lite.php:366
+#: src/Admin/Views/dashboard.php:157
+#: src/Admin/Views/dashboard.php:261
+msgid "Paused"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:35
+#: src/Core/I18n.php:40
+msgid "Unknown error"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:36
+#: src/Admin/AdminController.lite.php:401
+#: src/Admin/AdminController.php:366
+msgid "Could not update the campaign."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:37
+msgid "Are you sure you want to delete the campaign"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:38
+msgid "This campaign has associated statistics."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:39
+msgid "This campaign has associated statistics. Historical data is kept for reports."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:40
+#: src/Admin/AdminController.lite.php:415
+#: src/Admin/AdminController.php:383
+msgid "Could not delete the campaign."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:41
+#: src/Admin/AdminAssets.php:102
+#: src/Core/I18n.php:92
+msgid "Error"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:42
+msgid "Reset the units-sold counter for"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:43
+msgid "This will set the counter to zero."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:44
+msgid "This will set the counter for all units sold to zero."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:45
+#: src/Admin/AdminController.lite.php:604
+#: src/Admin/AdminController.php:700
+msgid "Could not reset the counter."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:103
+msgid "Could not save."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:104
+msgid "Could not save settings."
+msgstr ""
+
+#: src/Admin/AdminAssets.php:121
+msgid "Copied!"
+msgstr ""
+
+#: src/Admin/AdminAssets.php:122
+#: src/Admin/Views/shortcodes.php:146
+#: src/Admin/Views/shortcodes.php:237
+msgid "Copy"
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:137
+#: src/Admin/AdminController.php:71
+msgid "Insufficient permissions."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:217
+#: src/Admin/AdminController.php:138
+#: src/Core/Plugin.php:37
+msgid "PW - Ofertas Avanzadas"
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:218
+#: src/Admin/AdminController.php:139
+msgid "Offers"
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:228
+#: src/Admin/AdminController.lite.php:229
+#: src/Admin/AdminController.php:149
+#: src/Admin/AdminController.php:150
+#: src/Admin/Views/dashboard.lite.php:52
+#: src/Admin/Views/wizard.php:37
+msgid "New campaign"
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:237
+#: src/Admin/AdminController.lite.php:238
+#: src/Admin/AdminController.php:176
+#: src/Admin/AdminController.php:177
+#: src/Admin/Views/shortcodes.php:19
+msgid "Shortcodes"
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:264
+#: src/Admin/Views/wizard.lite.php:51
+msgid "Campaign limit reached"
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:265
+msgid "You have reached the limit of 5 campaigns on the Lite edition."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:266
+msgid "Upgrade to Pro"
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:267
+msgid "for unlimited campaigns."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:268
+msgid "Campaign limit"
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:297
+#: src/Admin/AdminController.lite.php:378
+#: src/Admin/AdminController.php:250
+#: src/Admin/AdminController.php:340
+msgid "Campaign not found."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:340
+msgid "You have reached the limit of 5 campaigns. Upgrade to Pro for unlimited campaigns."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:346
+#: src/Admin/AdminController.lite.php:393
+msgid "This strategy is not available in the Lite edition. Upgrade to Pro."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:355
+#: src/Admin/AdminController.php:310
+msgid "Could not create campaign."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:360
+#: src/Admin/AdminController.php:315
+msgid "Campaign created successfully."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:369
+#: src/Admin/AdminController.php:329
+msgid "Status updated."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:405
+#: src/Admin/AdminController.php:370
+msgid "Campaign updated successfully."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:418
+#: src/Admin/AdminController.php:386
+msgid "Campaign deleted successfully."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:552
+#: src/Admin/AdminController.php:623
+msgid "Attribute not specified."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:557
+#: src/Admin/AdminController.php:632
+msgid "Could not load attribute terms."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:600
+#: src/Admin/AdminController.php:694
+msgid "Invalid campaign ID."
+msgstr ""
+
+#: src/Admin/AdminController.lite.php:611
+#: src/Admin/AdminController.php:707
+msgid "Counter reset successfully."
+msgstr ""
+
+#: src/Admin/AdminController.php:158
+#: src/Admin/AdminController.php:159
+#: src/Admin/Views/analytics.php:14
+msgid "Analytics"
+msgstr ""
+
+#: src/Admin/AdminController.php:167
+#: src/Admin/AdminController.php:168
+#: src/Admin/Views/settings.php:17
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/AdminController.php:226
+msgid "Invalid value."
+msgstr ""
+
+#: src/Admin/AdminController.php:231
+msgid "Settings saved successfully."
+msgstr ""
+
+#: src/Admin/Views/analytics.php:15
+msgid "Performance summary for your discount campaigns."
+msgstr ""
+
+#: src/Admin/Views/analytics.php:21
+msgid "Orders with discount"
+msgstr ""
+
+#: src/Admin/Views/analytics.php:22
+#: src/Admin/Views/analytics.php:67
+msgid "Total discounted"
+msgstr ""
+
+#: src/Admin/Views/analytics.php:23
+msgid "Average discount"
+msgstr ""
+
+#: src/Admin/Views/analytics.php:24
+msgid "Total revenue"
+msgstr ""
+
+#: src/Admin/Views/analytics.php:56
+msgid "Top campaigns"
+msgstr ""
+
+#: src/Admin/Views/analytics.php:59
+msgid "No campaign data yet."
+msgstr ""
+
+#: src/Admin/Views/analytics.php:65
+#: src/Admin/Views/dashboard.lite.php:156
+#: src/Admin/Views/dashboard.php:180
+msgid "Campaign"
+msgstr ""
+
+#: src/Admin/Views/analytics.php:66
+msgid "Uses"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:10
+#: src/Admin/Views/dashboard.lite.php:25
+#: src/Admin/Views/dashboard.php:18
+#: src/Admin/Views/dashboard.php:32
+#: src/Admin/Views/wizard.lite.php:15
+#: src/Admin/Views/wizard.php:13
+#: src/Core/I18n.php:78
+msgid "Basic"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:11
+#: src/Admin/Views/dashboard.php:19
+#: src/Strategies/Pro/MinAmountStrategy.php:45
+msgid "Minimum amount"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:12
+#: src/Admin/Views/dashboard.php:20
+msgid "Free shipping"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:13
+#: src/Admin/Views/dashboard.php:21
+msgid "Tiered discount"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:14
+#: src/Admin/Views/dashboard.php:22
+msgid "Volume (bulk)"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:15
+#: src/Admin/Views/dashboard.php:23
+msgid "Expiry based"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:16
+#: src/Admin/Views/dashboard.php:24
+msgid "Low stock"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:17
+#: src/Admin/Views/dashboard.php:25
+msgid "Recurring purchase"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:18
+#: src/Admin/Views/dashboard.php:26
+#: src/Strategies/Pro/FlashSaleStrategy.php:38
+msgid "Flash sale"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:19
+#: src/Admin/Views/dashboard.php:27
+#: src/Strategies/Lite/BuyXPayYStrategy.php:60
+msgid "Buy X pay Y"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:20
+#: src/Admin/Views/dashboard.php:28
+msgid "By attributes"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:26
+#: src/Admin/Views/dashboard.php:33
+msgid "AOV"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:28
+#: src/Admin/Views/dashboard.php:34
+msgid "Liquidation"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:33
+#: src/Admin/Views/dashboard.php:35
+#: src/Admin/Views/wizard.lite.php:30
+#: src/Admin/Views/wizard.php:25
+#: src/Core/I18n.php:81
+msgid "Loyalty"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:37
+#: src/Admin/Views/dashboard.php:36
+msgid "Urgency"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:46
+#: src/Admin/Views/dashboard.php:53
+msgid "Discount campaigns"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:47
+#: src/Admin/Views/dashboard.php:54
+msgid "Manage your marketing strategies."
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:61
+#: src/Admin/Views/dashboard.php:128
+msgid "No active campaigns"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:63
+#: src/Admin/Views/dashboard.php:129
+msgid "Create your first discount campaign to boost sales and optimize inventory."
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:70
+msgid "Create first campaign"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:111
+msgid "Total campaigns"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:141
+#: src/Admin/Views/dashboard.lite.php:338
+#: src/Admin/Views/dashboard.php:158
+#: src/Admin/Views/dashboard.php:250
+msgid "Scheduled"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:157
+#: src/Admin/Views/dashboard.php:181
+#: src/Admin/Views/wizard.lite.php:90
+#: src/Admin/Views/wizard.php:48
+#: src/Core/I18n.php:76
+msgid "Objective"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:158
+#: src/Admin/Views/dashboard.php:182
+msgid "Period"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:159
+#: src/Admin/Views/dashboard.php:183
+msgid "Status"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:160
+#: src/Admin/Views/dashboard.php:184
+msgid "Actions"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:169
+#: src/Admin/Views/dashboard.php:189
+msgid "N/A"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:260
+msgid "Units sold:"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:316
+#: src/Admin/Views/dashboard.php:239
+msgid "through"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:326
+#: src/Admin/Views/dashboard.php:242
+msgid "Ongoing"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:334
+#: src/Admin/Views/dashboard.php:248
+msgid "Expired"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:385
+#: src/Admin/Views/dashboard.php:272
+msgid "Reset counter"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:395
+#: src/Admin/Views/dashboard.php:278
+#: src/Admin/Views/wizard.php:37
+msgid "Edit campaign"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:412
+#: src/Admin/Views/dashboard.php:285
+msgid "Delete campaign"
+msgstr ""
+
+#. translators: 1: first row number, 2: last row number, 3: total campaigns
+#: src/Admin/Views/dashboard.lite.php:436
+#, php-format
+msgid "Showing %1$s–%2$s of %3$s campaigns"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:449
+msgid "← Previous"
+msgstr ""
+
+#: src/Admin/Views/dashboard.lite.php:491
+msgid "Next →"
+msgstr ""
+
+#. translators: %s: stacking mode label
+#: src/Admin/Views/dashboard.php:70
+#, php-format
+msgid "Mode: %s"
+msgstr ""
+
+#: src/Admin/Views/dashboard.php:77
+msgid "Help"
+msgstr ""
+
+#: src/Admin/Views/dashboard.php:81
+msgid "+ New campaign"
+msgstr ""
+
+#. translators: %s: stacking mode label
+#: src/Admin/Views/dashboard.php:99
+#, php-format
+msgid "Active mode: %s"
+msgstr ""
+
+#: src/Admin/Views/dashboard.php:116
+msgid "Change in Settings"
+msgstr ""
+
+#: src/Admin/Views/dashboard.php:117
+#: src/Admin/Views/wizard.lite.php:313
+#: src/Admin/Views/wizard.php:279
+#: src/Core/I18n.php:93
+msgid "Close"
+msgstr ""
+
+#: src/Admin/Views/dashboard.php:131
+msgid "+ Create first campaign"
+msgstr ""
+
+#: src/Admin/Views/dashboard.php:155
+msgid "Total"
+msgstr ""
+
+#. translators: 1: units sold, 2: max units
+#: src/Admin/Views/dashboard.php:218
+#, php-format
+msgid "%1$s / %2$s units"
+msgstr ""
+
+#. translators: %s: number of campaigns
+#: src/Admin/Views/dashboard.php:310
+#, php-format
+msgid "%s campaign in total"
+msgid_plural "%s campaigns in total"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/Admin/Views/data/stacking-options.php:7
+msgid "Priority first"
+msgstr ""
+
+#: src/Admin/Views/data/stacking-options.php:9
+msgid "Campaigns marked as “Priority” always take precedence. If priority campaigns are available, the best discount among them is applied. “Stackable” campaigns are only used when no priority campaign applies."
+msgstr ""
+
+#: src/Admin/Views/data/stacking-options.php:11
+msgid "<strong>Use case:</strong> Best when you need full control over which discount wins. Ideal for special offers that must beat general promotions."
+msgstr ""
+
+#: src/Admin/Views/data/stacking-options.php:14
+msgid "Stackable only (classic)"
+msgstr ""
+
+#: src/Admin/Views/data/stacking-options.php:16
+msgid "If at least one “Stackable” campaign applies, all stackable campaigns are summed and priority campaigns are ignored. Priority applies only when no stackable campaign applies."
+msgstr ""
+
+#: src/Admin/Views/data/stacking-options.php:18
+msgid "<strong>Use case:</strong> Traditional behavior. Use when you want discounts to add up whenever possible."
+msgstr ""
+
+#: src/Admin/Views/data/stacking-options.php:21
+msgid "Always the best discount"
+msgstr ""
+
+#: src/Admin/Views/data/stacking-options.php:23
+msgid "The system evaluates both scenarios (sum of stackables vs best priority) and applies whichever saves the customer more."
+msgstr ""
+
+#: src/Admin/Views/data/stacking-options.php:25
+msgid "<strong>Caution:</strong> This mode can produce higher total discounts than expected if campaigns are not capped. Use with care."
+msgstr ""
+
+#: src/Admin/Views/settings.php:18
+msgid "Configure global behavior for PW - Ofertas Avanzadas."
+msgstr ""
+
+#: src/Admin/Views/settings.php:26
+msgid "Multiple discount behavior"
+msgstr ""
+
+#: src/Admin/Views/settings.php:27
+msgid "Define how discounts are applied when several campaigns are active at the same time."
+msgstr ""
+
+#: src/Admin/Views/settings.php:50
+msgid "Recommended"
+msgstr ""
+
+#: src/Admin/Views/settings.php:67
+msgid "Save changes"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:21
+msgid "Generator"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:22
+msgid "Reference"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:23
+msgid "Examples"
+msgstr ""
+
+#. translators: %s: shortcode tag
+#: src/Admin/Views/shortcodes.php:35
+#, php-format
+msgid "Main shortcode: <code>%s</code> — Place it on any page, post, or text widget."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:47
+msgid "Shortcode generator"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:48
+msgid "Set the parameters and copy the result."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:57
+msgid "Specific campaign"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:57
+msgid "optional"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:59
+msgid "— All active campaigns —"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:68
+msgid "Number of products"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:69
+msgid "Columns"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:70
+msgid "Order by"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:71
+msgid "Order"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:72
+msgid "Category (slug)"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:73
+#: src/Admin/Views/wizard.lite.php:236
+#: src/Admin/Views/wizard.php:202
+msgid "Minimum price"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:74
+#: src/Admin/Views/wizard.lite.php:244
+#: src/Admin/Views/wizard.php:210
+msgid "Maximum price"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:81
+msgid "4 (default)"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:86
+msgid "Date"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:87
+msgid "Price"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:88
+msgid "Name"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:89
+msgid "Random"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:92
+msgid "Descending"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:93
+msgid "Ascending"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:119
+msgid "Show discount badge"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:120
+msgid "Show campaign name"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:121
+msgid "Enable pagination"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:132
+msgid "Products per page"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:140
+msgid "Generated shortcode"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:160
+msgid "Campaign filters"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:162
+#: src/Admin/Views/shortcodes.php:171
+#: src/Admin/Views/shortcodes.php:172
+#: src/Admin/Views/shortcodes.php:178
+#: src/Admin/Views/shortcodes.php:179
+#: src/Admin/Views/shortcodes.php:190
+msgid "number"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:162
+msgid "Filter by campaign ID. If omitted, all active campaigns are used."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:163
+#: src/Admin/Views/shortcodes.php:169
+#: src/Admin/Views/shortcodes.php:170
+#: src/Admin/Views/shortcodes.php:180
+#: src/Admin/Views/shortcodes.php:181
+msgid "text"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:163
+msgid "Filter by strategy type: basic_discount, bulk_discount, buy_x_pay_y, etc."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:167
+msgid "Product filters"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:169
+msgid "Category slug(s), comma-separated."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:170
+msgid "Tag slug(s), comma-separated."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:171
+msgid "Minimum product price."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:172
+msgid "Maximum product price."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:176
+msgid "Display"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:178
+msgid "Total products when pagination is off."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:179
+msgid "Grid columns (1–6)."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:180
+msgid "Sort by: date, price, name, rand."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:181
+msgid "ASC or DESC."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:182
+#: src/Admin/Views/shortcodes.php:183
+#: src/Admin/Views/shortcodes.php:189
+msgid "boolean"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:182
+msgid "Show the discount badge on the image."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:183
+msgid "Show the campaign name under the title."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:187
+msgid "Pagination"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:189
+msgid "Enable pagination. Use per_page instead of limit."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:190
+msgid "Products per page when paginate=\"true\"."
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:200
+msgid "Parameter"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:200
+msgid "Type"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:200
+msgid "Default"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:200
+msgid "Description"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:219
+msgid "All products on sale"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:220
+msgid "3-column grid with 6 products"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:221
+msgid "Specific category, price ascending"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:222
+msgid "Campaign name visible"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:223
+msgid "Pagination, 9 products per page"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:224
+msgid "Specific campaign by ID"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:225
+msgid "Price range with campaign label"
+msgstr ""
+
+#: src/Admin/Views/shortcodes.php:229
+msgid "Usage examples"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:16
+#: src/Admin/Views/wizard.php:14
+msgid "Simple percentage or fixed amount discount on selected products."
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:20
+#: src/Admin/Views/wizard.php:17
+#: src/Core/I18n.php:79
+msgid "Increase cart value"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:21
+#: src/Admin/Views/wizard.php:18
+msgid "Raise average order value with strategic discounts."
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:25
+#: src/Admin/Views/wizard.php:21
+#: src/Core/I18n.php:80
+msgid "Clear inventory"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:26
+#: src/Admin/Views/wizard.php:22
+msgid "Move slow-moving or soon-to-expire stock."
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:31
+#: src/Admin/Views/wizard.php:26
+msgid "Reward repeat customers and build loyalty."
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:35
+#: src/Admin/Views/wizard.php:29
+#: src/Core/I18n.php:82
+msgid "Quick conversion"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:36
+#: src/Admin/Views/wizard.php:30
+msgid "Create urgency and drive immediate sales."
+msgstr ""
+
+#. translators: %d: number of campaign slots left
+#: src/Admin/Views/wizard.lite.php:57
+#, php-format
+msgid "%d campaign remaining"
+msgid_plural "%d campaigns remaining"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: opening strong tag, %s: closing strong tag
+#: src/Admin/Views/wizard.lite.php:69
+#, php-format
+msgid "Lite: up to 5 campaigns. %1$sUpgrade to Pro%2$s for unlimited campaigns and 6 advanced strategies."
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:79
+#: src/Core/I18n.php:112
+msgid "View Pro →"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:96
+#: src/Admin/Views/wizard.php:54
+#: src/Core/I18n.php:45
+msgid "Strategy"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:101
+#: src/Admin/Views/wizard.php:59
+#: src/Core/I18n.php:46
+msgid "Configuration"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:110
+#: src/Admin/Views/wizard.php:68
+msgid "What do you want to achieve?"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:138
+#: src/Admin/Views/wizard.php:91
+msgid "Choose a strategy"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:146
+#: src/Admin/Views/wizard.php:99
+msgid "Configure your campaign settings"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:151
+#: src/Admin/Views/wizard.php:104
+msgid "Campaign name"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:154
+#: src/Admin/Views/wizard.php:107
+msgid "e.g. Black Friday 2024 — volume discount"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:161
+#: src/Admin/Views/wizard.php:114
+msgid "Start date (optional)"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:166
+#: src/Admin/Views/wizard.php:119
+msgid "End date (optional)"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:173
+#: src/Admin/Views/wizard.php:127
+msgid "Application mode"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:175
+#: src/Admin/Views/wizard.php:133
+msgid "Priority (best discount wins)"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:176
+#: src/Admin/Views/wizard.php:134
+msgid "Stack discounts"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:178
+#: src/Admin/Views/wizard.php:136
+msgid "When several campaigns are active, apply only the best one or combine them?"
+msgstr ""
+
+#. translators: %s: opening strong tag, %s: closing strong tag
+#: src/Admin/Views/wizard.lite.php:185
+#, php-format
+msgid "💡 %1$sPro:%2$s Configure advanced multiple-discount behavior in Settings."
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:197
+#: src/Admin/Views/wizard.php:163
+msgid "Filter products (optional)"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:198
+#: src/Admin/Views/wizard.php:164
+msgid "If you set no filters, the discount applies to all products in the cart."
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:202
+#: src/Admin/Views/wizard.php:168
+msgid "Specific products"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:205
+#: src/Admin/Views/wizard.php:171
+#: src/Core/I18n.php:51
+msgid "Search by name, SKU or ID…"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:214
+#: src/Admin/Views/wizard.php:180
+msgid "Categories"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:230
+#: src/Admin/Views/wizard.php:196
+msgid "Hold Ctrl/Cmd to select multiple."
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:256
+#: src/Admin/Views/wizard.php:222
+msgid "Products matching criteria:"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:263
+#: src/Admin/Views/wizard.php:229
+msgid "View filtered products"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:277
+#: src/Admin/Views/wizard.php:243
+#: src/Core/I18n.php:44
+msgid "Update campaign"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:277
+#: src/Admin/Views/wizard.php:243
+msgid "Create campaign"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:281
+#: src/Admin/Views/wizard.php:247
+msgid "Cancel"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:294
+#: src/Admin/Views/wizard.php:260
+msgid "Products matching the filter"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:308
+#: src/Admin/Views/wizard.php:274
+msgid "Total:"
+msgstr ""
+
+#: src/Admin/Views/wizard.lite.php:310
+#: src/Admin/Views/wizard.php:276
+msgid "products"
+msgstr ""
+
+#: src/Admin/Views/wizard.php:129
+msgid "What does this mean?"
+msgstr ""
+
+#: src/Admin/Views/wizard.php:140
+msgid "Explanation:"
+msgstr ""
+
+#: src/Admin/Views/wizard.php:142
+msgid "Priority:"
+msgstr ""
+
+#: src/Admin/Views/wizard.php:142
+msgid "Competes with other priority campaigns. Only the highest discount applies."
+msgstr ""
+
+#: src/Admin/Views/wizard.php:143
+msgid "Stack:"
+msgstr ""
+
+#: src/Admin/Views/wizard.php:143
+msgid "Adds together with other stackable campaigns when available."
+msgstr ""
+
+#: src/Admin/Views/wizard.php:146
+msgid "Note:"
+msgstr ""
+
+#. translators: %s: URL to Settings screen
+#: src/Admin/Views/wizard.php:152
+#, php-format
+msgid "The exact behavior depends on the global configuration in <a href=\"%s\" class=\"underline font-bold\">Settings</a>."
+msgstr ""
+
+#: src/Core/I18n.php:37
+msgid "Discard your changes?"
+msgstr ""
+
+#: src/Core/I18n.php:38
+msgid "Enter valid quantities for “Buy” and “Pay”."
+msgstr ""
+
+#: src/Core/I18n.php:39
+msgid "The buy quantity must be greater than the pay quantity.\\n\\nExample: buy 3, pay 2."
+msgstr ""
+
+#: src/Core/I18n.php:41
+msgid "Connection error:"
+msgstr ""
+
+#: src/Core/I18n.php:42
+msgid "Could not load campaign:"
+msgstr ""
+
+#: src/Core/I18n.php:43
+msgid "Strategy not found."
+msgstr ""
+
+#: src/Core/I18n.php:47
+msgid "When to use:"
+msgstr ""
+
+#: src/Core/I18n.php:48
+msgid "This strategy has no extra settings."
+msgstr ""
+
+#: src/Core/I18n.php:49
+msgid "Add another product"
+msgstr ""
+
+#: src/Core/I18n.php:50
+msgid "Add tier"
+msgstr ""
+
+#. translators: %s: one-based product row index in the repeater
+#: src/Core/I18n.php:53
+#, php-format
+msgid "Product %s"
+msgstr ""
+
+#: src/Core/I18n.php:54
+msgid "Remove"
+msgstr ""
+
+#: src/Core/I18n.php:55
+msgid "Duplicate"
+msgstr ""
+
+#. translators: %s: one-based row number of the earlier duplicate product
+#: src/Core/I18n.php:57
+#, php-format
+msgid "Already set on product %s. Both discounts will apply."
+msgstr ""
+
+#: src/Core/I18n.php:58
+msgid "Validating…"
+msgstr ""
+
+#: src/Core/I18n.php:59
+msgid "Could not load"
+msgstr ""
+
+#: src/Core/I18n.php:60
+msgid "No products found"
+msgstr ""
+
+#: src/Core/I18n.php:61
+msgid "SKU:"
+msgstr ""
+
+#: src/Core/I18n.php:62
+msgid "Stock:"
+msgstr ""
+
+#: src/Core/I18n.php:63
+msgid "View →"
+msgstr ""
+
+#: src/Core/I18n.php:64
+msgid "Select an attribute…"
+msgstr ""
+
+#: src/Core/I18n.php:65
+msgid "Select an attribute first…"
+msgstr ""
+
+#: src/Core/I18n.php:66
+msgid "Loading…"
+msgstr ""
+
+#: src/Core/I18n.php:67
+msgid "No values available"
+msgstr ""
+
+#: src/Core/I18n.php:68
+msgid "The buy quantity must be greater than the pay quantity."
+msgstr ""
+
+#. translators: 1: buy quantity, 2: pay quantity, 3: discount percentage
+#: src/Core/I18n.php:70
+#, php-format
+msgid "Preview: Buy %1$s pay %2$s = %3$s%% off per set"
+msgstr ""
+
+#. translators: 1: units per set (buy quantity), 2: phrase like "2 units" (free count + word)
+#: src/Core/I18n.php:72
+#, php-format
+msgid "Every %1$s units, %2$s free"
+msgstr ""
+
+#: src/Core/I18n.php:73
+msgid "unit"
+msgstr ""
+
+#: src/Core/I18n.php:74
+msgid "units"
+msgstr ""
+
+#: src/Core/I18n.php:75
+msgid "Error:"
+msgstr ""
+
+#: src/Core/I18n.php:84
+msgid "Select value…"
+msgstr ""
+
+#: src/Core/I18n.php:85
+msgid "Preview:"
+msgstr ""
+
+#. translators: 1: minimum quantity, 2: attribute term name, 3: discount percentage
+#: src/Core/I18n.php:87
+#, php-format
+msgid "Every %1$s items of \"%2$s\" = %3$s%% off"
+msgstr ""
+
+#: src/Core/I18n.php:88
+msgid "applications"
+msgstr ""
+
+#: src/Core/I18n.php:89
+msgid "Unlimited"
+msgstr ""
+
+#. translators: %s: maximum number of discounted items
+#: src/Core/I18n.php:91
+#, php-format
+msgid "(max %s matching items)"
+msgstr ""
+
+#: src/Core/I18n.php:94
+#: src/Core/I18n.php:97
+msgid "Pro-only feature"
+msgstr ""
+
+#: src/Core/I18n.php:95
+msgid "is available in Pro with six advanced strategy types and full analytics."
+msgstr ""
+
+#: src/Core/I18n.php:96
+msgid "View Pro version →"
+msgstr ""
+
+#: src/Core/I18n.php:98
+msgid "This objective is available in Pro."
+msgstr ""
+
+#: src/Core/I18n.php:99
+msgid "Upgrade to Pro →"
+msgstr ""
+
+#. translators: %d: number of Pro-only strategies
+#: src/Core/I18n.php:101
+#, php-format
+msgid "%d Pro-only strategy"
+msgstr ""
+
+#. translators: %d: number of Pro-only strategies
+#: src/Core/I18n.php:103
+#, php-format
+msgid "%d Pro-only strategies"
+msgstr ""
+
+#. translators: 1: count of Lite strategies, 2: translated word "strategy" or "strategies"
+#: src/Core/I18n.php:105
+#, php-format
+msgid "You are viewing %1$d %2$s in Lite. "
+msgstr ""
+
+#: src/Core/I18n.php:106
+msgid "strategy"
+msgstr ""
+
+#: src/Core/I18n.php:107
+msgid "strategies"
+msgstr ""
+
+#. translators: 1: number of additional Pro strategies, 2: translated phrase "advanced strategy" or "advanced strategies"
+#: src/Core/I18n.php:109
+#, php-format
+msgid "Upgrade to Pro to unlock %1$d more %2$s."
+msgstr ""
+
+#: src/Core/I18n.php:110
+msgid "advanced strategy"
+msgstr ""
+
+#: src/Core/I18n.php:111
+msgid "advanced strategies"
+msgstr ""
+
+#: src/Shortcodes/ProductsShortcode.php:287
+msgid "No on-sale products are available right now."
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:88
+msgid "Attribute-based quantity discount"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:89
+msgid "Discount when the cart reaches X units that share a product attribute (e.g. three items with the same brand)."
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:91
+msgid "Brand, material, color, or similar promos. Example: “Buy 3 Nike items, get 15% off.” Good for clearing attribute-specific stock."
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:98
+msgid "Product attribute"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:98
+msgid "Choose the attribute (e.g. brand, color, size)."
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:99
+msgid "Attribute value"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:99
+msgid "Choose the specific attribute term."
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:100
+msgid "Minimum matching quantity"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:100
+msgid "How many matching items are required to trigger the discount."
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:101
+#: src/Strategies/Lite/BasicDiscountStrategy.php:44
+#: src/Strategies/Lite/BulkDiscountStrategy.php:103
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:89
+#: src/Strategies/Pro/FlashSaleStrategy.php:50
+#: src/Strategies/Pro/LowStockStrategy.php:64
+#: src/Strategies/Pro/MinAmountStrategy.php:46
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:106
+#: src/Strategies/Pro/TieredDiscountStrategy.php:67
+msgid "Discount type"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:101
+#: src/Strategies/Lite/BasicDiscountStrategy.php:47
+#: src/Strategies/Lite/BulkDiscountStrategy.php:103
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:92
+#: src/Strategies/Pro/FlashSaleStrategy.php:50
+#: src/Strategies/Pro/LowStockStrategy.php:64
+#: src/Strategies/Pro/MinAmountStrategy.php:46
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:106
+#: src/Strategies/Pro/TieredDiscountStrategy.php:69
+msgid "Percentage"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:101
+#: src/Strategies/Lite/BulkDiscountStrategy.php:103
+#: src/Strategies/Pro/LowStockStrategy.php:64
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:106
+msgid "Fixed per unit"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:102
+#: src/Strategies/Lite/BasicDiscountStrategy.php:54
+#: src/Strategies/Lite/BulkDiscountStrategy.php:104
+#: src/Strategies/Pro/FlashSaleStrategy.php:51
+#: src/Strategies/Pro/LowStockStrategy.php:65
+#: src/Strategies/Pro/MinAmountStrategy.php:47
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:107
+msgid "Discount value"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:103
+#: src/Strategies/Lite/BuyXPayYStrategy.php:72
+msgid "Max applications (optional)"
+msgstr ""
+
+#: src/Strategies/Lite/AttributeQuantityDiscountStrategy.php:103
+msgid "Cap how many times the discount can apply. Leave empty for unlimited."
+msgstr ""
+
+#: src/Strategies/Lite/BasicDiscountStrategy.php:32
+msgid "Basic product discount"
+msgstr ""
+
+#: src/Strategies/Lite/BasicDiscountStrategy.php:33
+msgid "Apply a simple percentage or fixed amount discount to selected products."
+msgstr ""
+
+#: src/Strategies/Lite/BasicDiscountStrategy.php:35
+msgid "General promotions, seasonal sales, product- or category-specific offers. Use when you want a straightforward discount without complex rules."
+msgstr ""
+
+#: src/Strategies/Lite/BasicDiscountStrategy.php:48
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:93
+#: src/Strategies/Pro/FlashSaleStrategy.php:50
+#: src/Strategies/Pro/MinAmountStrategy.php:46
+#: src/Strategies/Pro/TieredDiscountStrategy.php:69
+msgid "Fixed amount"
+msgstr ""
+
+#: src/Strategies/Lite/BasicDiscountStrategy.php:57
+msgid "Percentage (e.g. 15) or fixed amount in your store currency."
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:86
+msgid "Volume (bulk) discounts"
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:87
+msgid "Set up multiple products, each with its own quantity-capped discount."
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:89
+msgid "Great for per-product offers with a limited discounted quantity. Example: 10% off the first 50 units of several SKUs. Strong for controlled clearances and flash deals."
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:98
+msgid "Products on sale"
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:100
+msgid "Add each product with its own settings. The discount applies only to the first X units you specify."
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:102
+msgid "Product"
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:104
+msgid "e.g. 15 for 15% or a fixed amount per unit."
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:105
+msgid "Discounted quantity"
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:105
+msgid "Maximum units that receive the discount."
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:106
+msgid "Custom badge (optional)"
+msgstr ""
+
+#: src/Strategies/Lite/BulkDiscountStrategy.php:106
+msgid "e.g. “Limited offer”, “Expiring soon”."
+msgstr ""
+
+#: src/Strategies/Lite/BuyXPayYStrategy.php:61
+msgid "“2 for 1”, “3 for 2”, etc. The customer takes X units but pays for only Y."
+msgstr ""
+
+#: src/Strategies/Lite/BuyXPayYStrategy.php:63
+msgid "Very effective for fast-moving stock: consumables, overstocks, or aggressive promos (e.g. 3-for-2, 2-for-1, buy 5 pay 4)."
+msgstr ""
+
+#: src/Strategies/Lite/BuyXPayYStrategy.php:70
+msgid "Buy quantity"
+msgstr ""
+
+#: src/Strategies/Lite/BuyXPayYStrategy.php:70
+msgid "Units the customer receives in each set."
+msgstr ""
+
+#: src/Strategies/Lite/BuyXPayYStrategy.php:71
+msgid "Pay quantity"
+msgstr ""
+
+#: src/Strategies/Lite/BuyXPayYStrategy.php:71
+msgid "Units the customer pays for in each set."
+msgstr ""
+
+#: src/Strategies/Lite/BuyXPayYStrategy.php:72
+msgid "Maximum sets per order. Leave empty for unlimited."
+msgstr ""
+
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:77
+msgid "Expiry-based discount"
+msgstr ""
+
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:78
+msgid "Progressive discounts for products approaching their expiry date."
+msgstr ""
+
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:80
+msgid "Perishables, food, pharmacy. Increase the discount as the expiry date gets closer."
+msgstr ""
+
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:99
+#: src/Strategies/Pro/TieredDiscountStrategy.php:74
+msgid "Discount tiers"
+msgstr ""
+
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:101
+msgid "Set discounts by days until expiry. Products use the best matching tier. Example: 30 days → 10%, 15 days → 20%."
+msgstr ""
+
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:103
+msgid "Days until expiry"
+msgstr ""
+
+#: src/Strategies/Lite/ExpiryBasedStrategy.php:104
+#: src/Strategies/Pro/TieredDiscountStrategy.php:79
+msgid "Discount"
+msgstr ""
+
+#: src/Strategies/Pro/FlashSaleStrategy.php:39
+msgid "Time-limited discount to create urgency."
+msgstr ""
+
+#: src/Strategies/Pro/FlashSaleStrategy.php:41
+msgid "Peak events and launches; often strongest in 6–24 hour windows."
+msgstr ""
+
+#: src/Strategies/Pro/FlashSaleStrategy.php:48
+msgid "Start time"
+msgstr ""
+
+#: src/Strategies/Pro/FlashSaleStrategy.php:49
+msgid "End time"
+msgstr ""
+
+#: src/Strategies/Pro/FreeShippingStrategy.php:29
+msgid "Free shipping threshold"
+msgstr ""
+
+#: src/Strategies/Pro/FreeShippingStrategy.php:30
+msgid "Waive shipping when the cart reaches a minimum subtotal."
+msgstr ""
+
+#: src/Strategies/Pro/FreeShippingStrategy.php:32
+msgid "A strong always-on tactic; often lifts average order value by 20–35% across many stores."
+msgstr ""
+
+#: src/Strategies/Pro/FreeShippingStrategy.php:41
+msgid "Minimum subtotal for free shipping"
+msgstr ""
+
+#: src/Strategies/Pro/FreeShippingStrategy.php:44
+msgid "Amount in your store currency."
+msgstr ""
+
+#: src/Strategies/Pro/LowStockStrategy.php:53
+msgid "Low stock discount"
+msgstr ""
+
+#: src/Strategies/Pro/LowStockStrategy.php:54
+msgid "Automatically discount products when on-hand quantity falls below a threshold."
+msgstr ""
+
+#: src/Strategies/Pro/LowStockStrategy.php:56
+msgid "Seasonal clearance, end-of-line, or when you want urgency from scarcity."
+msgstr ""
+
+#: src/Strategies/Pro/LowStockStrategy.php:63
+msgid "Stock threshold"
+msgstr ""
+
+#: src/Strategies/Pro/LowStockStrategy.php:63
+msgid "Discount applies when stock is at or below this quantity."
+msgstr ""
+
+#: src/Strategies/Pro/MinAmountStrategy.php:35
+msgid "Minimum order discount"
+msgstr ""
+
+#: src/Strategies/Pro/MinAmountStrategy.php:36
+msgid "Apply a discount when the cart subtotal reaches a minimum amount."
+msgstr ""
+
+#: src/Strategies/Pro/MinAmountStrategy.php:38
+msgid "Works year-round to lift average order value. Especially strong before holidays and peak sales periods."
+msgstr ""
+
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:95
+msgid "Repeat purchase reward"
+msgstr ""
+
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:96
+msgid "Reward customers who have bought the same product multiple times."
+msgstr ""
+
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:98
+msgid "Consumables, supplements, cosmetics—any repurchase SKU. Often improves retention for subscribe-and-save style catalogs."
+msgstr ""
+
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:105
+msgid "Prior purchases required"
+msgstr ""
+
+#: src/Strategies/Pro/RecurringPurchaseStrategy.php:105
+msgid "How many completed purchases of the product unlock the discount."
+msgstr ""
+
+#: src/Strategies/Pro/TieredDiscountStrategy.php:55
+msgid "Tiered quantity discount"
+msgstr ""
+
+#: src/Strategies/Pro/TieredDiscountStrategy.php:56
+msgid "Higher discounts as the number of items in the cart increases."
+msgstr ""
+
+#: src/Strategies/Pro/TieredDiscountStrategy.php:58
+msgid "Peak sales and volume campaigns. Strong with low unit-cost items. Example: 10% at 3 items, 20% at 5, 30% at 10."
+msgstr ""
+
+#: src/Strategies/Pro/TieredDiscountStrategy.php:76
+msgid "Define tiers; the best matching tier is applied."
+msgstr ""
+
+#: src/Strategies/Pro/TieredDiscountStrategy.php:78
+msgid "Item quantity"
+msgstr ""
+
+#: src/Strategies/Pro/TieredDiscountStrategy.php:79
+msgid "Percentage or fixed value, depending on discount type."
+msgstr ""

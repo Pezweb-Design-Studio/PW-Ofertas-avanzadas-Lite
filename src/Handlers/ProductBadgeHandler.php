@@ -16,59 +16,30 @@ class ProductBadgeHandler {
         add_filter('woocommerce_cart_item_thumbnail', [$this, 'addBadgeToCartThumbnail'], 10, 3);
         add_filter('post_thumbnail_html', [$this, 'addBadgeToThumbnail'], 10, 5);
         add_filter('elementor/widget/render_content', [$this, 'addBadgeToElementorWidget'], 10, 2);
-        add_action('wp_head', [$this, 'addBadgeStyles'], 999);
-        add_action('wp_footer', [$this, 'injectBadgeScript'], 999);
+        add_action('wp_enqueue_scripts', [$this, 'enqueueBadgeStyles'], 20);
+        add_action('wp_footer', [$this, 'enqueueBadgeScript'], 15);
     }
 
     private function wrapImageWithBadge(string $html, string $badge_html): string {
         return preg_replace(
             '/(<img[^>]*>)/',
-            '<div style="position:relative;display:inline-block;">$1' . $badge_html . '</div>',
+            '<div class="pwoa-badge-image-wrap">$1' . $badge_html . '</div>',
             $html,
             1
         );
     }
 
-    public function addBadgeStyles(): void {
-        echo <<<'CSS'
-<style>
-    .pwoa-discount-badge {
-        position: absolute !important;
-        top: 8px !important;
-        right: 8px !important;
-        background: #3b82f6 !important;
-        color: white !important;
-        padding: 6px 10px !important;
-        border-radius: 6px !important;
-        font-size: 13px !important;
-        font-weight: bold !important;
-        line-height: 1 !important;
-        z-index: 999 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
-        pointer-events: none !important;
-    }
-    .pwoa-discount-badge.fixed-amount {
-        background: #10b981 !important;
-    }
-    .pwoa-custom-badge {
-        position: absolute !important;
-        top: 48px !important;
-        right: 8px !important;
-        background: #10b981 !important;
-        color: white !important;
-        padding: 4px 8px !important;
-        border-radius: 6px !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        line-height: 1.2 !important;
-        z-index: 998 !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
-        pointer-events: none !important;
-        max-width: 120px !important;
-        text-align: center !important;
-    }
-</style>
-CSS;
+    public function enqueueBadgeStyles(): void {
+        if (is_admin()) {
+            return;
+        }
+
+        wp_enqueue_style(
+            'pwoa-product-badges',
+            PWOA_URL . 'assets/css/product-badges.css',
+            [],
+            PWOA_VERSION,
+        );
     }
 
     private function collectPageBadges(): array {
@@ -112,7 +83,11 @@ CSS;
         return $badges;
     }
 
-    public function injectBadgeScript(): void {
+    public function enqueueBadgeScript(): void {
+        if (is_admin()) {
+            return;
+        }
+
         if (!is_shop() && !is_product_category() && !is_product() && !is_cart() && !is_checkout()) {
             return;
         }
@@ -131,183 +106,22 @@ CSS;
             }
         }
 
-        $badges_json = wp_json_encode($product_badges);
-        $slug_json   = wp_json_encode($slug_to_id);
+        wp_enqueue_script(
+            'pwoa-product-badges',
+            PWOA_URL . 'assets/js/product-badges.js',
+            [],
+            PWOA_VERSION,
+            true,
+        );
 
-        echo <<<JS
-        <script>
-            (function() {
-                const badges = {$badges_json};
-                const slugMap = {$slug_json};
-
-                function addBadges() {
-                    if (Object.keys(badges).length === 1) {
-                        const productId = Object.keys(badges)[0];
-                        const singleSelectors = [
-                            '.woocommerce-product-gallery__wrapper',
-                            '.woocommerce-product-gallery__image:first-child',
-                            '.wp-block-woocommerce-product-image-gallery',
-                            'div[data-block-name="woocommerce/product-image-gallery"]'
-                        ];
-
-                        for (let sel of singleSelectors) {
-                            const container = document.querySelector(sel);
-                            if (container && !container.querySelector('.pwoa-discount-badge')) {
-                                container.style.position = 'relative';
-                                container.insertAdjacentHTML('beforeend', badges[productId]);
-                                return;
-                            }
-                        }
-                    }
-
-                    document.querySelectorAll('.product, [data-product-id], [data-wp-context]').forEach(item => {
-                        if (item.querySelector('.pwoa-discount-badge')) return;
-
-                        let productId = null;
-
-                        if (item.dataset.productId) {
-                            productId = item.dataset.productId;
-                        } else if (item.dataset.wpContext) {
-                            try {
-                                const context = JSON.parse(item.dataset.wpContext);
-                                productId = context.productId;
-                            } catch(e) {}
-                        } else {
-                            const classes = item.className.split(' ');
-                            const postClass = classes.find(c => c.startsWith('post-'));
-                            if (postClass) {
-                                productId = postClass.replace('post-', '');
-                            }
-                        }
-
-                        if (!productId || !badges[productId]) return;
-
-                        const selectors = [
-                            '.jet-woo-builder-archive-product-thumbnail',
-                            '.wc-block-components-product-image__inner-container',
-                            'a.woocommerce-LoopProduct-link',
-                            '.product-thumbnail',
-                            'a[href*="producto"]'
-                        ];
-
-                        let container = null;
-                        for (let sel of selectors) {
-                            container = item.querySelector(sel);
-                            if (container && !container.querySelector('.pwoa-discount-badge')) {
-                                break;
-                            }
-                            container = null;
-                        }
-
-                        if (!container) return;
-
-                        container.style.position = 'relative';
-                        container.insertAdjacentHTML('beforeend', badges[productId]);
-                    });
-
-                    if (Object.keys(badges).length > 0) {
-                        const classicRows = document.querySelectorAll('.cart_item');
-
-                        classicRows.forEach(row => {
-                            if (row.querySelector('.pwoa-discount-badge')) return;
-
-                            const link = row.querySelector('.product-name a, td.product-name a');
-                            if (!link) return;
-
-                            let productId = null;
-                            const href = link.getAttribute('href');
-
-                            for (let id in badges) {
-                                if (href.includes('/' + id + '/') || href.includes('?p=' + id) || href.includes('post=' + id)) {
-                                    productId = id;
-                                    break;
-                                }
-                            }
-
-                            if (!productId || !badges[productId]) return;
-
-                            const thumbnail = row.querySelector('.product-thumbnail, td.product-thumbnail');
-
-                            if (thumbnail && !thumbnail.querySelector('.pwoa-discount-badge')) {
-                                thumbnail.style.position = 'relative';
-                                thumbnail.insertAdjacentHTML('beforeend', badges[productId]);
-                            }
-                        });
-
-                        const blockRows = document.querySelectorAll('.wc-block-cart-items__row');
-
-                        blockRows.forEach((row, index) => {
-                            if (row.querySelector('.pwoa-discount-badge')) return;
-
-                            let productId = null;
-
-                            const thumbLink = row.querySelector('.wc-block-cart-item__image a');
-                            if (thumbLink && thumbLink.dataset.productId) {
-                                productId = thumbLink.dataset.productId;
-                            }
-
-                            if (!productId && row.dataset) {
-                                for (let attr in row.dataset) {
-                                    try {
-                                        const data = JSON.parse(row.dataset[attr]);
-                                        if (data.id || data.productId || data.product_id) {
-                                            productId = data.id || data.productId || data.product_id;
-                                            break;
-                                        }
-                                    } catch(e) {}
-                                }
-                            }
-
-                            if (!productId) {
-                                const link = row.querySelector('.wc-block-components-product-name');
-                                if (link) {
-                                    const href = link.getAttribute('href');
-                                    const slug = href.split('/').filter(Boolean).pop();
-
-                                    if (slugMap[slug]) {
-                                        productId = slugMap[slug];
-                                    }
-                                }
-                            }
-
-                            if (!productId) {
-                                const badgeIds = Object.keys(badges);
-                                if (badgeIds[index]) {
-                                    productId = badgeIds[index];
-                                }
-                            }
-
-                            if (!productId || !badges[productId]) return;
-
-                            const thumbnail = row.querySelector('.wc-block-cart-item__image');
-
-                            if (thumbnail && !thumbnail.querySelector('.pwoa-discount-badge')) {
-                                thumbnail.style.position = 'relative';
-                                thumbnail.insertAdjacentHTML('beforeend', badges[productId]);
-                            }
-                        });
-                    }
-                }
-
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', addBadges);
-                } else {
-                    addBadges();
-                }
-
-                const observer = new MutationObserver(() => {
-                    requestAnimationFrame(addBadges);
-                });
-
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true
-                });
-
-                setTimeout(() => observer.disconnect(), 5000);
-            })();
-        </script>
-JS;
+        wp_localize_script(
+            'pwoa-product-badges',
+            'pwoaBadgeConfig',
+            [
+                'badges'  => $product_badges,
+                'slugMap' => $slug_to_id,
+            ],
+        );
     }
 
     public function addBadgeToImage($image, $product, $size, $attr, $placeholder) {
@@ -357,14 +171,14 @@ JS;
 
         if (strpos($content, 'jet-woo-builder-archive-product-thumbnail') !== false) {
             $content = preg_replace(
-                '/(<div class="jet-woo-builder-archive-product-thumbnail")/s',
-                '$1 style="position:relative"',
+                '/class="(jet-woo-builder-archive-product-thumbnail)"/',
+                'class="$1 pwoa-badge-image-wrap"',
                 $content,
                 1
             );
 
             return preg_replace(
-                '/(<div class="jet-woo-builder-archive-product-thumbnail"[^>]*>)/s',
+                '/(<div[^>]*class="[^"]*jet-woo-builder-archive-product-thumbnail[^"]*"[^>]*>)/s',
                 '$1' . $badge_html,
                 $content,
                 1

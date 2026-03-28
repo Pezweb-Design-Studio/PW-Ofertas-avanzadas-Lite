@@ -284,7 +284,7 @@ class ProductsShortcode {
         $query = new \WP_Query($query_args);
 
         if (!$query->have_posts()) {
-            echo '<p class="pwoa-no-products">' . esc_html__('No hay productos en oferta disponibles.', 'pw-ofertas-avanzadas') . '</p>';
+            echo '<p class="pwoa-no-products">' . esc_html__('No on-sale products are available right now.', 'pw-ofertas-avanzadas') . '</p>';
             return;
         }
 

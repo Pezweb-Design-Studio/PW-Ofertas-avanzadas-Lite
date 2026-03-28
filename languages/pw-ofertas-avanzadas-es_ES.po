@@ -1,0 +1,148 @@
+# Spanish translation for PW - Ofertas Avanzadas
+# Copyright (C) PezWeb
+msgid ""
+msgstr ""
+"Project-Id-Version: PW - Ofertas Avanzadas\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "PW - Ofertas Avanzadas"
+msgstr "PW - Ofertas Avanzadas"
+
+msgid "Offers"
+msgstr "Ofertas"
+
+msgid "New campaign"
+msgstr "Nueva campaña"
+
+msgid "Analytics"
+msgstr "Analíticas"
+
+msgid "Settings"
+msgstr "Ajustes"
+
+msgid "Shortcodes"
+msgstr "Shortcodes"
+
+msgid "Insufficient permissions."
+msgstr "Permisos insuficientes."
+
+msgid "Invalid value."
+msgstr "Valor no válido."
+
+msgid "Settings saved successfully."
+msgstr "Configuración guardada correctamente."
+
+msgid "Campaign not found."
+msgstr "Campaña no encontrada."
+
+msgid "Could not create campaign."
+msgstr "No se pudo crear la campaña."
+
+msgid "Campaign created successfully."
+msgstr "Campaña creada correctamente."
+
+msgid "Status updated."
+msgstr "Estado actualizado."
+
+msgid "Could not update the campaign."
+msgstr "No se pudo actualizar la campaña."
+
+msgid "Campaign updated successfully."
+msgstr "Campaña actualizada correctamente."
+
+msgid "Could not delete the campaign."
+msgstr "No se pudo eliminar la campaña."
+
+msgid "Campaign deleted successfully."
+msgstr "Campaña eliminada correctamente."
+
+msgid "Attribute not specified."
+msgstr "Atributo no especificado."
+
+msgid "Could not load attribute terms."
+msgstr "No se pudieron cargar los términos del atributo."
+
+msgid "Invalid campaign ID."
+msgstr "ID de campaña no válido."
+
+msgid "Could not reset the counter."
+msgstr "No se pudo restablecer el contador."
+
+msgid "Counter reset successfully."
+msgstr "Contador restablecido correctamente."
+
+msgid "Campaign limit reached"
+msgstr "Límite de campañas alcanzado"
+
+msgid "You have reached the limit of 5 campaigns on the Lite edition."
+msgstr "Has alcanzado el límite de 5 campañas en la versión Lite."
+
+msgid "Upgrade to Pro"
+msgstr "Actualizar a Pro"
+
+msgid "for unlimited campaigns."
+msgstr "para campañas ilimitadas."
+
+msgid "Campaign limit"
+msgstr "Límite de campañas"
+
+msgid "You have reached the limit of 5 campaigns. Upgrade to Pro for unlimited campaigns."
+msgstr "Has alcanzado el límite de 5 campañas. Actualiza a Pro para campañas ilimitadas."
+
+msgid "This strategy is not available in the Lite edition. Upgrade to Pro."
+msgstr "Esta estrategia no está disponible en la versión Lite. Actualiza a Pro."
+
+msgid "Active"
+msgstr "Activa"
+
+msgid "Paused"
+msgstr "Pausada"
+
+msgid "Unknown error"
+msgstr "Error desconocido"
+
+msgid "Are you sure you want to delete the campaign"
+msgstr "¿Seguro que quieres eliminar la campaña"
+
+msgid "This campaign has associated statistics."
+msgstr "Esta campaña tiene estadísticas asociadas."
+
+msgid "This campaign has associated statistics. Historical data is kept for reports."
+msgstr "Esta campaña tiene estadísticas asociadas. Los datos históricos se conservan para informes."
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Reset the units-sold counter for"
+msgstr "¿Restablecer el contador de unidades vendidas de"
+
+msgid "This will set the counter to zero."
+msgstr "Esto pondrá el contador a cero."
+
+msgid "This will set the counter for all units sold to zero."
+msgstr "Esto pondrá a cero el contador de todas las unidades vendidas."
+
+msgid "Could not save."
+msgstr "No se pudo guardar."
+
+msgid "Could not save settings."
+msgstr "No se pudo guardar la configuración."
+
+msgid "Copied!"
+msgstr "¡Copiado!"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "No on-sale products are available right now."
+msgstr "No hay productos en oferta disponibles."
+
+msgid "PW Ofertas Avanzadas Lite was deactivated automatically because the Pro edition is already installed."
+msgstr "PW Ofertas Avanzadas Lite se desactivó automáticamente porque la versión Pro ya está instalada."
+
+msgid "PW - Ofertas Avanzadas requires WooCommerce to be active."
+msgstr "PW - Ofertas Avanzadas necesita que WooCommerce esté activo."

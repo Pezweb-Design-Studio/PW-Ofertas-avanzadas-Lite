@@ -1,4 +1,14 @@
-﻿const PWOAWizard = {
+function pwoaWizardT(key, fallback) {
+  try {
+    const pack =
+      typeof pwoaData !== "undefined" && pwoaData.i18n ? pwoaData.i18n : {};
+    const v = pack[key];
+    if (v != null && String(v) !== "") return v;
+  } catch (e) {}
+  return fallback;
+}
+
+const PWOAWizard = {
   state: {
     objective: null,
     strategy: null,
@@ -46,7 +56,12 @@
     else if (t.id === "crumb-strategy") this.goToStep("strategy");
     else if (t.id === "btn-back") this.goToStep("objective");
     else if (t.id === "btn-back-config") this.goToStep("strategy");
-    else if (t.id === "btn-cancel" && confirm("¿Descartar cambios?"))
+    else if (
+      t.id === "btn-cancel" &&
+      confirm(
+        pwoaWizardT("discardConfirm", "Discard your changes?"),
+      )
+    )
       location.href = "?page=pwoa-dashboard";
     else if (t.closest(".add-repeater")) {
       const key = t.closest(".add-repeater").dataset.fieldKey;
@@ -154,15 +169,16 @@
       const pay = parseInt(formData.get("config[pay_quantity]")) || 0;
 
       if (buy <= 0 || pay <= 0) {
-        alert(
-          'Error: Debes especificar cantidades válidas para "Llevas" y "Pagas"',
-        );
+        alert(pwoaWizardT("buyXPayYInvalid", "Enter valid quantities for Buy and Pay."));
         return;
       }
 
       if (buy <= pay) {
         alert(
-          "Error: La cantidad a llevar debe ser mayor que la cantidad a pagar.\n\nEjemplo válido: Lleva 3, Paga 2",
+          pwoaWizardT(
+            "buyXPayYMustExceed",
+            "The buy quantity must be greater than the pay quantity.\n\nExample: buy 3, pay 2.",
+          ),
         );
         return;
       }
@@ -219,10 +235,20 @@
         alert("✓ " + result.data.message);
         location.href = "?page=pwoa-dashboard";
       } else {
-        alert("✗ Error: " + (result.data || "Error desconocido"));
+        alert(
+          "✗ " +
+            pwoaWizardT("errorLabel", "Error:") +
+            " " +
+            (result.data || pwoaWizardT("unknownError", "Unknown error")),
+        );
       }
     } catch (error) {
-      alert("✗ Error de conexión: " + error.message);
+      alert(
+        "✗ " +
+          pwoaWizardT("connectionErrorPrefix", "Connection error:") +
+          " " +
+          error.message,
+      );
     }
   },
 
@@ -241,7 +267,11 @@
       const result = await res.json();
 
       if (!result.success) {
-        alert("Error al cargar campaña: " + result.data);
+        alert(
+          pwoaWizardT("loadCampaignErrorPrefix", "Could not load campaign:") +
+            " " +
+            result.data,
+        );
         location.href = "?page=pwoa-dashboard";
         return;
       }
@@ -254,11 +284,11 @@
       this.state.strategy = c.strategy;
 
       this.state.strategyData = data.strategies.find(
-        (s) => this.getStrategyKey(s.name) === c.strategy,
+        (s) => (s.key || this.getStrategyKey(s.name)) === c.strategy,
       );
 
       if (!this.state.strategyData) {
-        alert("Error: Estrategia no encontrada");
+        alert(pwoaWizardT("strategyNotFound", "Strategy not found."));
         return;
       }
 
@@ -288,7 +318,11 @@
       // ⚡ Validar UNA sola vez al final
       this.validateFilters();
     } catch (error) {
-      alert("Error al cargar campaña: " + error.message);
+      alert(
+        pwoaWizardT("loadCampaignErrorPrefix", "Could not load campaign:") +
+          " " +
+          error.message,
+      );
       location.href = "?page=pwoa-dashboard";
     }
   },
@@ -315,7 +349,10 @@
       if (input) input.value = campaign.config[key];
     }
 
-    document.getElementById("submit-btn").textContent = "Actualizar Campaña";
+    document.getElementById("submit-btn").textContent = pwoaWizardT(
+      "updateCampaign",
+      "Update campaign",
+    );
   },
 
   async selectObjective(objective, title) {
@@ -351,7 +388,7 @@
 
   selectStrategy(data) {
     this.state.strategyData = data;
-    this.state.strategy = this.getStrategyKey(data.name);
+    this.state.strategy = data.key || this.getStrategyKey(data.name);
 
     document.getElementById("selected-strategy-title").textContent = data.name;
 
@@ -421,8 +458,12 @@
       document.getElementById("crumb-objective").textContent =
         this.getObjectiveTitle();
       document.getElementById("crumb-strategy").textContent =
-        this.state.strategyData?.name || "Estrategia";
-      document.getElementById("crumb-config").textContent = "Configuración";
+        this.state.strategyData?.name ||
+        pwoaWizardT("strategy", "Strategy");
+      document.getElementById("crumb-config").textContent = pwoaWizardT(
+        "configuration",
+        "Configuration",
+      );
       document.getElementById("crumb-config").classList.remove("text-gray-500");
       document
         .getElementById("crumb-config")
@@ -437,14 +478,13 @@
   },
 
   getObjectiveTitle() {
-    const map = {
-      basic: "Básico",
-      aov: "Aumentar Valor del Carrito",
-      liquidation: "Liquidar Inventario",
-      loyalty: "Fidelización",
-      urgency: "Conversión Rápida",
-    };
-    return map[this.state.objective] || "Objetivo";
+    const map =
+      (typeof pwoaData !== "undefined" && pwoaData.i18n && pwoaData.i18n.objectives) ||
+      {};
+    return (
+      map[this.state.objective] ||
+      pwoaWizardT("objectiveFallback", "Objective")
+    );
   },
 
   toggleProductFilters() {
@@ -469,7 +509,7 @@
                 </div>
                 <p class="text-gray-600 mb-6 leading-relaxed">${s.description}</p>
                 <div class="bg-blue-50 p-4 rounded">
-                    <strong class="text-blue-900">Cuándo usar:</strong>
+                    <strong class="text-blue-900">${pwoaWizardT("whenToUse", "When to use:")}</strong>
                     <span class="text-blue-800">${s.when_to_use}</span>
                 </div>
             </div>
@@ -487,7 +527,10 @@
     if (!fields.length) {
       const p = document.createElement("p");
       p.className = "text-gray-500";
-      p.textContent = "Esta estrategia no requiere configuración adicional.";
+      p.textContent = pwoaWizardT(
+        "noExtraConfig",
+        "This strategy has no extra settings.",
+      );
       fragment.appendChild(p);
       return fragment;
     }
@@ -619,7 +662,11 @@
     btn.className =
       "add-repeater mt-6 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center gap-2";
     btn.dataset.fieldKey = f.key;
-    btn.innerHTML = `<span class="text-xl">+</span><span>${f.key === "bulk_items" ? "Agregar otro producto" : "Agregar nivel"}</span>`;
+    btn.innerHTML = `<span class="text-xl">+</span><span>${
+      f.key === "bulk_items"
+        ? pwoaWizardT("addAnotherProduct", "Add another product")
+        : pwoaWizardT("addTier", "Add tier")
+    }</span>`;
     container.appendChild(btn);
 
     return container;
@@ -641,7 +688,7 @@
                     <div class="mb-4">
                         <label class="block text-sm font-semibold mb-2">${sf.label}</label>
                         <div class="relative">
-                            <input type="text" placeholder="Buscar por nombre, SKU o ID..."
+                            <input type="text" placeholder="${pwoaWizardT("searchPlaceholder", "Search by name, SKU or ID…")}"
                                    class="repeater-product-search w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                    data-row-index="${idx}" data-field-key="${key}" data-subfield-key="${sf.key}">
                             <div class="repeater-search-results hidden absolute z-50 w-full bg-white border rounded-lg shadow-xl mt-1 max-h-48 overflow-y-auto"></div>
@@ -676,10 +723,10 @@
                         <svg class="accordion-icon w-5 h-5 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
-                        <h4 class="text-base font-bold text-gray-800">Producto ${idx + 1}</h4>
+                        <h4 class="text-base font-bold text-gray-800">${(pwoaWizardT("productN", "Product %s") + "").replace("%s", String(idx + 1))}</h4>
                         <span class="product-name-preview text-sm text-gray-500 italic"></span>
                     </div>
-                    <button type="button" class="remove-repeater bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm">× Eliminar</button>
+                    <button type="button" class="remove-repeater bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm">× ${pwoaWizardT("removeRow", "Remove")}</button>
                 </div>
                 <div class="repeater-content p-4 pt-0 border-t border-gray-100">
                     ${productSearch}
@@ -786,7 +833,7 @@
           const w = document.createElement("div");
           w.className =
             "duplicate-warning bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 px-4 py-2 rounded text-sm mb-3";
-          w.innerHTML = `⚠️ <strong>Duplicado</strong> - Ya configurado en Producto ${ids[id] + 1}. Ambas se aplicarán.`;
+          w.innerHTML = `⚠️ <strong>${pwoaWizardT("duplicateStrong", "Duplicate")}</strong> — ${(pwoaWizardT("duplicateBody", "Already set on product %s. Both discounts will apply.") + "").replace("%s", String(ids[id] + 1))}`;
           content.insertBefore(w, content.firstChild);
         }
       } else {
@@ -952,7 +999,7 @@
             <div class="p-3 hover:bg-gray-50 cursor-pointer border-b product-result"
                  data-id="${p.id}" data-name="${p.name}" data-sku="${p.sku || ""}">
                 <div class="font-semibold text-sm">${p.name}</div>
-                <div class="text-xs text-gray-500">${p.sku ? "SKU: " + p.sku + " | " : ""}ID: ${p.id} | ${p.formatted_price}</div>
+                <div class="text-xs text-gray-500">${p.sku ? pwoaWizardT("skuPrefix", "SKU:") + " " + p.sku + " | " : ""}ID: ${p.id} | ${p.formatted_price}</div>
             </div>
         `,
       )
@@ -1041,7 +1088,7 @@
     if (!span) return;
 
     const cond = this.buildConditions();
-    span.textContent = "Validando...";
+    span.textContent = pwoaWizardT("validating", "Validating…");
 
     const res = await fetch(pwoaData.ajaxUrl, {
       method: "POST",
@@ -1053,7 +1100,9 @@
     });
 
     const data = await res.json();
-    span.textContent = data.success ? data.data.count : "Error";
+    span.textContent = data.success
+      ? data.data.count
+      : pwoaWizardT("errorShort", "Error");
   },
 
   async showMatchingProducts() {
@@ -1061,7 +1110,9 @@
     const list = document.getElementById("modal-products-list");
 
     list.innerHTML =
-      '<p class="text-center text-gray-500 py-8">Cargando...</p>';
+      '<p class="text-center text-gray-500 py-8">' +
+      pwoaWizardT("loading", "Loading…") +
+      "</p>";
     modal.classList.remove("hidden");
 
     const cond = this.buildConditions();
@@ -1078,7 +1129,9 @@
 
     if (!data.success) {
       list.innerHTML =
-        '<p class="text-center text-red-500 py-8">Error al cargar</p>';
+        '<p class="text-center text-red-500 py-8">' +
+        pwoaWizardT("loadFailed", "Could not load") +
+        "</p>";
       return;
     }
 
@@ -1087,7 +1140,9 @@
 
     if (!data.data.products.length) {
       list.innerHTML =
-        '<p class="text-center text-gray-500 py-8">No hay productos</p>';
+        '<p class="text-center text-gray-500 py-8">' +
+        pwoaWizardT("noProducts", "No products found") +
+        "</p>";
       return;
     }
 
@@ -1097,12 +1152,12 @@
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100">
                 <div class="flex-1">
                     <p class="font-semibold text-gray-900">${p.name}</p>
-                    <p class="text-sm text-gray-500">${p.sku ? "SKU: " + p.sku + " | " : ""}ID: ${p.id}</p>
+                    <p class="text-sm text-gray-500">${p.sku ? pwoaWizardT("skuPrefix", "SKU:") + " " + p.sku + " | " : ""}ID: ${p.id}</p>
                 </div>
                 <div class="text-right">
                     <p class="font-bold text-gray-900">${p.formatted_price}</p>
-                    ${p.stock ? '<p class="text-xs text-gray-500">Stock: ' + p.stock + "</p>" : ""}
-                    <a href="${pwoaData.adminUrl}post.php?post=${p.id}&action=edit" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 mt-1 inline-block">Ver →</a>
+                    ${p.stock ? '<p class="text-xs text-gray-500">' + pwoaWizardT("stockLabel", "Stock:") + " " + p.stock + "</p>" : ""}
+                    <a href="${pwoaData.adminUrl}post.php?post=${p.id}&action=edit" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 mt-1 inline-block">${pwoaWizardT("viewProduct", "View →")}</a>
                 </div>
             </div>
         `,
@@ -1113,8 +1168,11 @@
   getStrategyKey(name) {
     const map = {
       "Descuento Básico por Productos": "basic_discount",
+      "Descuento Basico por Productos": "basic_discount",
       "Descuento por Monto Mínimo": "min_amount",
+      "Descuento por Monto Minimo": "min_amount",
       "Envío Gratis sobre Monto Mínimo": "free_shipping",
+      "Envio Gratis sobre Monto Minimo": "free_shipping",
       "Descuento Escalonado por Cantidad": "tiered_discount",
       "Descuentos por Volumen (Bulk)": "bulk_discount",
       "Lleva X Paga Y": "buy_x_pay_y",
@@ -1123,6 +1181,18 @@
       "Descuento por Stock Bajo": "low_stock",
       "Descuento por Compras Recurrentes": "recurring_purchase",
       "Flash Sale (Oferta Relámpago)": "flash_sale",
+      "Flash Sale (Oferta Relampago)": "flash_sale",
+      "Basic product discount": "basic_discount",
+      "Minimum order discount": "min_amount",
+      "Free shipping threshold": "free_shipping",
+      "Tiered quantity discount": "tiered_discount",
+      "Volume (bulk) discounts": "bulk_discount",
+      "Buy X pay Y": "buy_x_pay_y",
+      "Attribute-based quantity discount": "attribute_quantity_discount",
+      "Expiry-based discount": "expiry_based",
+      "Low stock discount": "low_stock",
+      "Repeat purchase reward": "recurring_purchase",
+      "Flash sale": "flash_sale",
     };
     return map[name] || "";
   },
@@ -1155,7 +1225,13 @@
       err.className =
         "bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-6";
       err.innerHTML =
-        "<strong>Error:</strong> La cantidad a llevar debe ser mayor que la cantidad a pagar";
+        "<strong>" +
+        pwoaWizardT("errorLabel", "Error:") +
+        "</strong> " +
+        pwoaWizardT(
+          "buyXPayYInlineError",
+          "The buy quantity must be greater than the pay quantity.",
+        );
 
       gridContainer.insertAdjacentElement("afterend", err);
       return;
@@ -1170,11 +1246,23 @@
     prev.id = "buy-x-pay-y-preview";
     prev.className =
       "bg-blue-50 border-l-4 border-blue-500 text-blue-800 px-4 py-3 rounded mb-6";
+    const free = buy - pay;
+    const unitWord =
+      free === 1
+        ? pwoaWizardT("previewUnit", "unit")
+        : pwoaWizardT("previewUnits", "units");
+    const previewLine = (pwoaWizardT("previewBuyPay", "Preview: Buy %1$s pay %2$s = %3$s%% off per set") + "")
+      .replace("%1$s", String(buy))
+      .replace("%2$s", String(pay))
+      .replace("%3$s", String(discount));
+    const eachLine = (pwoaWizardT("previewEachSet", "Every %1$s units, %2$s free") + "")
+      .replace("%1$s", String(buy))
+      .replace("%2$s", String(free) + " " + unitWord);
     prev.innerHTML = `
             <div class="flex items-center gap-3">
                 <div>
-                    <div class="text-sm"><strong>Vista previa:</strong> Lleva ${buy} Paga ${pay} = <strong>${discount}% OFF</strong> por set</div>
-                    <div class="text-xs text-blue-600 mt-1">Cada ${buy} unidades, ${buy - pay} ${buy - pay === 1 ? "es" : "son"} gratis</div>
+                    <div class="text-sm"><strong>${pwoaWizardT("previewColon", "Preview:")}</strong> ${previewLine}</div>
+                    <div class="text-xs text-blue-600 mt-1">${eachLine}</div>
                 </div>
             </div>
         `;
@@ -1204,7 +1292,10 @@
 
         const defaultOpt = document.createElement("option");
         defaultOpt.value = "";
-        defaultOpt.textContent = "Seleccionar atributo...";
+        defaultOpt.textContent = pwoaWizardT(
+          "selectAttribute",
+          "Select an attribute…",
+        );
         select.appendChild(defaultOpt);
 
         attributes.forEach((a) => {
@@ -1242,7 +1333,10 @@
 
         const defaultOpt = document.createElement("option");
         defaultOpt.value = "";
-        defaultOpt.textContent = "Primero selecciona un atributo...";
+        defaultOpt.textContent = pwoaWizardT(
+          "selectAttributeFirst",
+          "Select an attribute first…",
+        );
         select.appendChild(defaultOpt);
 
         div.appendChild(select);
@@ -1290,7 +1384,8 @@
     const select = document.getElementById("attribute-value-select");
     if (!select || !attributeSlug) return;
 
-    select.innerHTML = '<option value="">Cargando...</option>';
+    select.innerHTML =
+      '<option value="">' + pwoaWizardT("loading", "Loading…") + "</option>";
 
     const res = await fetch(pwoaData.ajaxUrl, {
       method: "POST",
@@ -1305,12 +1400,17 @@
 
     if (data.success && data.data.length) {
       select.innerHTML =
-        '<option value="">Seleccionar valor...</option>' +
+        '<option value="">' +
+        pwoaWizardT("selectValue", "Select value…") +
+        "</option>" +
         data.data
           .map((t) => `<option value="${t.slug}">${t.name}</option>`)
           .join("");
     } else {
-      select.innerHTML = '<option value="">No hay valores disponibles</option>';
+      select.innerHTML =
+        '<option value="">' +
+        pwoaWizardT("noValues", "No values available") +
+        "</option>";
     }
 
     this.previewAttributeDiscount();
@@ -1353,12 +1453,30 @@
     prev.className =
       "bg-blue-50 border-l-4 border-blue-500 text-blue-800 px-4 py-3 rounded mb-6";
 
-    let maxText = maxApps > 0 ? ` (máximo ${maxApps * minQty} productos)` : "";
+    const maxText =
+      maxApps > 0
+        ? " " +
+          (pwoaWizardT("maxMatchingItems", "(max %s matching items)") + "").replace(
+            "%s",
+            String(maxApps * minQty),
+          )
+        : "";
+    const mainLine = (pwoaWizardT(
+      "attrPreviewMain",
+      'Every %1$s items of "%2$s" = %3$s%% off',
+    ) + "")
+      .replace("%1$s", String(minQty))
+      .replace("%2$s", valueName)
+      .replace("%3$s", String(discValue));
+    const appsLine =
+      maxApps > 0
+        ? maxApps + " " + pwoaWizardT("applications", "applications")
+        : pwoaWizardT("unlimited", "Unlimited");
 
     prev.innerHTML = `
             <div>
-                <div class="text-sm"><strong>Vista previa:</strong> Cada ${minQty} productos de "${valueName}" = <strong>${discValue}% OFF</strong></div>
-                <div class="text-xs text-blue-600 mt-1">Máximo ${maxApps > 0 ? maxApps + " aplicaciones" : "ilimitado"}${maxText}</div>
+                <div class="text-sm"><strong>${pwoaWizardT("previewColon", "Preview:")}</strong> ${mainLine}</div>
+                <div class="text-xs text-blue-600 mt-1">${appsLine}${maxText}</div>
             </div>
         `;
 

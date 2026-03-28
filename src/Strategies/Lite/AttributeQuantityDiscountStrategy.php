@@ -84,22 +84,23 @@ class AttributeQuantityDiscountStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Descuento por Atributos',
-            'description'   => 'Aplica descuento cuando el cliente compra X productos con un atributo especifico (ej: 3 productos de la marca Nike)',
+            'key'           => 'attribute_quantity_discount',
+            'name'          => __('Attribute-based quantity discount', 'pw-ofertas-avanzadas'),
+            'description'   => __('Discount when the cart reaches X units that share a product attribute (e.g. three items with the same brand).', 'pw-ofertas-avanzadas'),
             'effectiveness' => 5,
-            'when_to_use'   => 'Ideal para promociones de marca, material, color, etc. Ejemplo: "Lleva 3 productos Nike y obten 15% OFF". Muy efectivo para liquidar stock de atributos especificos o promocionar marcas.',
+            'when_to_use'   => __('Brand, material, color, or similar promos. Example: “Buy 3 Nike items, get 15% off.” Good for clearing attribute-specific stock.', 'pw-ofertas-avanzadas'),
             'objective'     => 'aov',
         ];
     }
 
     public static function getConfigFields(): array {
         return [
-            ['key' => 'attribute_slug',   'label' => 'Atributo del producto',             'type' => 'attribute_select',       'required' => true, 'description' => 'Selecciona el atributo (ej: Marca, Color, Talla)'],
-            ['key' => 'attribute_value',  'label' => 'Valor del atributo',                'type' => 'attribute_value_select', 'required' => true, 'description' => 'Selecciona el valor especifico del atributo'],
-            ['key' => 'min_quantity',     'label' => 'Cantidad minima de productos',      'type' => 'number',                 'required' => true, 'description' => 'Cantidad de productos con este atributo para activar el descuento'],
-            ['key' => 'discount_type',    'label' => 'Tipo de descuento',                 'type' => 'select', 'options' => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo por unidad'], 'required' => true],
-            ['key' => 'discount_value',   'label' => 'Valor del descuento',               'type' => 'number',                 'required' => true],
-            ['key' => 'max_applications', 'label' => 'Limite de aplicaciones (opcional)',  'type' => 'number',                 'required' => false, 'description' => 'Maximo de veces que se puede aplicar el descuento. Dejalo vacio para ilimitado'],
+            ['key' => 'attribute_slug',   'label' => __('Product attribute', 'pw-ofertas-avanzadas'),             'type' => 'attribute_select',       'required' => true, 'description' => __('Choose the attribute (e.g. brand, color, size).', 'pw-ofertas-avanzadas')],
+            ['key' => 'attribute_value',  'label' => __('Attribute value', 'pw-ofertas-avanzadas'),                'type' => 'attribute_value_select', 'required' => true, 'description' => __('Choose the specific attribute term.', 'pw-ofertas-avanzadas')],
+            ['key' => 'min_quantity',     'label' => __('Minimum matching quantity', 'pw-ofertas-avanzadas'),      'type' => 'number',                 'required' => true, 'description' => __('How many matching items are required to trigger the discount.', 'pw-ofertas-avanzadas')],
+            ['key' => 'discount_type',    'label' => __('Discount type', 'pw-ofertas-avanzadas'),                 'type' => 'select', 'options' => ['percentage' => __('Percentage', 'pw-ofertas-avanzadas'), 'fixed' => __('Fixed per unit', 'pw-ofertas-avanzadas')], 'required' => true],
+            ['key' => 'discount_value',   'label' => __('Discount value', 'pw-ofertas-avanzadas'),               'type' => 'number',                 'required' => true],
+            ['key' => 'max_applications', 'label' => __('Max applications (optional)', 'pw-ofertas-avanzadas'),  'type' => 'number',                 'required' => false, 'description' => __('Cap how many times the discount can apply. Leave empty for unlimited.', 'pw-ofertas-avanzadas')],
         ];
     }
 }

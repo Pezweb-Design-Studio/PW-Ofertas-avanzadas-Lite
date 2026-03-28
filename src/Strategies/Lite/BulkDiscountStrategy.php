@@ -82,10 +82,11 @@ class BulkDiscountStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Descuentos por Volumen (Bulk)',
-            'description'   => 'Configura multiples productos con descuentos individuales limitados por cantidad',
+            'key'           => 'bulk_discount',
+            'name'          => __('Volume (bulk) discounts', 'pw-ofertas-avanzadas'),
+            'description'   => __('Set up multiple products, each with its own quantity-capped discount.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 5,
-            'when_to_use'   => 'Ideal para ofertas especificas por producto con limite de stock en descuento. Ejemplo: "10% OFF en las primeras 50 unidades" de varios productos diferentes. Muy efectivo para liquidaciones controladas y ofertas flash.',
+            'when_to_use'   => __('Great for per-product offers with a limited discounted quantity. Example: 10% off the first 50 units of several SKUs. Strong for controlled clearances and flash deals.', 'pw-ofertas-avanzadas'),
             'objective'     => 'aov',
         ];
     }
@@ -94,15 +95,15 @@ class BulkDiscountStrategy implements DiscountStrategy {
         return [
             [
                 'key'         => 'bulk_items',
-                'label'       => 'Productos en oferta',
+                'label'       => __('Products on sale', 'pw-ofertas-avanzadas'),
                 'type'        => 'repeater',
-                'description' => 'Agrega cada producto con su configuracion individual. El descuento se aplicara SOLO a las primeras X unidades especificadas.',
+                'description' => __('Add each product with its own settings. The discount applies only to the first X units you specify.', 'pw-ofertas-avanzadas'),
                 'fields'      => [
-                    ['key' => 'product_id',     'label' => 'Producto',                       'type' => 'product_search', 'required' => true],
-                    ['key' => 'discount_type',  'label' => 'Tipo de descuento',              'type' => 'select', 'options' => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo por unidad'], 'required' => true],
-                    ['key' => 'discount_value', 'label' => 'Valor del descuento',            'type' => 'number', 'required' => true, 'description' => 'Ej: 15 para 15% o monto fijo'],
-                    ['key' => 'max_quantity',   'label' => 'Cantidad con descuento',          'type' => 'number', 'required' => true, 'description' => 'Maximo de unidades que recibiran descuento'],
-                    ['key' => 'badge_text',     'label' => 'Badge personalizado (opcional)',  'type' => 'text',   'required' => false, 'description' => 'Ej: "Oferta unica", "Vencen pronto"'],
+                    ['key' => 'product_id',     'label' => __('Product', 'pw-ofertas-avanzadas'),                       'type' => 'product_search', 'required' => true],
+                    ['key' => 'discount_type',  'label' => __('Discount type', 'pw-ofertas-avanzadas'),              'type' => 'select', 'options' => ['percentage' => __('Percentage', 'pw-ofertas-avanzadas'), 'fixed' => __('Fixed per unit', 'pw-ofertas-avanzadas')], 'required' => true],
+                    ['key' => 'discount_value', 'label' => __('Discount value', 'pw-ofertas-avanzadas'),            'type' => 'number', 'required' => true, 'description' => __('e.g. 15 for 15% or a fixed amount per unit.', 'pw-ofertas-avanzadas')],
+                    ['key' => 'max_quantity',   'label' => __('Discounted quantity', 'pw-ofertas-avanzadas'),          'type' => 'number', 'required' => true, 'description' => __('Maximum units that receive the discount.', 'pw-ofertas-avanzadas')],
+                    ['key' => 'badge_text',     'label' => __('Custom badge (optional)', 'pw-ofertas-avanzadas'),  'type' => 'text',   'required' => false, 'description' => __('e.g. “Limited offer”, “Expiring soon”.', 'pw-ofertas-avanzadas')],
                 ],
             ],
         ];

@@ -51,10 +51,11 @@ class TieredDiscountStrategy implements DiscountStrategy {
 
     public static function getMeta(): array {
         return [
-            'name'          => 'Descuento Escalonado por Cantidad',
-            'description'   => 'Descuentos progresivos segun cantidad de productos en el carrito',
+            'key'           => 'tiered_discount',
+            'name'          => __('Tiered quantity discount', 'pw-ofertas-avanzadas'),
+            'description'   => __('Higher discounts as the number of items in the cart increases.', 'pw-ofertas-avanzadas'),
             'effectiveness' => 4,
-            'when_to_use'   => 'Black Friday, Cyber Monday, campanas de volumen. Muy efectivo con productos de bajo costo unitario. Ejemplo: 10% en 3 items, 20% en 5, 30% en 10.',
+            'when_to_use'   => __('Peak sales and volume campaigns. Strong with low unit-cost items. Example: 10% at 3 items, 20% at 5, 30% at 10.', 'pw-ofertas-avanzadas'),
             'objective'     => 'aov',
         ];
     }
@@ -63,19 +64,19 @@ class TieredDiscountStrategy implements DiscountStrategy {
         return [
             [
                 'key'      => 'discount_type',
-                'label'    => 'Tipo de descuento',
+                'label'    => __('Discount type', 'pw-ofertas-avanzadas'),
                 'type'     => 'select',
-                'options'  => ['percentage' => 'Porcentaje', 'fixed' => 'Monto fijo'],
+                'options'  => ['percentage' => __('Percentage', 'pw-ofertas-avanzadas'), 'fixed' => __('Fixed amount', 'pw-ofertas-avanzadas')],
                 'required' => true,
             ],
             [
                 'key'         => 'tiers',
-                'label'       => 'Niveles de descuento',
+                'label'       => __('Discount tiers', 'pw-ofertas-avanzadas'),
                 'type'        => 'repeater',
-                'description' => 'Define los niveles. El sistema aplicara el mayor descuento que cumpla la condicion.',
+                'description' => __('Define tiers; the best matching tier is applied.', 'pw-ofertas-avanzadas'),
                 'fields'      => [
-                    ['key' => 'quantity', 'label' => 'Cantidad de productos', 'type' => 'number', 'required' => true],
-                    ['key' => 'discount', 'label' => 'Descuento',            'type' => 'number', 'required' => true, 'description' => 'Porcentaje o valor fijo segun tipo seleccionado'],
+                    ['key' => 'quantity', 'label' => __('Item quantity', 'pw-ofertas-avanzadas'), 'type' => 'number', 'required' => true],
+                    ['key' => 'discount', 'label' => __('Discount', 'pw-ofertas-avanzadas'),            'type' => 'number', 'required' => true, 'description' => __('Percentage or fixed value, depending on discount type.', 'pw-ofertas-avanzadas')],
                 ],
             ],
         ];

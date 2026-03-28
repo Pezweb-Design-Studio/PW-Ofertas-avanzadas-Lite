@@ -1,28 +1,27 @@
 <?php
-// Datos compartidos de modos de apilamiento.
-// Usados por settings.php (formulario) y dashboard.php (modal de ayuda).
+// Shared stacking-mode copy for settings.php and dashboard.php help modal.
 defined('ABSPATH') || exit;
 
 $stacking_options = [
-    "priority_first" => [
-        "title"       => "Prioridad primero",
-        "recommended" => true,
-        "description" => "Las campañas marcadas como \"Prioritarias\" siempre tienen precedencia. Si existen campañas prioritarias disponibles, se aplicará la de mayor descuento. Las campañas \"Apilables\" solo se usarán cuando NO haya campañas prioritarias aplicables.",
-        "note_type"   => "neutral",
-        "note"        => "<strong>Caso de uso:</strong> Ideal si quieres tener control total sobre qué descuento tiene más importancia. Útil para ofertas especiales que deben predominar sobre promociones generales.",
+    'priority_first' => [
+        'title'         => __('Priority first', 'pw-ofertas-avanzadas'),
+        'recommended'   => true,
+        'description'   => __('Campaigns marked as “Priority” always take precedence. If priority campaigns are available, the best discount among them is applied. “Stackable” campaigns are only used when no priority campaign applies.', 'pw-ofertas-avanzadas'),
+        'note_type'     => 'neutral',
+        'note'          => __('<strong>Use case:</strong> Best when you need full control over which discount wins. Ideal for special offers that must beat general promotions.', 'pw-ofertas-avanzadas'),
     ],
-    "stack_first" => [
-        "title"       => "Solo apilables (Clásico)",
-        "recommended" => false,
-        "description" => "Si existe AL MENOS una campaña \"Apilable\", se sumarán TODAS las campañas apilables disponibles e ignorará las prioritarias. Solo aplicará campañas prioritarias si no hay ninguna apilable aplicable.",
-        "note_type"   => "neutral",
-        "note"        => "<strong>Caso de uso:</strong> Comportamiento tradicional. Útil si prefieres que los descuentos se acumulen cuando sea posible.",
+    'stack_first'    => [
+        'title'         => __('Stackable only (classic)', 'pw-ofertas-avanzadas'),
+        'recommended'   => false,
+        'description'   => __('If at least one “Stackable” campaign applies, all stackable campaigns are summed and priority campaigns are ignored. Priority applies only when no stackable campaign applies.', 'pw-ofertas-avanzadas'),
+        'note_type'     => 'neutral',
+        'note'          => __('<strong>Use case:</strong> Traditional behavior. Use when you want discounts to add up whenever possible.', 'pw-ofertas-avanzadas'),
     ],
-    "max_discount" => [
-        "title"       => "Siempre el mejor descuento",
-        "recommended" => false,
-        "description" => "El sistema calcula AMBOS escenarios (suma de apilables vs mejor prioritario) y aplica automáticamente el que genere mayor ahorro para el cliente.",
-        "note_type"   => "warning",
-        "note"        => "<strong>⚠️ Precaución:</strong> Este modo puede generar descuentos totales mayores de los esperados si no configuras límites claros en tus campañas. Úsalo con cuidado.",
+    'max_discount'   => [
+        'title'         => __('Always the best discount', 'pw-ofertas-avanzadas'),
+        'recommended'   => false,
+        'description'   => __('The system evaluates both scenarios (sum of stackables vs best priority) and applies whichever saves the customer more.', 'pw-ofertas-avanzadas'),
+        'note_type'     => 'warning',
+        'note'          => __('<strong>Caution:</strong> This mode can produce higher total discounts than expected if campaigns are not capped. Use with care.', 'pw-ofertas-avanzadas'),
     ],
 ];

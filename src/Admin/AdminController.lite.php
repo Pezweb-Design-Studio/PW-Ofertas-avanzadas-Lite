@@ -3,6 +3,7 @@ namespace PW\OfertasAvanzadas\Admin;
 
 defined('ABSPATH') || exit;
 
+use PW\OfertasAvanzadas\Core\UpgradeUrl;
 use PW\OfertasAvanzadas\Repositories\CampaignRepository;
 
 class AdminController
@@ -38,50 +39,56 @@ class AdminController
 
     private const PRO_STRATEGY_META = [
         'PW\\OfertasAvanzadas\\Strategies\\Pro\\MinAmountStrategy' => [
-            'name'          => 'Descuento por Monto Mínimo',
-            'description'   => 'Aplica descuento cuando el carrito supera un monto específico',
+            'key'           => 'min_amount',
+            'name'          => 'Minimum order discount',
+            'description'   => 'Apply a discount when the cart subtotal reaches a minimum amount.',
             'effectiveness' => 5,
-            'when_to_use'   => 'Efectivo todo el año. Ideal para aumentar ticket promedio.',
+            'when_to_use'   => 'Works year-round to lift average order value. Especially strong before holidays and peak sales periods.',
             'objective'     => 'aov',
             'config_fields' => [],
         ],
         'PW\\OfertasAvanzadas\\Strategies\\Pro\\FreeShippingStrategy' => [
-            'name'          => 'Envío Gratis sobre Monto Mínimo',
-            'description'   => 'Elimina costo de envío cuando el carrito supera un monto específico',
+            'key'           => 'free_shipping',
+            'name'          => 'Free shipping threshold',
+            'description'   => 'Waive shipping when the cart reaches a minimum subtotal.',
             'effectiveness' => 5,
-            'when_to_use'   => 'Estrategia permanente altamente efectiva. Incrementa ticket promedio 20-35%.',
+            'when_to_use'   => 'A strong always-on tactic; often lifts average order value by 20–35% across many stores.',
             'objective'     => 'aov',
             'config_fields' => [],
         ],
         'PW\\OfertasAvanzadas\\Strategies\\Pro\\TieredDiscountStrategy' => [
-            'name'          => 'Descuento Escalonado por Cantidad',
-            'description'   => 'Descuentos progresivos según cantidad de productos en el carrito',
+            'key'           => 'tiered_discount',
+            'name'          => 'Tiered quantity discount',
+            'description'   => 'Higher discounts as the number of items in the cart increases.',
             'effectiveness' => 4,
-            'when_to_use'   => 'Black Friday, Cyber Monday, campañas de volumen.',
+            'when_to_use'   => 'Peak sales and volume campaigns. Strong with low unit-cost items.',
             'objective'     => 'aov',
             'config_fields' => [],
         ],
         'PW\\OfertasAvanzadas\\Strategies\\Pro\\LowStockStrategy' => [
-            'name'          => 'Descuento por Stock Bajo',
-            'description'   => 'Aplica descuentos automáticos a productos con pocas unidades disponibles',
+            'key'           => 'low_stock',
+            'name'          => 'Low stock discount',
+            'description'   => 'Automatically discount products when on-hand quantity falls below a threshold.',
             'effectiveness' => 4,
-            'when_to_use'   => 'Liquidación de inventario, cambio de temporada, discontinuación de productos.',
+            'when_to_use'   => 'Seasonal clearance, end-of-line, or when you want urgency from scarcity.',
             'objective'     => 'liquidation',
             'config_fields' => [],
         ],
         'PW\\OfertasAvanzadas\\Strategies\\Pro\\RecurringPurchaseStrategy' => [
-            'name'          => 'Descuento por Compras Recurrentes',
-            'description'   => 'Recompensa a clientes que compran el mismo producto múltiples veces',
+            'key'           => 'recurring_purchase',
+            'name'          => 'Repeat purchase reward',
+            'description'   => 'Reward customers who have bought the same product multiple times.',
             'effectiveness' => 5,
-            'when_to_use'   => 'Productos de recompra: cosméticos, suplementos, alimentos. Aumenta retención 40-60%.',
+            'when_to_use'   => 'Consumables, supplements, cosmetics—any repurchase SKU.',
             'objective'     => 'loyalty',
             'config_fields' => [],
         ],
         'PW\\OfertasAvanzadas\\Strategies\\Pro\\FlashSaleStrategy' => [
-            'name'          => 'Flash Sale (Oferta Relámpago)',
-            'description'   => 'Descuento por tiempo limitado para generar urgencia',
+            'key'           => 'flash_sale',
+            'name'          => 'Flash sale',
+            'description'   => 'Time-limited discount to create urgency.',
             'effectiveness' => 5,
-            'when_to_use'   => 'Black Friday, Cyber Monday, lanzamientos de productos. Máxima efectividad en ventanas de 6-24 horas.',
+            'when_to_use'   => 'Peak events and launches; often strongest in 6–24 hour windows.',
             'objective'     => 'urgency',
             'config_fields' => [],
         ],
@@ -113,6 +120,8 @@ class AdminController
 
     public function __construct()
     {
+        AdminAssets::register();
+
         add_action('admin_menu', [$this, 'addMenuPages']);
 
         foreach (self::AJAX_HOOKS as $hook => $method) {
@@ -125,7 +134,7 @@ class AdminController
         check_ajax_referer('pwoa_nonce', 'nonce');
 
         if (!current_user_can('manage_woocommerce')) {
-            wp_send_json_error('Permisos insuficientes');
+            wp_send_json_error(__('Insufficient permissions.', 'pw-ofertas-avanzadas'));
         }
     }
 
@@ -205,8 +214,8 @@ class AdminController
     public function addMenuPages(): void
     {
         add_menu_page(
-            'Ofertas Avanzadas',
-            'Ofertas',
+            __('PW - Ofertas Avanzadas', 'pw-ofertas-avanzadas'),
+            __('Offers', 'pw-ofertas-avanzadas'),
             'manage_woocommerce',
             'pwoa-dashboard',
             [$this, 'renderDashboard'],
@@ -216,8 +225,8 @@ class AdminController
 
         add_submenu_page(
             'pwoa-dashboard',
-            'Nueva Campaña',
-            'Nueva Campaña',
+            __('New campaign', 'pw-ofertas-avanzadas'),
+            __('New campaign', 'pw-ofertas-avanzadas'),
             'manage_woocommerce',
             'pwoa-new-campaign',
             [$this, 'renderWizard']
@@ -225,8 +234,8 @@ class AdminController
 
         add_submenu_page(
             'pwoa-dashboard',
-            'Shortcodes',
-            'Shortcodes',
+            __('Shortcodes', 'pw-ofertas-avanzadas'),
+            __('Shortcodes', 'pw-ofertas-avanzadas'),
             'manage_woocommerce',
             'pwoa-shortcodes',
             [$this, 'renderShortcodes']
@@ -250,11 +259,13 @@ class AdminController
         if (!isset($_GET['edit'])) {
             $total = CampaignRepository::getCount();
             if ($total >= self::CAMPAIGN_LIMIT) {
+                $upgrade_url = UpgradeUrl::get();
                 wp_die(
-                    '<h1>Límite alcanzado</h1>' .
-                    '<p>Has alcanzado el límite de 5 campañas en la versión Lite.</p>' .
-                    '<p><a href="https://pezweb.com/servicios/ofertas-avanzadas/">Actualiza a Pro</a> para campañas ilimitadas.</p>',
-                    'Límite de campañas',
+                    '<h1>' . esc_html(__('Campaign limit reached', 'pw-ofertas-avanzadas')) . '</h1>' .
+                    '<p>' . esc_html(__('You have reached the limit of 5 campaigns on the Lite edition.', 'pw-ofertas-avanzadas')) . '</p>' .
+                    '<p><a href="' . esc_url($upgrade_url) . '">' . esc_html(__('Upgrade to Pro', 'pw-ofertas-avanzadas')) . '</a> ' .
+                    esc_html(__('for unlimited campaigns.', 'pw-ofertas-avanzadas')) . '</p>',
+                    esc_html__('Campaign limit', 'pw-ofertas-avanzadas'),
                     ['back_link' => true]
                 );
             }
@@ -283,7 +294,7 @@ class AdminController
         if ($campaign_id > 0) {
             $campaign = CampaignRepository::getById($campaign_id);
             if (!$campaign) {
-                wp_send_json_error('Campaña no encontrada');
+                wp_send_json_error(__('Campaign not found.', 'pw-ofertas-avanzadas'));
             }
             $campaign->config     = json_decode($campaign->config, true);
             $campaign->conditions = json_decode($campaign->conditions, true);
@@ -326,13 +337,13 @@ class AdminController
         $this->verifyAjax();
 
         if (CampaignRepository::getCount() >= self::CAMPAIGN_LIMIT) {
-            wp_send_json_error('Has alcanzado el límite de 5 campañas. Actualiza a Pro para campañas ilimitadas.');
+            wp_send_json_error(__('You have reached the limit of 5 campaigns. Upgrade to Pro for unlimited campaigns.', 'pw-ofertas-avanzadas'));
             return;
         }
 
         $strategy = sanitize_text_field($_POST['strategy'] ?? '');
         if (!$this->isLiteStrategy($strategy)) {
-            wp_send_json_error('Esta estrategia no está disponible en la versión Lite. Actualiza a Pro.');
+            wp_send_json_error(__('This strategy is not available in the Lite edition. Upgrade to Pro.', 'pw-ofertas-avanzadas'));
             return;
         }
 
@@ -340,17 +351,22 @@ class AdminController
 
         if (!$campaign_id) {
             global $wpdb;
-            wp_send_json_error('Error al crear campaña: ' . $wpdb->last_error);
+            wp_send_json_error(
+                __('Could not create campaign.', 'pw-ofertas-avanzadas') . ' ' . esc_html($wpdb->last_error),
+            );
         }
 
-        wp_send_json_success(['message' => 'Campaña creada correctamente', 'campaign_id' => $campaign_id]);
+        wp_send_json_success([
+            'message'     => __('Campaign created successfully.', 'pw-ofertas-avanzadas'),
+            'campaign_id' => $campaign_id,
+        ]);
     }
 
     public function ajaxToggleCampaign(): void
     {
         $this->verifyAjax();
         CampaignRepository::updateStatus(intval($_POST['campaign_id'] ?? 0), intval($_POST['active'] ?? 0));
-        wp_send_json_success(['message' => 'Estado actualizado']);
+        wp_send_json_success(['message' => __('Status updated.', 'pw-ofertas-avanzadas')]);
     }
 
     public function ajaxGetCampaign(): void
@@ -359,7 +375,7 @@ class AdminController
 
         $campaign = CampaignRepository::getById(intval($_POST['campaign_id'] ?? 0));
         if (!$campaign) {
-            wp_send_json_error('Campaña no encontrada');
+            wp_send_json_error(__('Campaign not found.', 'pw-ofertas-avanzadas'));
         }
 
         $campaign->config     = json_decode($campaign->config, true);
@@ -374,7 +390,7 @@ class AdminController
 
         $strategy = sanitize_text_field($_POST['strategy'] ?? '');
         if (!$this->isLiteStrategy($strategy)) {
-            wp_send_json_error('Esta estrategia no está disponible en la versión Lite. Actualiza a Pro.');
+            wp_send_json_error(__('This strategy is not available in the Lite edition. Upgrade to Pro.', 'pw-ofertas-avanzadas'));
             return;
         }
 
@@ -382,10 +398,13 @@ class AdminController
         $success     = CampaignRepository::update($campaign_id, $this->buildCampaignData($strategy));
 
         if (!$success) {
-            wp_send_json_error('Error al actualizar campaña');
+            wp_send_json_error(__('Could not update the campaign.', 'pw-ofertas-avanzadas'));
         }
 
-        wp_send_json_success(['message' => 'Campaña actualizada correctamente', 'campaign_id' => $campaign_id]);
+        wp_send_json_success([
+            'message'     => __('Campaign updated successfully.', 'pw-ofertas-avanzadas'),
+            'campaign_id' => $campaign_id,
+        ]);
     }
 
     public function ajaxDeleteCampaign(): void
@@ -393,10 +412,10 @@ class AdminController
         $this->verifyAjax();
 
         if (!CampaignRepository::softDelete(intval($_POST['campaign_id'] ?? 0))) {
-            wp_send_json_error('Error al eliminar campaña');
+            wp_send_json_error(__('Could not delete the campaign.', 'pw-ofertas-avanzadas'));
         }
 
-        wp_send_json_success(['message' => 'Campaña eliminada correctamente']);
+        wp_send_json_success(['message' => __('Campaign deleted successfully.', 'pw-ofertas-avanzadas')]);
     }
 
     public function ajaxSearchProducts(): void
@@ -530,12 +549,12 @@ class AdminController
 
         $attribute_slug = sanitize_text_field($_POST['attribute_slug'] ?? '');
         if (empty($attribute_slug)) {
-            wp_send_json_error('Atributo no especificado');
+            wp_send_json_error(__('Attribute not specified.', 'pw-ofertas-avanzadas'));
         }
 
         $terms = get_terms(['taxonomy' => $attribute_slug, 'hide_empty' => false]);
         if (is_wp_error($terms)) {
-            wp_send_json_error('Error al obtener términos');
+            wp_send_json_error(__('Could not load attribute terms.', 'pw-ofertas-avanzadas'));
         }
 
         wp_send_json_success(array_map(fn($t) => ['slug' => $t->slug, 'name' => $t->name], $terms));
@@ -578,23 +597,23 @@ class AdminController
 
         $campaign_id = intval($_POST['campaign_id'] ?? 0);
         if (!$campaign_id) {
-            wp_send_json_error('ID de campaña inválido');
+            wp_send_json_error(__('Invalid campaign ID.', 'pw-ofertas-avanzadas'));
         }
 
         if (!CampaignRepository::resetUnitsSold($campaign_id)) {
-            wp_send_json_error('Error al resetear contador');
+            wp_send_json_error(__('Could not reset the counter.', 'pw-ofertas-avanzadas'));
         }
 
         if (class_exists('PW\\OfertasAvanzadas\\Handlers\\ProductBadgeHandler')) {
             \PW\OfertasAvanzadas\Handlers\ProductBadgeHandler::clearCache();
         }
 
-        wp_send_json_success(['message' => 'Contador reseteado correctamente']);
+        wp_send_json_success(['message' => __('Counter reset successfully.', 'pw-ofertas-avanzadas')]);
     }
 
     private function getCachedStrategies(string $objective): array
     {
-        $cache_key  = 'pwoa_strategies_' . $objective;
+        $cache_key  = 'pwoa_strategies_v2_' . $objective;
         $strategies = get_transient($cache_key);
 
         if ($strategies === false) {
@@ -650,7 +669,12 @@ class AdminController
             $meta = self::PRO_STRATEGY_META[$class] ?? null;
             if ($meta) {
                 $meta['available'] = false;
-                $result[]          = $meta;
+                foreach (['name', 'description', 'when_to_use'] as $k) {
+                    if (!empty($meta[$k])) {
+                        $meta[$k] = __($meta[$k], 'pw-ofertas-avanzadas');
+                    }
+                }
+                $result[] = $meta;
             }
         }
 
