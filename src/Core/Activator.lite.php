@@ -31,6 +31,7 @@ class Activator {
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql_campaigns);
+        dbDelta(Schema::statsTableSql());
 
         update_option('pwoa_db_version', PWOA_VERSION);
         update_option('pwoa_edition', 'lite');

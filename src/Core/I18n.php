@@ -13,21 +13,68 @@ final class I18n
             return;
         }
         self::$registered = true;
-        self::loadTextdomain();
+
         add_action('init', [self::class, 'loadTextdomain'], 0);
     }
 
     public static function loadTextdomain(): void
     {
-        if (!defined('PWOA_PLUGIN_FILE')) {
+        if (!defined('PWOA_PATH') || !defined('PWOA_PLUGIN_FILE')) {
             return;
         }
 
+        $domain = 'pw-ofertas-avanzadas';
+        $locale = str_replace('-', '_', determine_locale());
+        $mofile = self::resolveMoFile($domain, $locale);
+
+        unload_textdomain($domain, false);
+
+        if ($mofile !== null) {
+            /*
+             * WP 6.5+ stores translations in WP_Translation_Controller under the $locale passed here.
+             * Runtime lookups use determine_locale() (e.g. es_CL). The bundled file is es_ES.mo, but
+             * the bucket must match the request locale or translate() never finds entries.
+             */
+            load_textdomain($domain, $mofile, $locale);
+        }
+
         load_plugin_textdomain(
-            'pw-ofertas-avanzadas',
+            $domain,
             false,
             dirname(plugin_basename(PWOA_PLUGIN_FILE)) . '/languages',
         );
+    }
+
+    /**
+     * Pick an existing .mo on disk. Single shipped pack: es_ES; used for all regional Spanish locales.
+     *
+     * @return string|null Absolute path to .mo, or null if none readable.
+     */
+    private static function resolveMoFile(string $domain, string $locale): ?string
+    {
+        $dir = trailingslashit(PWOA_PATH) . 'languages';
+        $prefix = $dir . '/' . $domain . '-';
+
+        $candidates = [$prefix . $locale . '.mo'];
+
+        if (self::isSpanishLocale($locale) && $locale !== 'es_ES') {
+            $candidates[] = $prefix . 'es_ES.mo';
+        }
+
+        foreach ($candidates as $path) {
+            if (is_readable($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    private static function isSpanishLocale(string $locale): bool
+    {
+        $locale = strtolower($locale);
+
+        return $locale === 'es' || str_starts_with($locale, 'es_');
     }
 
     /** Strings for assets/js/wizard.js (English msgids). */

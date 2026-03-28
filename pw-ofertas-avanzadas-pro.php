@@ -24,6 +24,13 @@ define('PWOA_PATH', plugin_dir_path(__FILE__));
 define('PWOA_URL', plugin_dir_url(__FILE__));
 define('PWOA_PLUGIN_FILE', __FILE__);
 
+add_action('before_woocommerce_init', function (): void {
+    if (!class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+        return;
+    }
+    \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', PWOA_PLUGIN_FILE, true);
+});
+
 add_action('admin_init', function () {
     if (!is_plugin_active('pw-ofertas-avanzadas-pro/pw-ofertas-avanzadas-pro.php')) return;
     deactivate_plugins(plugin_basename(__FILE__));

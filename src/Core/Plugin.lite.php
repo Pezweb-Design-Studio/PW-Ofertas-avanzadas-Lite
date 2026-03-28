@@ -20,6 +20,7 @@ class Plugin {
     }
 
     public function init(): void {
+        Schema::ensureStatsTable();
         I18n::register();
 
         if (is_admin()) {

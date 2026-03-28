@@ -23,12 +23,11 @@ class AnalyticsService {
 
         $date_from = date('Y-m-d', strtotime("-{$days} days"));
 
-        $total_orders = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(DISTINCT ID) FROM {$wpdb->prefix}posts WHERE post_type = 'shop_order' AND post_date >= %s",
-            $date_from
-        ));
+        $total_orders = self::countOrdersSinceDate($date_from);
 
-        if ($total_orders === 0) return 0.0;
+        if ($total_orders === 0) {
+            return 0.0;
+        }
 
         $orders_with_discount = (int) $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(DISTINCT order_id) FROM {$wpdb->prefix}pwoa_stats WHERE applied_at >= %s",
@@ -36,6 +35,30 @@ class AnalyticsService {
         ));
 
         return round(($orders_with_discount / $total_orders) * 100, 2);
+    }
+
+    /**
+     * Order count since a calendar date (site timezone), compatible with HPOS and legacy storage.
+     */
+    private static function countOrdersSinceDate(string $date_from): int
+    {
+        if (!function_exists('wc_get_orders')) {
+            return 0;
+        }
+
+        $result = wc_get_orders([
+            'limit'      => 1,
+            'paginate'   => true,
+            'status'     => 'any',
+            'date_after' => $date_from,
+            'return'     => 'ids',
+        ]);
+
+        if (is_object($result) && isset($result->total)) {
+            return (int) $result->total;
+        }
+
+        return 0;
     }
 
     public static function calculateROI(array $summary): float {

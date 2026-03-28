@@ -25,8 +25,8 @@ if [ -z "$edition" ]; then
     echo -e "${RED}❌ Error: Debes especificar la edición${NC}"
     echo ""
     echo "Uso:"
-    echo "  ${CYAN}./build-deploy-v2.sh deploy [lite|pro]${NC}  - Incrementa versión y crea ZIP"
-    echo "  ${CYAN}./build-deploy-v2.sh [lite|pro]${NC}         - Copia archivos para desarrollo"
+    echo "  ${CYAN}./build-deploy.sh deploy [lite|pro]${NC}  - Incrementa versión y crea ZIP"
+    echo "  ${CYAN}./build-deploy.sh [lite|pro]${NC}         - Copia archivos para desarrollo"
     echo ""
     echo "NPM Scripts:"
     echo "  ${CYAN}npm run build:lite${NC} / ${CYAN}npm run build:pro${NC}"
@@ -156,13 +156,6 @@ cp composer.json "$plugin_dir/"
 # Vendor
 cp -r vendor "$plugin_dir/"
 
-# Assets base
-mkdir -p "$plugin_dir/assets/js"
-cp assets/js/wizard.js "$plugin_dir/assets/js/"
-
-# SRC base
-mkdir -p "$plugin_dir/src"
-
 # ============================================
 # COPIA SELECTIVA SEGÚN EDICIÓN
 # ============================================
@@ -176,7 +169,6 @@ if [ "$edition" = "lite" ]; then
     cp src/Admin/Views/dashboard.lite.php "$plugin_dir/src/Admin/Views/dashboard.php"
     cp src/Admin/Views/wizard.lite.php "$plugin_dir/src/Admin/Views/wizard.php"
     cp src/Admin/Views/shortcodes.php "$plugin_dir/src/Admin/Views/"
-    cp assets/js/wizard.lite-addon.js "$plugin_dir/assets/js/"
 
     # Core (LITE)
     mkdir -p "$plugin_dir/src/Core"
@@ -221,7 +213,6 @@ else
     cp src/Admin/Views/settings.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/shortcodes.php "$plugin_dir/src/Admin/Views/"
     cp src/Admin/Views/data/stacking-options.php "$plugin_dir/src/Admin/Views/data/"
-    cp assets/js/analytics.js "$plugin_dir/assets/js/"
 
     # Core (PRO)
     mkdir -p "$plugin_dir/src/Core"
@@ -252,6 +243,52 @@ else
     cp -r src/Strategies/Lite/* "$plugin_dir/src/Strategies/Lite/"
     cp -r src/Strategies/Pro/* "$plugin_dir/src/Strategies/Pro/"
 fi
+
+# ============================================
+# COMPARTIDO: AdminAssets, i18n, traducciones, assets
+# ============================================
+echo "  → Shared files (AdminAssets, I18n, languages, assets)..."
+
+mkdir -p "$plugin_dir/src/Admin"
+cp src/Admin/AdminAssets.php "$plugin_dir/src/Admin/"
+
+mkdir -p "$plugin_dir/src/Core"
+cp src/Core/Schema.php "$plugin_dir/src/Core/"
+cp src/Core/I18n.php "$plugin_dir/src/Core/"
+cp src/Core/UpgradeUrl.php "$plugin_dir/src/Core/"
+
+if [ -d "languages" ]; then
+    mkdir -p "$plugin_dir/languages"
+    cp languages/* "$plugin_dir/languages/" 2>/dev/null || true
+    if command -v msgfmt >/dev/null 2>&1; then
+        for po in "$plugin_dir/languages"/*.po; do
+            [ -f "$po" ] || continue
+            msgfmt -o "${po%.po}.mo" "$po"
+        done
+    fi
+fi
+
+[ -f "readme.txt" ] && cp readme.txt "$plugin_dir/"
+[ -f "readme_es.txt" ] && cp readme_es.txt "$plugin_dir/"
+
+mkdir -p "$plugin_dir/assets/js" "$plugin_dir/assets/css"
+cp assets/js/wizard.js "$plugin_dir/assets/js/"
+if [ "$edition" = "lite" ]; then
+    cp assets/js/wizard.lite-addon.js "$plugin_dir/assets/js/"
+    cp assets/js/admin-dashboard-lite.js "$plugin_dir/assets/js/"
+else
+    cp assets/js/admin-dashboard.js "$plugin_dir/assets/js/"
+    cp assets/js/analytics.js "$plugin_dir/assets/js/"
+fi
+cp assets/js/admin-settings.js "$plugin_dir/assets/js/"
+cp assets/js/admin-shortcodes.js "$plugin_dir/assets/js/"
+cp assets/js/product-badges.js "$plugin_dir/assets/js/"
+
+shopt -s nullglob
+for css in assets/css/*.css; do
+    cp "$css" "$plugin_dir/assets/css/"
+done
+shopt -u nullglob
 
 # ============================================
 # LIMPIEZA

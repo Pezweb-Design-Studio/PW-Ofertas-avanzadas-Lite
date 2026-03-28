@@ -38,6 +38,7 @@ src/
 ## Preferencias de trabajo
 - Cambios minimalistas. Resolver desde la raíz, no con parches.
 - Sin estilos inline (`style="..."`). Usar componentes del design system o clases CSS estructuradas.
+- **No editar la copia del plugin bajo `wp-content/plugins/...`** salvo pruebas locales desechables. El flujo correcto es cambiar este repo, ejecutar `./build-deploy.sh [lite|pro]` y desplegar el artefacto en `releases/…` (o el proceso que uses a partir del build). Así el paquete Lite incluye siempre `Schema.php`, `I18n.php`, idiomas y assets compartidos.
 
 ## Lecciones técnicas aprendidas
 
@@ -70,6 +71,25 @@ Cuando un callback de `render_page` o `card` tiene closures internas, las variab
     ]);
 },
 ```
+
+### Base de datos: tabla `pwoa_stats`
+- **Pro** y **Lite** deben poder asumir que existe `{$wpdb->prefix}pwoa_stats` (dashboard, `CampaignRepository::hasStats`, etc.).
+- `src/Core/Schema.php`: `ensureStatsTable()` (comprueba con `SHOW TABLES` + `dbDelta`) se llama al inicio de `Plugin::init()` / `Plugin.lite.php`; los activadores usan el mismo SQL vía `Schema::statsTableSql()`.
+- `CampaignRepository::hasStats()` debe tolerar ausencia de tabla (por si acaso) sin disparar errores en log.
+
+### WooCommerce HPOS y avisos de compatibilidad
+- Declarar compatibilidad en el archivo principal del plugin, en `before_woocommerce_init`, con `Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', PWOA_PLUGIN_FILE, true )`.
+- No contar pedidos con SQL directo a `wp_posts` (`post_type = shop_order`); usar `wc_get_orders()` (API del almacén de pedidos) para métricas compatibles con HPOS.
+
+### Internacionalización (WordPress 6.5+ y regiones `es_*`)
+- En runtime WordPress solo carga **`.mo`**, no `.po`. Versionar en git **`languages/pw-ofertas-avanzadas-es_ES.mo`** (regenerar con `msgfmt` tras cambios en el `.po`).
+- Tras añadir cadenas en código: actualizar el POT (`wp i18n make-pot` o flujo equivalente), **`msgmerge`** al `es_ES.po`, completar traducciones y **`msgfmt -o … .mo`**.
+- **`WP_Translation_Controller`** (WP 6.5+) indexa traducciones por **locale de la petición** (`determine_locale()`, p. ej. `es_CL`). Al cargar el único paquete `pw-ofertas-avanzadas-es_ES.mo`, hay que llamar `load_textdomain( $domain, $ruta_al_mo, $locale_peticion )` con ese locale, aunque el archivo en disco sea `…-es_ES.mo`. Resolver la ruta del archivo con fallback (p. ej. probar `es_CL` y luego `es_ES`). Normalizar `es-CL` → `es_CL` si hiciera falta.
+- Cargar el dominio del plugin en **`init`** (p. ej. `I18n::register()` solo engancha `loadTextdomain` ahí), alineado con las recomendaciones post-6.7.
+
+### Build (`build-deploy.sh`)
+- Bloque compartido post Lite/Pro: copia **`src/Core/Schema.php`** junto a `I18n.php` y `UpgradeUrl.php`.
+- Si existe `msgfmt`, recompila los `.po` del directorio `languages/` en el artefacto para que el ZIP siempre lleve `.mo` actualizados.
 
 ## Lo que NO tocar
 - `vendor/` — generado por Composer

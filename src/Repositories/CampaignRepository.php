@@ -179,6 +179,11 @@ class CampaignRepository
     {
         global $wpdb;
 
+        $stats = $wpdb->prefix . 'pwoa_stats';
+        if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $stats)) !== $stats) {
+            return false;
+        }
+
         return (int) $wpdb->get_var($wpdb->prepare("
             SELECT COUNT(*) FROM {$wpdb->prefix}pwoa_stats
             WHERE campaign_id = %d
