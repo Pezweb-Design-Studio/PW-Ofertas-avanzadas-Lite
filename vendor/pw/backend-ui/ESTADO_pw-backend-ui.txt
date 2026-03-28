@@ -1,0 +1,105 @@
+ESTADO ACTUAL — pw/backend-ui
+=================================
+Versión: 1.4.0 (dev-main)
+Fecha:   Febrero 2026
+
+QUÉ HACE
+---------
+Sistema de diseño compartido para el admin de WordPress. Proporciona un layout
+completo (header, tabs, body con sidebar, footer) y componentes reutilizables
+(botones, inputs, cards, toggles, notices, etc.).
+
+Todos los plugins PW que necesiten una interfaz en el backend consumen este
+package para mantener consistencia visual. El package carga Tailwind CSS CDN
+automáticamente — disponible también para los plugins consumidores.
+
+CLASES IMPLEMENTADAS
+---------------------
+BackendUI               Singleton. Entry point público.
+                        Métodos: init(), ui(), config(), render_page(), playground(), reset()
+
+AssetsManager           Carga Tailwind CDN + CSS + JS del design system
+                        solo en las screens configuradas.
+                        screens vacío = no carga nada (opt-in explícito).
+
+ComponentRenderer       Renderiza componentes UI individuales.
+                        Métodos: button, input, date_input, textarea, select,
+                        checkbox, toggle, radio, radio_group, segmented_control,
+                        card, notice, badge, spinner, progress_bar, skeleton,
+                        tooltip, heading, paragraph, link, separator,
+                        tabs, tab_panel, breadcrumbs, pagination, side_nav, stepper
+
+PageConfigInterface     Contrato opcional para plugins que quieran definir
+                        la configuración de página de forma estructurada.
+
+HOOKS REGISTRADOS
+------------------
+admin_enqueue_scripts       Carga Tailwind CDN + CSS + JS
+
+HOOKS EXPUESTOS
+----------------
+pw_bui/page_config          filter — modificar config de página antes de renderizar
+pw_bui/enqueue_assets       action — encolar assets adicionales
+pw_bui/header_right         action — inyectar contenido a la derecha del header
+
+EVENTOS JS
+-----------
+pw-bui:ready                El JS del design system se inicializó
+pw-bui:theme-changed        Se cambió el tema (detail: { theme })
+pw-bui:tab-changed          Se cambió de tab (detail: { slug }) — solo mode 'js'
+pw-bui:toggle-changed       Se cambió un toggle (detail: { name, checked, value })
+pw-bui:segment-changed      Se cambió segmented control (detail: { name, value })
+pw-bui:wizard-step-changed  Se avanzó/retrocedió en wizard (detail: { from, to, index })
+
+COMPONENTES IMPLEMENTADOS
+--------------------------
+Layout:      page-wrapper (header + tabs + body + sidebar/sidenav + footer)
+
+Formulario:  input, date_input, textarea, select (soporta wrapper_class),
+             checkbox, toggle, radio, radio_group, segmented_control
+
+Contenido:   card, notice, badge, separator
+
+Tipografía:  heading, paragraph, link
+
+Feedback:    spinner, progress_bar, skeleton, tooltip
+
+Navegación:  tabs (mode: js|url), tab_panel, breadcrumbs, pagination,
+             side_nav, stepper
+
+SISTEMA DE ESTILOS
+-------------------
+- CSS custom con variables (--pw-color-*, --pw-shadow-*)
+- Tema dark (default) / light — switcheable desde el header, persistido en localStorage
+- Anti-flash: script inline bloqueante aplica el tema antes del primer paint
+- Tailwind CDN disponible para utilities en el package y plugins consumidores
+- WP admin resets dentro de #pw-backend-ui-app
+- WP_List_Table normalizado para dark/light: colores de tabla, bulk actions,
+  search_box, paginación nativa, botones .button de WP
+
+DECISIONES DE DISEÑO
+---------------------
+- Singleton: un solo init() por request
+- Tailwind CDN: sin build process, aceptable para admin backend
+- CSS con custom properties: theming flexible sin duplicar clases
+- @apply no disponible (CDN sin PostCSS) — componentes usan clases pw-bui-* en CSS puro
+- Componentes via include de vistas PHP: fácil de leer y extender
+- Callable para content/footer: composición flexible
+- Eventos JS custom: los plugins pueden reaccionar sin acoplarse al design system
+- Sin jQuery: JS vanilla, patrón delegación de eventos
+
+LO QUE NO HACE (intencional)
+------------------------------
+- No persiste datos (responsabilidad del plugin)
+- No registra páginas de admin (responsabilidad del plugin)
+- No tiene lógica de negocio
+- No carga assets en frontend público
+- No tiene build process
+- No tiene dependencia de jQuery
+
+PENDIENTE / PRÓXIMOS PASOS
+---------------------------
+- Agregar componente modal/dialog
+- Agregar componente table (listados con sort/paginación propios)
+- Agregar componente file upload
+- Documentar cómo hacer override de vistas desde el plugin consumidor

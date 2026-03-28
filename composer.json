@@ -1,0 +1,26 @@
+{
+	"name": "pw/ofertas-avanzadas",
+	"description": "Sistema avanzado de descuentos orientado a marketing para WooCommerce",
+	"license": "GPL-2.0-or-later",
+	"type": "wordpress-plugin",
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/hizoka3/pw-backend-ui"
+		}
+	],
+	"require": {
+		"php": ">=8.0",
+		"pw/backend-ui": "^1.0"
+	},
+	"autoload": {
+		"psr-4": {
+			"PW\\OfertasAvanzadas\\": "src/"
+		}
+	},
+	"authors": [
+		{
+			"name": "PezWeb"
+		}
+	]
+}

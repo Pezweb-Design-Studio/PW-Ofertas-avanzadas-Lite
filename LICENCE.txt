@@ -1,0 +1,18 @@
+LICENCIA PROPIETARIA - TODOS LOS DERECHOS RESERVADOS
+
+Copyright (c) 2025 PEZWEB
+
+Este software y su código fuente son propiedad exclusiva de PEZWEB.
+
+ESTÁ PROHIBIDO:
+1. Copiar, modificar o distribuir este software
+2. Utilizar este código en otros proyectos
+3. Realizar ingeniería inversa
+4. Sublicenciar o transferir derechos
+
+El incumplimiento de estos términos resultará en acciones legales conforme a:
+- Ley 17.336 sobre Propiedad Intelectual (Chile)
+- Código Penal de Chile (Art. 197 y siguientes)
+- Tratados internacionales aplicables
+
+Para adquirir una licencia comercial, contactar: contacto@pezweb.com

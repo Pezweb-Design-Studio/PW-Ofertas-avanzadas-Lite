@@ -1,0 +1,144 @@
+INSTRUCCIONES — pw/backend-ui
+=================================
+
+REPOSITORIO
+-----------
+GitHub público: https://github.com/pez-web/backend-ui
+Packagist: Sí (público)
+
+STACK
+-----
+- PHP 8.0+
+- WordPress 6.0+
+- Tailwind CSS CDN (cdn.tailwindcss.com) — disponible para el package y plugins consumidores
+- JS vanilla (sin dependencias)
+- Sin build process
+
+ESTRUCTURA
+----------
+pw-backend-ui/
+├── src/
+│   ├── BackendUI.php                    Entry point, singleton
+│   ├── Admin/AssetsManager.php          Enqueue de Tailwind CDN + CSS + JS del design system
+│   ├── Components/ComponentRenderer.php Métodos render para cada componente UI
+│   └── Contracts/PageConfigInterface.php Interface opcional para config de página
+├── views/
+│   ├── layout/page-wrapper.php          Layout completo: header, tabs, body, sidebar, footer
+│   └── components/
+│       ├── button.php                   Botón con variantes y tamaños
+│       ├── input.php                    Input texto con label/error/help
+│       ├── textarea.php                 Textarea con label/error/help
+│       ├── select.php                   Select dropdown (soporta wrapper_class)
+│       ├── checkbox.php                 Checkbox con label
+│       ├── toggle.php                   Switch interactivo on/off
+│       ├── card.php                     Card container con header/body/footer
+│       ├── notice.php                   Alertas: info/success/warning/danger
+│       ├── badge.php                    Badge/tag con variantes
+│       ├── heading.php                  Títulos h1-h6
+│       ├── paragraph.php               Párrafos: default/muted/small
+│       ├── link.php                     Enlaces con variantes
+│       ├── separator.php               Divisor horizontal
+│       ├── tabs.php                     Navegación por pestañas (mode: js | url)
+│       ├── tab-panel.php               Panel contenido de tab
+│       ├── radio.php                    Radio button individual
+│       ├── radio-group.php             Grupo de radio buttons
+│       ├── segmented-control.php       Selector mutuamente excluyente
+│       ├── spinner.php                  Indicador de carga
+│       ├── progress-bar.php            Barra de progreso
+│       ├── breadcrumbs.php             Migas de pan
+│       ├── pagination.php              Control de paginación
+│       ├── tooltip.php                  Tooltip hover/focus
+│       ├── skeleton.php                Placeholder de carga
+│       ├── side-nav.php                Navegación vertical tipo WP Settings
+│       └── stepper.php                 Indicador de progreso multi-paso (wizard)
+├── assets/
+│   ├── css/backend-ui.css               Tokens CSS + resets WP admin + estilos componentes
+│   └── js/backend-ui.js                 Tabs, toggles, dismiss notices, wizard, theme toggle
+├── composer.json
+└── CONTRACT.md
+
+CONVENCIONES DE CÓDIGO
+-----------------------
+- Comentario de ruta relativa en el header de cada archivo PHP, JS y CSS
+- Namespace raíz: PW\BackendUI
+- Prefijo de hooks WP: pw_bui/
+- Prefijo de handles JS/CSS: pw-backend-ui (o $config['slug'])
+- Prefijo de clases CSS custom: pw-bui-
+- Prefijo de data attributes: data-pw-
+- Prefijo de eventos JS custom: pw-bui:
+- Tailwind: sin prefijo, usar clases estándar (flex, gap-4, mt-2, etc.)
+
+VERSIONADO
+----------
+- En desarrollo activo: usar dev-main en el plugin consumidor
+- Al estabilizar: git tag vX.Y.Z + git push origin vX.Y.Z
+- Patch  (1.0.x): bug fixes, cambios internos en views o CSS
+- Minor  (1.x.0): nuevos componentes, cambios no destructivos
+- Major  (x.0.0): cambios que rompen la API de ComponentRenderer o BackendUI
+
+CÓMO CONSUMIR ESTE PACKAGE EN UN PLUGIN
+-----------------------------------------
+1. Agregar al composer.json del plugin:
+
+   "require": { "pw/backend-ui": "dev-main" }
+
+2. Correr: composer install
+
+3. Inicializar en plugins_loaded:
+
+   BackendUI::init([
+       'assets_url' => plugin_dir_url(__FILE__) . 'vendor/pw/backend-ui/assets/',
+       'screens'    => [ 'toplevel_page_mi-plugin' ],
+   ]);
+
+4. Crear la página de admin (add_menu_page / add_submenu_page)
+
+5. Renderizar usando render_page() para layout completo:
+
+   BackendUI::init()->render_page([
+       'title'   => 'Settings',
+       'tabs'    => [...],
+       'content' => function( $bui ) { ... },
+   ]);
+
+6. O usar componentes individuales:
+
+   $ui = BackendUI::init()->ui();
+   $ui->card([ 'title' => 'Mi Card', 'content' => function() use ($ui) {
+       $ui->input([ 'name' => 'field', 'label' => 'Nombre' ]);
+   }]);
+
+7. Persistencia: el plugin es responsable de guardar/recuperar los valores
+   de los campos. El design system solo renderiza UI.
+
+TAILWIND CSS
+------------
+- Tailwind CSS se carga via CDN automáticamente al inicializar el package
+- Disponible tanto para los componentes del package como para los plugins consumidores
+- No requiere configuración adicional — el CDN escanea clases en runtime
+- Usar clases estándar de Tailwind (sin prefijo) en los plugins consumidores
+- El CDN es aceptable para admin backend (no se carga en frontend público)
+- @apply NO está disponible (requiere build process, no aplica con CDN)
+
+WP_LIST_TABLE
+-------------
+- El package normaliza colores de .wp-list-table automáticamente para respetar el tema activo
+- Incluye fixes para: bulk actions, search_box, paginación nativa, botones .button de WP
+- Al usar WP_List_Table dentro del wrapper, agregar margin-top al contenedor desde el plugin:
+  echo '<div style="margin-top:16px;">';
+  $table->display();
+  echo '</div>';
+
+ADVERTENCIAS
+------------
+- screens vacío = assets NO se cargan en ninguna pantalla (opt-in explícito)
+- El package NO persiste datos (responsabilidad del plugin)
+- El package NO registra páginas de admin (responsabilidad del plugin)
+- Tailwind CDN NO es adecuado para frontend público (solo admin)
+- Revisar posibles conflictos de CSS con otros plugins que modifiquen el admin
+
+CONTEXTO PARA CLAUDE
+---------------------
+- Adjuntar CONTRACT.md al inicio de cada conversación sobre este package
+- Los cambios de componentes requieren actualizar CONTRACT.md
+- Al agregar componentes nuevos: crear vista en views/components/, método en ComponentRenderer, documentar en CONTRACT.md

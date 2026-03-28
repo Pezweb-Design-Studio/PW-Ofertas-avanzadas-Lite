@@ -1,0 +1,4 @@
+# Lite GitHub repo root = releases/lite/pw-ofertas-avanzadas/ (copiado por build-deploy.sh si no hay .gitignore)
+.DS_Store
+Thumbs.db
+*.zip

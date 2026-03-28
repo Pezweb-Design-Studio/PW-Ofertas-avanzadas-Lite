@@ -1,0 +1,42 @@
+.pwoa-badge-image-wrap {
+	position: relative;
+	display: inline-block;
+}
+
+.pwoa-discount-badge {
+	position: absolute !important;
+	top: 8px !important;
+	right: 8px !important;
+	background: #3b82f6 !important;
+	color: white !important;
+	padding: 6px 10px !important;
+	border-radius: 6px !important;
+	font-size: 13px !important;
+	font-weight: bold !important;
+	line-height: 1 !important;
+	z-index: 999 !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+	pointer-events: none !important;
+}
+
+.pwoa-discount-badge.fixed-amount {
+	background: #10b981 !important;
+}
+
+.pwoa-custom-badge {
+	position: absolute !important;
+	top: 48px !important;
+	right: 8px !important;
+	background: #10b981 !important;
+	color: white !important;
+	padding: 4px 8px !important;
+	border-radius: 6px !important;
+	font-size: 11px !important;
+	font-weight: 600 !important;
+	line-height: 1.2 !important;
+	z-index: 998 !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+	pointer-events: none !important;
+	max-width: 120px !important;
+	text-align: center !important;
+}

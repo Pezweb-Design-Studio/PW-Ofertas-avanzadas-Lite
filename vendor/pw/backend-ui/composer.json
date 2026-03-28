@@ -1,0 +1,15 @@
+{
+    "name": "pw/backend-ui",
+    "description": "Design system for WordPress admin plugin pages — layout, buttons, inputs, cards, tabs, and more. Powered by Tailwind CSS 4.",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PW\\BackendUI\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
