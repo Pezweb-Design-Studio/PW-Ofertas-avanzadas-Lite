@@ -136,17 +136,34 @@ echo -e "${YELLOW}[3/5]${NC} Building $edition edition..."
 output_dir="releases/$edition"
 mkdir -p "$output_dir"
 
-# Limpiar SOLO el directorio temporal del plugin (no los ZIPs)
+# Limpiar SOLO el árbol del plugin (no los ZIPs en output_dir).
+# LITE: conservar .git / .gitignore / .gitattributes dentro de pw-ofertas-avanzadas
+# si el repo de GitHub usa la carpeta del plugin como raíz.
 plugin_dir="$output_dir/pw-ofertas-avanzadas"
 echo "  → Cleaning $plugin_dir..."
-rm -rf "$plugin_dir"
-mkdir -p "$plugin_dir"
+if [ "$edition" = "lite" ] && [ -d "$plugin_dir" ]; then
+    _pwoa_git_stash=$(mktemp -d "${TMPDIR:-/tmp}/pwoa-lite-git.XXXXXX")
+    for _p in .git .gitignore .gitattributes; do
+        if [ -e "$plugin_dir/$_p" ]; then
+            mv "$plugin_dir/$_p" "$_pwoa_git_stash/"
+        fi
+    done
+    rm -rf "$plugin_dir"
+    mkdir -p "$plugin_dir"
+    for _p in .git .gitignore .gitattributes; do
+        if [ -e "$_pwoa_git_stash/$_p" ]; then
+            mv "$_pwoa_git_stash/$_p" "$plugin_dir/"
+        fi
+    done
+    rmdir "$_pwoa_git_stash" 2>/dev/null || rm -rf "$_pwoa_git_stash"
+else
+    rm -rf "$plugin_dir"
+    mkdir -p "$plugin_dir"
+fi
 
 # Archivo principal
 cp "$main_file" "$plugin_dir/pw-ofertas-avanzadas.php"
 
-# README y LICENCE
-cp README.md "$plugin_dir/"
 cp LICENCE.txt "$plugin_dir/"
 
 # Composer
@@ -162,6 +179,21 @@ cp -r vendor "$plugin_dir/"
 
 if [ "$edition" = "lite" ]; then
     echo "  → Building LITE edition"
+
+    # readme: build → README.md (GitHub); deploy → readme.txt (WordPress.org / ZIP)
+    if [ "$mode" = "deploy" ]; then
+        if [ ! -f "readme.txt" ]; then
+            echo -e "${RED}❌ Falta readme.txt en la raíz (requerido para deploy Lite / WordPress.org).${NC}"
+            exit 1
+        fi
+        cp readme.txt "$plugin_dir/readme.txt"
+    else
+        if [ ! -f "README.md" ]; then
+            echo -e "${RED}❌ Falta README.md en la raíz (requerido para build Lite / repo).${NC}"
+            exit 1
+        fi
+        cp README.md "$plugin_dir/README.md"
+    fi
 
     # Admin (LITE)
     mkdir -p "$plugin_dir/src/Admin/Views"
@@ -203,6 +235,12 @@ if [ "$edition" = "lite" ]; then
 
 else
     echo "  → Building PRO edition"
+
+    if [ "$mode" = "deploy" ]; then
+        [ -f "readme.txt" ] && cp readme.txt "$plugin_dir/"
+    else
+        [ -f "README.md" ] && cp README.md "$plugin_dir/"
+    fi
 
     # Admin (PRO)
     mkdir -p "$plugin_dir/src/Admin/Views/data"
@@ -268,7 +306,6 @@ if [ -d "languages" ]; then
     fi
 fi
 
-[ -f "readme.txt" ] && cp readme.txt "$plugin_dir/"
 [ -f "readme_es.txt" ] && cp readme_es.txt "$plugin_dir/"
 
 mkdir -p "$plugin_dir/assets/js" "$plugin_dir/assets/css"
@@ -289,6 +326,32 @@ for css in assets/css/*.css; do
     cp "$css" "$plugin_dir/assets/css/"
 done
 shopt -u nullglob
+
+# ============================================
+# LITE: Git en releases/lite/pw-ofertas-avanzadas/ (carpeta que se pushea a GitHub)
+# ============================================
+if [ "$edition" = "lite" ]; then
+    LITE_GITHUB_REMOTE="https://github.com/Pezweb-Design-Studio/PW-Ofertas-avanzadas-Lite.git"
+    if [ -f "build-support/lite-plugin-repo.gitignore" ] && [ ! -f "$plugin_dir/.gitignore" ]; then
+        cp "build-support/lite-plugin-repo.gitignore" "$plugin_dir/.gitignore"
+    fi
+    if command -v git >/dev/null 2>&1; then
+        (
+            cd "$plugin_dir" || exit 0
+            if [ ! -d .git ]; then
+                git init -b main >/dev/null 2>&1 || git init >/dev/null 2>&1
+            fi
+            if git remote get-url origin >/dev/null 2>&1; then
+                git remote set-url origin "$LITE_GITHUB_REMOTE"
+            else
+                git remote add origin "$LITE_GITHUB_REMOTE" 2>/dev/null || true
+            fi
+        )
+        echo "  → Lite: $plugin_dir → origin $LITE_GITHUB_REMOTE"
+    else
+        echo "  → Lite: git no encontrado; configura el remoto en $plugin_dir"
+    fi
+fi
 
 # ============================================
 # LIMPIEZA

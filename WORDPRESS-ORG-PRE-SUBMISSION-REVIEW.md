@@ -11,7 +11,7 @@ Este archivo conserva el informe de revisión tipo WordPress.org y sirve como ch
 
 ### Bloqueantes identificados (resumen)
 
-1. Sin `readme.txt` estándar; `README.md` solo para desarrollo.
+1. Sin `readme.txt` estándar (formato WordPress.org).
 2. Cabeceras incompletas (licencia, Requires at least WP, Tested up to, Author URI, etc.); Plugin URI devolvía 404.
 3. JS/CSS incrustados con etiquetas `<script>` / `<style>` en PHP.
 4. Servicio externo (Tailwind CDN) sin documentar en readme.

@@ -14,6 +14,7 @@
 ├── pw-ofertas-avanzadas-pro.php
 ├── pw-ofertas-avanzadas.lite.php
 ├── README.md
+├── readme.txt
 └── src
     ├── Admin
     │   ├── AdminController.lite.php

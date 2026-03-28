@@ -1716,3 +1716,11 @@ msgstr "Cantidad de artículos"
 msgid "Percentage or fixed value, depending on discount type."
 msgstr ""
 "Porcentaje o valor fijo, según el tipo de descuento."
+
+#: src/Admin/Views/wizard.lite.php
+msgid ""
+"Global stacking rules and advanced options are available in Pro (%1$sview "
+"Pro edition%2$s)."
+msgstr ""
+"Las reglas globales de apilamiento y opciones avanzadas están disponibles en "
+"Pro (%1$sver la edición Pro%2$s)."

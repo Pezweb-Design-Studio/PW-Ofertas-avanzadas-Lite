@@ -1659,3 +1659,9 @@ msgstr ""
 #: src/Strategies/Pro/TieredDiscountStrategy.php:79
 msgid "Percentage or fixed value, depending on discount type."
 msgstr ""
+
+#: src/Admin/Views/wizard.lite.php
+msgid ""
+"Global stacking rules and advanced options are available in Pro (%1$sview "
+"Pro edition%2$s)."
+msgstr ""

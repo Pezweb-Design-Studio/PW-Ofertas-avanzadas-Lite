@@ -18,13 +18,23 @@ final class AdminAssets
 
         if ($hook === 'toplevel_page_pwoa-dashboard') {
             self::enqueueDashboard();
-        } elseif ($hook === 'ofertas_page_pwoa-new-campaign') {
+        } elseif (self::isSubmenuHook($hook, 'pwoa-new-campaign')) {
             self::enqueueWizard();
-        } elseif ($hook === 'ofertas_page_pwoa-settings') {
+        } elseif (self::isSubmenuHook($hook, 'pwoa-settings')) {
             self::enqueueSettings();
-        } elseif ($hook === 'ofertas_page_pwoa-shortcodes') {
+        } elseif (self::isSubmenuHook($hook, 'pwoa-shortcodes')) {
             self::enqueueShortcodes();
         }
+    }
+
+    /**
+     * WordPress builds submenu screen IDs as "{sanitized_parent_menu_title}_page_{slug}".
+     * The parent label is translated (e.g. Offers vs Ofertas), so the prefix varies by locale.
+     */
+    private static function isSubmenuHook(string $hook, string $pageSlug): bool
+    {
+        return $hook === 'ofertas_page_' . $pageSlug
+            || $hook === 'offers_page_' . $pageSlug;
     }
 
     private static function dashboardStrings(): array
