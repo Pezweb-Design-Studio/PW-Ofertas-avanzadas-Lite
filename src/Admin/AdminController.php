@@ -669,16 +669,53 @@ class AdminController
             $meta = self::PRO_STRATEGY_META[$class] ?? null;
             if ($meta) {
                 $meta['available'] = false;
-                foreach (['name', 'description', 'when_to_use'] as $k) {
-                    if (!empty($meta[$k])) {
-                        $meta[$k] = __($meta[$k], 'pw-ofertas-avanzadas');
-                    }
-                }
-                $result[] = $meta;
+                $meta              = self::translateProStrategyLabels($meta);
+                $result[]          = $meta;
             }
         }
 
         return $result;
+    }
+
+    /**
+     * Literal strings only (WordPress.org / Polyglots tooling).
+     */
+    private static function translateProStrategyLabels(array $meta): array
+    {
+        switch ($meta['key'] ?? '') {
+            case 'min_amount':
+                $meta['name']        = __('Minimum order discount', 'pw-ofertas-avanzadas');
+                $meta['description'] = __('Apply a discount when the cart subtotal reaches a minimum amount.', 'pw-ofertas-avanzadas');
+                $meta['when_to_use']  = __('Works year-round to lift average order value. Especially strong before holidays and peak sales periods.', 'pw-ofertas-avanzadas');
+                break;
+            case 'free_shipping':
+                $meta['name']        = __('Free shipping threshold', 'pw-ofertas-avanzadas');
+                $meta['description'] = __('Waive shipping when the cart reaches a minimum subtotal.', 'pw-ofertas-avanzadas');
+                $meta['when_to_use']  = __('A strong always-on tactic; often lifts average order value by 20–35% across many stores.', 'pw-ofertas-avanzadas');
+                break;
+            case 'tiered_discount':
+                $meta['name']        = __('Tiered quantity discount', 'pw-ofertas-avanzadas');
+                $meta['description'] = __('Higher discounts as the number of items in the cart increases.', 'pw-ofertas-avanzadas');
+                $meta['when_to_use']  = __('Peak sales and volume campaigns. Strong with low unit-cost items.', 'pw-ofertas-avanzadas');
+                break;
+            case 'low_stock':
+                $meta['name']        = __('Low stock discount', 'pw-ofertas-avanzadas');
+                $meta['description'] = __('Automatically discount products when on-hand quantity falls below a threshold.', 'pw-ofertas-avanzadas');
+                $meta['when_to_use']  = __('Seasonal clearance, end-of-line, or when you want urgency from scarcity.', 'pw-ofertas-avanzadas');
+                break;
+            case 'recurring_purchase':
+                $meta['name']        = __('Repeat purchase reward', 'pw-ofertas-avanzadas');
+                $meta['description'] = __('Reward customers who have bought the same product multiple times.', 'pw-ofertas-avanzadas');
+                $meta['when_to_use']  = __('Consumables, supplements, cosmetics—any repurchase SKU.', 'pw-ofertas-avanzadas');
+                break;
+            case 'flash_sale':
+                $meta['name']        = __('Flash sale', 'pw-ofertas-avanzadas');
+                $meta['description'] = __('Time-limited discount to create urgency.', 'pw-ofertas-avanzadas');
+                $meta['when_to_use']  = __('Peak events and launches; often strongest in 6–24 hour windows.', 'pw-ofertas-avanzadas');
+                break;
+        }
+
+        return $meta;
     }
 
     private function isLiteStrategy(string $strategy): bool

@@ -38,7 +38,7 @@ $bui->render_page([
             ),
         ]);
 
-        echo '<div style="margin-bottom:20px;"></div>';
+        echo '<div class="mb-5"></div>';
 
         if ($tab === "generador" || $tab === "") {
 
@@ -47,15 +47,15 @@ $bui->render_page([
                 "title"       => __('Shortcode generator', 'pw-ofertas-avanzadas'),
                 "description" => __('Set the parameters and copy the result.', 'pw-ofertas-avanzadas'),
                 "content"     => function () use ($campaigns): void {
-                    echo '<div id="pwoa-generator" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">';
+                    echo '<div id="pwoa-generator" class="grid grid-cols-2 gap-6">';
 
                     // Controls
-                    echo '<div style="display:flex;flex-direction:column;gap:14px;">';
+                    echo '<div class="flex flex-col gap-3.5">';
 
                     if (!empty($campaigns)) {
                         echo '<div>';
-                        echo '<label style="display:block;font-size:12px;font-weight:600;color:var(--pw-color-fg-default);margin-bottom:6px;">' . esc_html__('Specific campaign', 'pw-ofertas-avanzadas') . ' <span style="color:var(--pw-color-fg-muted);font-weight:400;">(' . esc_html__('optional', 'pw-ofertas-avanzadas') . ')</span></label>';
-                        echo '<select id="gen-campaign_id" style="width:100%;border:1px solid var(--pw-color-border-default);border-radius:4px;padding:8px 10px;background:var(--pw-color-bg-canvas);color:var(--pw-color-fg-default);font-size:13px;">';
+                        echo '<label class="block text-xs font-semibold text-pwoa-fg mb-1.5">' . esc_html__('Specific campaign', 'pw-ofertas-avanzadas') . ' <span class="text-pwoa-fg-muted font-normal">(' . esc_html__('optional', 'pw-ofertas-avanzadas') . ')</span></label>';
+                        echo '<select id="gen-campaign_id" class="w-full border border-pwoa-border rounded px-2.5 py-2 bg-pwoa-canvas text-pwoa-fg text-sm box-border">';
                         echo '<option value="">' . esc_html__('— All active campaigns —', 'pw-ofertas-avanzadas') . '</option>';
                         foreach ($campaigns as $c) {
                             echo '<option value="' . esc_attr($c->id) . '">' . esc_html($c->name) . ' (ID: ' . (int) $c->id . ')</option>';
@@ -94,22 +94,18 @@ $bui->render_page([
                         ],
                     ];
 
-                    $input_style = "width:100%;border:1px solid var(--pw-color-border-default);border-radius:4px;padding:8px 10px;"
-                        . "background:var(--pw-color-bg-canvas);color:var(--pw-color-fg-default);font-size:13px;box-sizing:border-box;";
-                    $label_style = "display:block;font-size:12px;font-weight:600;color:var(--pw-color-fg-default);margin-bottom:6px;";
-
                     foreach ($fields as [$id, $type, $label, $default]) {
                         echo '<div>';
-                        echo '<label for="' . esc_attr($id) . '" style="' . $label_style . '">' . esc_html($label) . '</label>';
+                        echo '<label for="' . esc_attr($id) . '" class="mb-1.5 block text-xs font-semibold text-pwoa-fg">' . esc_html($label) . '</label>';
                         if ($type === "select") {
-                            echo '<select id="' . esc_attr($id) . '" style="' . $input_style . '">';
+                            echo '<select id="' . esc_attr($id) . '" class="box-border w-full rounded border border-pwoa-border bg-pwoa-canvas px-2.5 py-2 text-sm text-pwoa-fg">';
                             foreach ($select_options[$id] as $val => $lbl) {
                                 echo '<option value="' . esc_attr($val) . '"' . ($val == $default ? ' selected' : '') . '>' . esc_html($lbl) . '</option>';
                             }
                             echo '</select>';
                         } else {
                             $extra = $type === "number" ? 'step="1" ' : '';
-                            echo '<input type="' . esc_attr($type) . '" id="' . esc_attr($id) . '" value="' . esc_attr($default) . '" ' . $extra . 'style="' . $input_style . '">';
+                            echo '<input type="' . esc_attr($type) . '" id="' . esc_attr($id) . '" value="' . esc_attr($default) . '" ' . $extra . 'class="box-border w-full rounded border border-pwoa-border bg-pwoa-canvas px-2.5 py-2 text-sm text-pwoa-fg">';
                         }
                         echo '</div>';
                     }
@@ -120,29 +116,28 @@ $bui->render_page([
                         ["gen-show_campaign_name", false, __('Show campaign name', 'pw-ofertas-avanzadas')],
                         ["gen-paginate",           false, __('Enable pagination', 'pw-ofertas-avanzadas')],
                     ];
-                    echo '<div style="display:flex;flex-direction:column;gap:8px;">';
+                    echo '<div class="flex flex-col gap-2">';
                     foreach ($checks as [$id, $checked, $label]) {
-                        echo '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--pw-color-fg-default);">';
-                        echo '<input type="checkbox" id="' . esc_attr($id) . '"' . ($checked ? ' checked' : '') . ' style="width:14px;height:14px;">';
+                        echo '<label class="flex items-center gap-2 cursor-pointer text-sm text-pwoa-fg">';
+                        echo '<input type="checkbox" id="' . esc_attr($id) . '"' . ($checked ? ' checked' : '') . ' class="h-3.5 w-3.5">';
                         echo esc_html($label) . '</label>';
                     }
                     echo '</div>';
 
-                    echo '<div id="gen-per_page-wrap" style="display:none;">';
-                    echo '<label for="gen-per_page" style="' . $label_style . '">' . esc_html__('Products per page', 'pw-ofertas-avanzadas') . '</label>';
-                    echo '<input type="number" id="gen-per_page" value="12" min="1" max="100" style="' . $input_style . '">';
+                    echo '<div id="gen-per_page-wrap" class="hidden">';
+                    echo '<label for="gen-per_page" class="mb-1.5 block text-xs font-semibold text-pwoa-fg">' . esc_html__('Products per page', 'pw-ofertas-avanzadas') . '</label>';
+                    echo '<input type="number" id="gen-per_page" value="12" min="1" max="100" class="box-border w-full rounded border border-pwoa-border bg-pwoa-canvas px-2.5 py-2 text-sm text-pwoa-fg">';
                     echo '</div>';
 
                     echo '</div>'; // end controls
 
                     // Output
-                    echo '<div style="display:flex;flex-direction:column;">';
-                    echo '<label style="' . $label_style . '">' . esc_html__('Generated shortcode', 'pw-ofertas-avanzadas') . '</label>';
-                    echo '<div style="background:#030712;border-radius:6px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;min-height:160px;">';
-                    echo '<code id="gen-output" style="color:#fff;font-family:monospace;font-size:13px;word-break:break-all;white-space:pre-wrap;">[pwoa_productos_oferta]</code>';
-                    echo '<div style="margin-top:16px;text-align:right;">';
-                    echo '<button id="gen-copy-btn" type="button"
-                        style="padding:8px 16px;background:var(--pw-color-accent-emphasis);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;">';
+                    echo '<div class="flex flex-col">';
+                    echo '<label class="mb-1.5 block text-xs font-semibold text-pwoa-fg">' . esc_html__('Generated shortcode', 'pw-ofertas-avanzadas') . '</label>';
+                    echo '<div class="bg-pwoa-code-bg rounded-md p-5 flex flex-col justify-between min-h-[160px]">';
+                    echo '<code id="gen-output" class="text-white font-mono text-sm break-all whitespace-pre-wrap">[pwoa_productos_oferta]</code>';
+                    echo '<div class="mt-4 text-right">';
+                    echo '<button id="gen-copy-btn" type="button" class="cursor-pointer rounded border-0 bg-pwoa-accent px-4 py-2 text-sm font-semibold text-white">';
                     echo '<span id="gen-copy-label">' . esc_html__('Copy', 'pw-ofertas-avanzadas') . '</span></button>';
                     echo '</div>';
                     echo '</div>';
@@ -196,20 +191,20 @@ $bui->render_page([
                 $ui->card([
                     "title"   => $section["title"],
                     "content" => function () use ($section): void {
-                        echo '<table class="wp-list-table widefat" style="width:100%;">';
+                        echo '<table class="wp-list-table widefat w-full">';
                         echo '<thead><tr><th>' . esc_html__('Parameter', 'pw-ofertas-avanzadas') . '</th><th>' . esc_html__('Type', 'pw-ofertas-avanzadas') . '</th><th>' . esc_html__('Default', 'pw-ofertas-avanzadas') . '</th><th>' . esc_html__('Description', 'pw-ofertas-avanzadas') . '</th></tr></thead><tbody>';
                         foreach ($section["params"] as $p) {
                             echo '<tr>';
                             echo '<td><code>' . esc_html($p[0]) . '</code></td>';
-                            echo '<td style="color:var(--pw-color-fg-muted);">' . esc_html($p[1]) . '</td>';
-                            echo '<td style="color:var(--pw-color-fg-muted);">' . esc_html($p[2]) . '</td>';
+                            echo '<td class="text-pwoa-fg-muted">' . esc_html($p[1]) . '</td>';
+                            echo '<td class="text-pwoa-fg-muted">' . esc_html($p[2]) . '</td>';
                             echo '<td>' . esc_html($p[3]) . '</td>';
                             echo '</tr>';
                         }
                         echo '</tbody></table>';
                     },
                 ]);
-                echo '<div style="margin-bottom:16px;"></div>';
+                echo '<div class="mb-4"></div>';
             }
 
         } elseif ($tab === "ejemplos") {
@@ -228,16 +223,15 @@ $bui->render_page([
             $ui->card([
                 "title"   => __('Usage examples', 'pw-ofertas-avanzadas'),
                 "content" => function () use ($examples): void {
-                    echo '<div style="display:flex;flex-direction:column;gap:12px;">';
+                    echo '<div class="flex flex-col gap-3">';
                     foreach ($examples as $ex) {
-                        echo '<div style="border:1px solid var(--pw-color-border-muted);border-radius:4px;overflow:hidden;">';
-                        echo '<div style="padding:10px 14px;background:var(--pw-color-bg-subtle);display:flex;justify-content:space-between;align-items:center;">';
-                        echo '<span style="font-size:13px;font-weight:600;color:var(--pw-color-fg-default);">' . esc_html($ex[0]) . '</span>';
-                        echo '<button class="pwoa-copy-btn" type="button" data-code="' . esc_attr($ex[1]) . '"
-                            style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:4px 10px;background:var(--pw-color-bg-canvas);border:1px solid var(--pw-color-border-default);border-radius:3px;cursor:pointer;color:var(--pw-color-fg-default);">' . esc_html__('Copy', 'pw-ofertas-avanzadas') . '</button>';
+                        echo '<div class="overflow-hidden rounded border border-pwoa-border-muted">';
+                        echo '<div class="flex items-center justify-between bg-pwoa-subtle px-3.5 py-2.5">';
+                        echo '<span class="text-sm font-semibold text-pwoa-fg">' . esc_html($ex[0]) . '</span>';
+                        echo '<button class="pwoa-copy-btn cursor-pointer rounded-sm border border-pwoa-border bg-pwoa-canvas px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-pwoa-fg" type="button" data-code="' . esc_attr($ex[1]) . '">' . esc_html__('Copy', 'pw-ofertas-avanzadas') . '</button>';
                         echo '</div>';
-                        echo '<div style="padding:10px 14px;background:#030712;">';
-                        echo '<code style="color:#fff;font-family:monospace;font-size:13px;">' . esc_html($ex[1]) . '</code>';
+                        echo '<div class="bg-pwoa-code-bg p-3.5">';
+                        echo '<code class="font-mono text-sm text-white">' . esc_html($ex[1]) . '</code>';
                         echo '</div>';
                         echo '</div>';
                     }

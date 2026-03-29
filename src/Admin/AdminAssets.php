@@ -16,6 +16,8 @@ final class AdminAssets
             return;
         }
 
+        self::useCompiledTailwindInsteadOfCdn();
+
         if ($hook === 'toplevel_page_pwoa-dashboard') {
             self::enqueueDashboard();
         } elseif (self::isSubmenuHook($hook, 'pwoa-new-campaign')) {
@@ -35,6 +37,27 @@ final class AdminAssets
     {
         return $hook === 'ofertas_page_' . $pageSlug
             || $hook === 'offers_page_' . $pageSlug;
+    }
+
+    /**
+     * Backend UI may register a Tailwind Play CDN handle; we dequeue it and ship compiled utilities instead.
+     */
+    private static function useCompiledTailwindInsteadOfCdn(): void
+    {
+        $path = PWOA_PATH . 'assets/css/pwoa-tailwind-admin.css';
+        if (!is_readable($path)) {
+            return;
+        }
+
+        wp_dequeue_script('tailwind-cdn');
+        wp_deregister_script('tailwind-cdn');
+
+        wp_enqueue_style(
+            'pwoa-tailwind-admin',
+            PWOA_URL . 'assets/css/pwoa-tailwind-admin.css',
+            ['pwoa-styles'],
+            PWOA_VERSION,
+        );
     }
 
     private static function dashboardStrings(): array

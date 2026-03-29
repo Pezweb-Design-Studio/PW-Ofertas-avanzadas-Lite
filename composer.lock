@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "pw/backend-ui",
-            "version": "v1.4.0",
+            "version": "v1.4.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/hizoka3/pw-backend-ui.git",
-                "reference": "b47a3a234694c8dbf4a2bbd93105cc1ce37f9d7b"
+                "url": "https://github.com/Pezweb-Design-Studio/pw-backend-ui.git",
+                "reference": "7ab75350d01a5d2e21eb3d920c2cadaf2d7351fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/hizoka3/pw-backend-ui/zipball/b47a3a234694c8dbf4a2bbd93105cc1ce37f9d7b",
-                "reference": "b47a3a234694c8dbf4a2bbd93105cc1ce37f9d7b",
+                "url": "https://api.github.com/repos/Pezweb-Design-Studio/pw-backend-ui/zipball/7ab75350d01a5d2e21eb3d920c2cadaf2d7351fb",
+                "reference": "7ab75350d01a5d2e21eb3d920c2cadaf2d7351fb",
                 "shasum": ""
             },
             "require": {
@@ -34,10 +34,10 @@
             ],
             "description": "Design system for WordPress admin plugin pages — layout, buttons, inputs, cards, tabs, and more. Powered by Tailwind CSS 4.",
             "support": {
-                "source": "https://github.com/hizoka3/pw-backend-ui/tree/v1.4.0",
-                "issues": "https://github.com/hizoka3/pw-backend-ui/issues"
+                "source": "https://github.com/Pezweb-Design-Studio/pw-backend-ui/tree/v1.4.1",
+                "issues": "https://github.com/Pezweb-Design-Studio/pw-backend-ui/issues"
             },
-            "time": "2026-03-18T11:29:55+00:00"
+            "time": "2026-03-29T01:59:19+00:00"
         }
     ],
     "packages-dev": [],

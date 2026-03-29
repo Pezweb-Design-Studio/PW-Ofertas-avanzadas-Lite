@@ -1,0 +1,24 @@
+/* Product expiry field (admin) and storefront notice — no inline styles. */
+.pwoa-expiry-field .description {
+	display: block;
+	margin-top: 0.35em;
+	color: #646970;
+}
+
+.pwoa-product-expiry-notice {
+	margin-bottom: 1rem;
+	padding: 0.75rem 1rem;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fcf9e8;
+}
+
+.pwoa-product-expiry-notice p {
+	margin: 0;
+	font-weight: 600;
+}
+
+.pwoa-product-expiry-notice--soon {
+	border-color: #d63638;
+	background: #fcf0f1;
+}

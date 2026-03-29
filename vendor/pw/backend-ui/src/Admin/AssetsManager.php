@@ -39,15 +39,6 @@ class AssetsManager
 		$version = $this->config["version"];
 		$slug = $this->config["slug"];
 
-		// Tailwind CSS CDN (disponible para el package y plugins consumidores)
-		wp_enqueue_script(
-			"tailwind-cdn",
-			"https://cdn.tailwindcss.com",
-			[],
-			null,
-			false,
-		);
-
 		// Package stylesheet (CSS variables + all component styles)
 		wp_enqueue_style(
 			$slug . "-styles",
@@ -63,6 +54,14 @@ class AssetsManager
 			[],
 			$version,
 			true,
+		);
+
+		// Apply persisted theme before the bundle runs to avoid flash of wrong theme.
+		// Runs via WP API (wp_add_inline_script) instead of a raw <script> tag in the template.
+		wp_add_inline_script(
+			$slug . "-scripts",
+			"try{var __pwt=localStorage.getItem('pw-bui-theme');if(__pwt==='light'||__pwt==='dark'){var __pwa=document.getElementById('pw-backend-ui-app');if(__pwa){__pwa.setAttribute('data-pw-theme',__pwt);}}}catch(e){}",
+			"before",
 		);
 
 		do_action("pw_bui/enqueue_assets", $hook_suffix, $url, $version);

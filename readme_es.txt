@@ -3,9 +3,9 @@ Contributors: pezweb
 Donate link: https://pezweb.com/
 Tags: woocommerce, descuentos, marketing, campañas, ofertas, lite
 Requires at least: 6.0
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 2.0.18
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,19 +48,20 @@ En tablas personalizadas que se crean al activar el plugin.
 
 == External services ==
 
-El plugin carga **Tailwind CSS** desde una CDN pública (`cdn.tailwindcss.com`) para estilizar el asistente y otras pantallas de administración en Lite.
-
-* **Qué:** Tailwind CSS (compilado para navegador).
-* **Cuándo:** Al cargar páginas de administración del plugin que encolan ese script.
-* **Datos enviados:** No se envían datos de la tienda ni de clientes a Tailwind; el navegador del visitante solicita el script.
-* **Términos / privacidad:** Consulta https://tailwindcss.com/ y las políticas de Tailwind Labs.
+El plugin **no** llama a APIs remotas ni envía datos de la tienda a terceros en segundo plano. El asistente y el panel usan CSS de utilidades **incluido** en el paquete (`assets/css/pwoa-tailwind-admin.css`), no una CDN pública. Los enlaces opcionales de mejora a Pro son navegación normal; la URL se puede cambiar con el filtro `pwoa_upgrade_url`.
 
 == Changelog ==
+
+= 2.1.1 =
+* Alineación WordPress.org: stable tag, texto de servicios externos, descripción del plugin en inglés en la cabecera.
+* Conflicto Pro/Lite: Pro desactiva correctamente el paquete Lite si ambos están instalados.
+* i18n: etiquetas de estrategias Pro con cadenas traducibles literales; caducidad de producto y aviso en tienda traducibles.
+* Estilos: caducidad de producto en admin/tienda con CSS encolado (sin estilos inline); utilidades Tailwind compiladas en el repo (sin `cdn.tailwindcss.com`).
 
 = 2.0.18 =
 * Readme y marca alineados con PW - Ofertas Avanzadas; traducción es_ES; URL Pro filtrable.
 
 == Upgrade Notice ==
 
-= 2.0.18 =
-Actualización recomendada por documentación y traducciones.
+= 2.1.2 =
+Actualización recomendada por metadatos WordPress.org, traducciones y estilos admin/tienda.

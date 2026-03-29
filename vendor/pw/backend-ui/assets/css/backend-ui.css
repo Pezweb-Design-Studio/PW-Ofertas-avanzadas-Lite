@@ -502,6 +502,62 @@
 	padding: 24px;
 }
 
+/* ── PAGE LAYOUT HELPERS ─────────────────────────────────────────────────────
+   Clases para elementos del page-wrapper que reemplazan atributos style="".
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Título en header cuando no hay brand name */
+.pw-bui-header__title {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--pw-color-fg-default);
+	margin: 0;
+}
+
+/* Bloque título + descripción de página */
+.pw-bui-page-title {
+	margin-bottom: 20px;
+}
+
+.pw-bui-page-title__heading {
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--pw-color-fg-default);
+	margin: 0 0 4px;
+}
+
+.pw-bui-page-title__desc {
+	font-size: 13px;
+	color: var(--pw-color-fg-muted);
+	margin: 0;
+}
+
+/* Descripción standalone (sin título de página) */
+.pw-bui-page-title__desc--standalone {
+	font-size: 13px;
+	color: var(--pw-color-fg-muted);
+	margin: 0 0 20px;
+}
+
+/* Columnas del layout grid */
+.pw-bui-layout__main {
+	min-width: 0;
+}
+
+.pw-bui-layout__sidebar {
+	min-width: 0;
+}
+
+/* Label de sección en sidebar */
+.pw-bui-sidebar__label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--pw-color-fg-muted);
+	margin: 0 0 10px;
+}
+
 /* =========================================================================
    4. COMPONENTS
    ========================================================================= */

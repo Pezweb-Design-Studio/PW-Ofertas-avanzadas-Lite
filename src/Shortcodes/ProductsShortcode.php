@@ -56,7 +56,7 @@ class ProductsShortcode {
         ];
 
         if ($paginate) {
-            $args['paged'] = max(1, (int) ($_GET['pwoa_page'] ?? 1));
+            $args['paged'] = $this->currentPwoaPage();
         }
 
         if ($orderby === 'price') {
@@ -350,8 +350,12 @@ class ProductsShortcode {
         }
     }
 
+    private function currentPwoaPage(): int {
+        return max(1, absint(wp_unslash($_GET['pwoa_page'] ?? '')));
+    }
+
     private function renderPagination(\WP_Query $query): void {
-        $current = max(1, (int) ($_GET['pwoa_page'] ?? 1));
+        $current = $this->currentPwoaPage();
         echo '<nav class="pwoa-pagination woocommerce-pagination">';
         echo paginate_links([
             'base'    => add_query_arg('pwoa_page', '%#%', get_permalink()),

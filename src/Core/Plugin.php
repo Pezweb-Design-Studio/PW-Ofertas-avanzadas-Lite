@@ -54,7 +54,7 @@ class Plugin {
         add_action('admin_enqueue_scripts', function ($hook) {
             if (strpos($hook, 'pwoa') === false) return;
 
-            // Tailwind + design tokens: BackendUI on registered screens (same as Pro).
+            // Design tokens: BackendUI; utilities: pwoa-tailwind-admin.css (AdminAssets).
             wp_enqueue_script('pwoa-wizard', PWOA_URL . 'assets/js/wizard.js', ['jquery'], PWOA_VERSION, true);
             wp_enqueue_script('pwoa-wizard-lite-addon', PWOA_URL . 'assets/js/wizard.lite-addon.js', ['pwoa-wizard'], PWOA_VERSION, true);
             wp_localize_script('pwoa-wizard', 'pwoaData', [
