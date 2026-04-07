@@ -10,7 +10,11 @@ Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Free **Lite** edition: discount campaigns for WooCommerce (limits on campaigns and strategies). The **Pro** version is sold separately by the author.
+Free Lite edition: discount campaigns for WooCommerce (campaign and strategy limits). The Pro version is sold separately by the author.
+
+== Description ==
+
+Free **Lite** uses the same feature set with lower campaign/strategy caps; **Pro** is sold separately.
 
 | | |
 | --- | --- |
@@ -23,8 +27,6 @@ Free **Lite** edition: discount campaigns for WooCommerce (limits on campaigns a
 > WordPress.org uses `readme.txt` in this repo with the same information in [plugin directory format](https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/).
 
 ---
-
-## Description
 
 **PW - Ofertas Avanzadas Lite** helps you create and manage discount campaigns in WooCommerce using a guided wizard, several marketing-oriented strategies, and optional on-product badges.
 

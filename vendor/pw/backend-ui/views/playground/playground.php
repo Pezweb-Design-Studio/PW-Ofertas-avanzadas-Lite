@@ -486,6 +486,112 @@ $ui->tab_panel([
 		echo "<br>";
 		$ui->pagination(["current" => 100, "total" => 100, "base_url" => "#"]);
 		pw_pg_section_end();
+
+		pw_pg_section("List table (markup WP_List_Table)");
+		echo '<p style="font-size:12px;color:var(--pw-color-fg-muted);margin:0 0 12px;">' .
+			esc_html(
+				"Tabla y tablenav con las clases que genera WordPress; los tokens del tema se aplican dentro de #pw-backend-ui-app.",
+			) .
+			"</p>";
+		echo '<div class="tablenav top">';
+		echo '<div class="alignleft actions bulkactions">';
+		echo '<label for="pg-bulk-action" class="screen-reader-text">' .
+			esc_html("Acción en lote") .
+			"</label>";
+		echo '<select name="action" id="pg-bulk-action">';
+		echo '<option value="-1">' . esc_html("Acciones en lote") . "</option>";
+		echo '<option value="trash">' . esc_html("Mover a la papelera") . "</option>";
+		echo "</select>";
+		echo '<input type="submit" class="button action" value="' .
+			esc_attr("Aplicar") .
+			'" disabled />';
+		echo "</div>";
+		echo '<p class="search-box">';
+		echo '<label for="pg-list-search"><span class="screen-reader-text">' .
+			esc_html("Buscar") .
+			"</span></label>";
+		echo '<input type="search" id="pg-list-search" name="s" value="" placeholder="' .
+			esc_attr("Buscar ítems…") .
+			'" />';
+		echo '<input type="submit" id="pg-search-submit" class="button" value="' .
+			esc_attr("Buscar ítems") .
+			'" />';
+		echo "</p>";
+		echo '<br class="clear" />';
+		echo "</div>";
+		echo '<table class="wp-list-table widefat fixed striped">';
+		echo "<thead><tr>";
+		echo '<td id="cb" class="manage-column column-cb check-column"><input type="checkbox" disabled /></td>';
+		echo '<th scope="col" class="manage-column column-title column-primary sortable desc">';
+		echo '<a href="#"><span>' .
+			esc_html("Título") .
+			"</span><span class=\"sorting-indicators\"><span class=\"sorting-indicator asc\" aria-hidden=\"true\"></span><span class=\"sorting-indicator desc\" aria-hidden=\"true\"></span></span></a>";
+		echo "</th>";
+		echo '<th scope="col" class="manage-column">' .
+			esc_html("Autor") .
+			"</th>";
+		echo '<th scope="col" class="manage-column sorted asc">';
+		echo '<a href="#"><span>' .
+			esc_html("Fecha") .
+			"</span><span class=\"sorting-indicators\"><span class=\"sorting-indicator asc\" aria-hidden=\"true\"></span><span class=\"sorting-indicator desc\" aria-hidden=\"true\"></span></span></a>";
+		echo "</th>";
+		echo "</tr></thead><tbody>";
+		$pg_rows = [
+			[
+				"title" => "Entrada de ejemplo",
+				"author" => "María",
+				"date" => "2026-04-01",
+			],
+			[
+				"title" => "Otro ítem con acciones de fila",
+				"author" => "Carlos",
+				"date" => "2026-03-28",
+			],
+			[
+				"title" => "Borrador pendiente",
+				"author" => "María",
+				"date" => "—",
+			],
+		];
+		foreach ($pg_rows as $i => $row) {
+			echo "<tr>";
+			echo '<th scope="row" class="check-column"><input type="checkbox" disabled /></th>';
+			echo '<td class="title column-title has-row-actions column-primary">';
+			echo "<strong><a href=\"#\">" . esc_html($row["title"]) . "</a></strong>";
+			echo '<div class="row-actions"><span class="edit"><a href="#">' .
+				esc_html("Editar") .
+				'</a> | </span><span class="trash"><a href="#" class="submitdelete">' .
+				esc_html("Papelera") .
+				"</a></span></div>";
+			echo "</td>";
+			echo "<td>" . esc_html($row["author"]) . "</td>";
+			echo "<td>" . esc_html($row["date"]) . "</td>";
+			echo "</tr>";
+		}
+		echo "</tbody><tfoot><tr>";
+		echo '<td class="manage-column column-cb check-column"><input type="checkbox" disabled /></td>';
+		echo "<th class=\"manage-column column-primary\">" .
+			esc_html("Título") .
+			"</th>";
+		echo "<th class=\"manage-column\">" . esc_html("Autor") . "</th>";
+		echo "<th class=\"manage-column\">" . esc_html("Fecha") . "</th>";
+		echo "</tr></tfoot></table>";
+		echo '<div class="tablenav bottom">';
+		echo '<div class="tablenav-pages">';
+		echo '<span class="displaying-num">' .
+			esc_html(sprintf("%d ítems", count($pg_rows))) .
+			"</span>";
+		echo '<span class="pagination-links"><span class="tablenav-pages-navspan" aria-hidden="true">«</span>';
+		echo '<span class="tablenav-pages-navspan" aria-hidden="true">‹</span>';
+		echo '<span class="paging-input"><label for="pg-current-page" class="screen-reader-text">' .
+			esc_html("Página actual") .
+			'</label><input class="current-page" id="pg-current-page" type="text" name="paged" value="1" size="1" aria-describedby="table-paging" disabled /><span class="tablenav-paging-text"> ' .
+			esc_html("de") .
+			' <span class="total-pages">1</span></span></span>';
+		echo '<span class="tablenav-pages-navspan" aria-hidden="true">›</span>';
+		echo '<span class="tablenav-pages-navspan" aria-hidden="true">»</span></span>';
+		echo "</div></div>";
+		pw_pg_section_end();
 	},
 ]);
 

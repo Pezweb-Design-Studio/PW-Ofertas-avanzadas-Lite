@@ -57,7 +57,7 @@ const PWOAWizard = {
     else if (t.id === "btn-back") this.goToStep("objective");
     else if (t.id === "btn-back-config") this.goToStep("strategy");
     else if (
-      t.id === "btn-cancel" &&
+      (t.id === "btn-cancel" || t.id === "header-cancel-btn") &&
       confirm(
         pwoaWizardT("discardConfirm", "Discard your changes?"),
       )
@@ -109,7 +109,13 @@ const PWOAWizard = {
   handleInput(e) {
     const t = e.target;
 
-    if (t.classList.contains("repeater-product-search")) {
+    if (t.id === "header-name") {
+      const f = document.getElementById("form-name");
+      if (f) f.value = t.value;
+    } else if (t.id === "form-name") {
+      const h = document.getElementById("header-name");
+      if (h) h.value = t.value;
+    } else if (t.classList.contains("repeater-product-search")) {
       clearTimeout(this.searchTimeout);
       this.searchTimeout = setTimeout(() => this.searchInRepeater(t), 300);
     } else if (t.id === "product-search") {
@@ -317,6 +323,7 @@ const PWOAWizard = {
 
       // ⚡ Validar UNA sola vez al final
       this.validateFilters();
+      this.toggleActionBar(true);
     } catch (error) {
       alert(
         pwoaWizardT("loadCampaignErrorPrefix", "Could not load campaign:") +
@@ -330,6 +337,8 @@ const PWOAWizard = {
   // ⚡ NUEVO: Poblar campos del form
   async populateFormFields(campaign) {
     document.getElementById("form-name").value = campaign.name;
+    const headerName = document.getElementById("header-name");
+    if (headerName) headerName.value = campaign.name;
     document.getElementById("form-stacking-mode").value =
       campaign.stacking_mode;
 
@@ -406,10 +415,22 @@ const PWOAWizard = {
     setTimeout(() => this.validateFilters(), 300);
   },
 
+  toggleActionBar(show) {
+    const title     = document.getElementById("wizard-title");
+    const bar       = document.getElementById("config-action-bar");
+    const titleWrap = title ? title.closest(".pw-bui-page-title") : null;
+    if (!title || !bar) return;
+    title.classList.toggle("hidden", show);
+    if (titleWrap) titleWrap.classList.toggle("hidden", show);
+    bar.classList.toggle("hidden", !show);
+    bar.classList.toggle("flex", show);
+  },
+
   goToStep(step) {
     this.hideSteps();
     document.getElementById("step-" + step).classList.remove("hidden");
     this.updateBreadcrumb(step);
+    this.toggleActionBar(step === "config");
   },
 
   hideSteps() {

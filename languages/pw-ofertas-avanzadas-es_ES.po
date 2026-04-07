@@ -936,6 +936,10 @@ msgstr "Elige una estrategia"
 msgid "Configure your campaign settings"
 msgstr "Configura tu campaña"
 
+#: src/Admin/Views/wizard.lite.php:59 src/Admin/Views/wizard.php:56
+msgid "Campaign name…"
+msgstr "Nombre de la campaña…"
+
 #: src/Admin/Views/wizard.lite.php:151 src/Admin/Views/wizard.php:104
 msgid "Campaign name"
 msgstr "Nombre de la campaña"
@@ -1724,3 +1728,25 @@ msgid ""
 msgstr ""
 "Las reglas globales de apilamiento y opciones avanzadas están disponibles en "
 "Pro (%1$sver la edición Pro%2$s)."
+
+#: src/Admin/Views/wizard.php src/Admin/Views/wizard.lite.php
+msgid "Discount settings"
+msgstr "Configuración del descuento"
+
+#: src/Admin/Views/wizard.php src/Admin/Views/wizard.lite.php
+msgid "Set the discount type, value, and options defined by the selected strategy."
+msgstr ""
+"Define el tipo de descuento, el valor y las opciones propias de la estrategia "
+"elegida."
+
+#: src/Admin/Views/wizard.php src/Admin/Views/wizard.lite.php
+msgid "Schedule"
+msgstr "Programación"
+
+#: src/Admin/Views/wizard.php src/Admin/Views/wizard.lite.php
+msgid "Optional start and end date for this campaign."
+msgstr "Fechas de inicio y fin opcionales para esta campaña."
+
+#: src/Admin/Views/wizard.php src/Admin/Views/wizard.lite.php
+msgid "Stacking behavior"
+msgstr "Comportamiento de apilamiento"

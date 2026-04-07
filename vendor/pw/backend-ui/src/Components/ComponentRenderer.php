@@ -779,4 +779,5 @@ class ComponentRenderer
 		]);
 		include __DIR__ . "/../../views/components/switch.php";
 	}
+
 }

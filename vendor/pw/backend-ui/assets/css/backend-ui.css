@@ -285,32 +285,66 @@
 	gap: 16px;
 }
 
-/* Logo PW — cuadrado rojo grande, sin texto dentro */
+/* Logo PW */
 .pw-bui-logo {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 2px;
+	flex-shrink: 0;
+	user-select: none;
+	text-decoration: none;
+}
+
+.pw-bui-logo__top {
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	text-decoration: none;
-	flex-shrink: 0;
+	gap: 6px;
+	color: #fff !important;
 }
 
 .pw-bui-logo__mark {
-	width: 40px;
-	height: 40px;
-	background: #ff0000;
-	border-radius: 4px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	/* Sin contenido SVG — cuadrado rojo puro */
+	display: block !important;
+	width: 5px !important;
+	height: 5px !important;
+	max-width: 5px !important;
+	max-height: 5px !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	background: #c0392b !important;
+	background-image: none !important;
+	border-radius: 0 !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	font-size: 0 !important;
+	line-height: 1 !important;
+	overflow: hidden !important;
+	box-sizing: border-box !important;
+	flex-shrink: 0 !important;
+	animation: pw-bui-logo-blink 0.4s ease-in-out infinite;
 }
 
+@keyframes pw-bui-logo-blink {
+	0%, 100% { opacity: 1; }
+	50%       { opacity: 0; }
+}
+
+/* Colores fijos: el header es siempre negro; no usar tokens de tema (en light, fg-default es oscuro). */
 .pw-bui-logo__name {
 	font-size: 15px;
-	font-weight: 600;
-	color: #ffffff; /* blanco fijo — header siempre oscuro */
-	letter-spacing: -0.01em;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: #ffffff;
+	line-height: 1;
+}
+
+.pw-bui-logo__plugin {
+	font-size: 11px;
+	font-weight: 400;
+	color: #a8a8a8;
+	line-height: 1;
+	padding-left: 11px; /* 5px mark + 6px gap */
 }
 
 /* Header right slot */
@@ -506,11 +540,11 @@
    Clases para elementos del page-wrapper que reemplazan atributos style="".
    ───────────────────────────────────────────────────────────────────────────── */
 
-/* Título en header cuando no hay brand name */
+/* Título en header cuando no hay brand name (header siempre oscuro — ver logo). */
 .pw-bui-header__title {
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--pw-color-fg-default);
+	color: #ffffff;
 	margin: 0;
 }
 
@@ -2023,3 +2057,4 @@
 	color: var(--pw-color-fg-default) !important;
 	box-shadow: none !important;
 }
+

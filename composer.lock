@@ -4,25 +4,26 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6f122ef08b51f75c875e5fffc551535e",
+    "content-hash": "588e515c6f7b84d78235236f29a2a196",
     "packages": [
         {
             "name": "pw/backend-ui",
-            "version": "v1.4.1",
+            "version": "dev-main",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Pezweb-Design-Studio/pw-backend-ui.git",
-                "reference": "7ab75350d01a5d2e21eb3d920c2cadaf2d7351fb"
+                "reference": "00adc8bbcff939adab37c0dbc874029034aac82c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Pezweb-Design-Studio/pw-backend-ui/zipball/7ab75350d01a5d2e21eb3d920c2cadaf2d7351fb",
-                "reference": "7ab75350d01a5d2e21eb3d920c2cadaf2d7351fb",
+                "url": "https://api.github.com/repos/Pezweb-Design-Studio/pw-backend-ui/zipball/00adc8bbcff939adab37c0dbc874029034aac82c",
+                "reference": "00adc8bbcff939adab37c0dbc874029034aac82c",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.0"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -34,16 +35,18 @@
             ],
             "description": "Design system for WordPress admin plugin pages — layout, buttons, inputs, cards, tabs, and more. Powered by Tailwind CSS 4.",
             "support": {
-                "source": "https://github.com/Pezweb-Design-Studio/pw-backend-ui/tree/v1.4.1",
+                "source": "https://github.com/Pezweb-Design-Studio/pw-backend-ui/tree/main",
                 "issues": "https://github.com/Pezweb-Design-Studio/pw-backend-ui/issues"
             },
-            "time": "2026-03-29T01:59:19+00:00"
+            "time": "2026-04-07T04:18:32+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "pw/backend-ui": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

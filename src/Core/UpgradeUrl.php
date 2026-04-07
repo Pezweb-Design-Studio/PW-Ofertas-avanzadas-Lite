@@ -13,7 +13,7 @@ final class UpgradeUrl
 {
     public static function get(): string
     {
-        $default = 'https://pezweb.com/';
+        $default = 'https://pezweb.com/producto/ofertas-avanzadas/';
 
         return (string) apply_filters('pwoa_upgrade_url', $default);
     }

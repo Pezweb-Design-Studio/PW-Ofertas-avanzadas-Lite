@@ -37,8 +37,12 @@ class Plugin {
                     'ofertas_page_pwoa-shortcodes',
                     'offers_page_pwoa-shortcodes',
                 ],
-                'brand' => ['name' => __('PW - Ofertas Avanzadas', 'pw-ofertas-avanzadas')],
+                'brand' => [
+                    'name'        => 'PEZWEB',
+                    'plugin_name' => __('Ofertas Avanzadas', 'pw-ofertas-avanzadas'),
+                ],
             ]);
+            BackendUI::playground();
             new AdminController();
             new ProductExpiryHandler();
         }

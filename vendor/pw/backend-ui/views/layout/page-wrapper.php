@@ -25,14 +25,17 @@ $has_sidenav = !empty($page["sidenav"]);
     <header class="pw-bui-header">
         <div class="pw-bui-header__inner">
 
-            <a href="<?php echo esc_url(admin_url()); ?>" class="pw-bui-logo">
-                <span class="pw-bui-logo__mark" aria-hidden="true"></span>
-                <?php if (!empty($brand["name"])): ?>
-                    <span class="pw-bui-logo__name"><?php echo esc_html(
-                    	$brand["name"],
-                    ); ?></span>
+            <div class="pw-bui-logo">
+                <div class="pw-bui-logo__top">
+                    <span class="pw-bui-logo__mark" aria-hidden="true"></span>
+                    <?php if (!empty($brand["name"])): ?>
+                        <span class="pw-bui-logo__name"><?php echo esc_html($brand["name"]); ?></span>
+                    <?php endif; ?>
+                </div>
+                <?php if (!empty($brand["plugin_name"])): ?>
+                    <span class="pw-bui-logo__plugin"><?php echo esc_html($brand["plugin_name"]); ?></span>
                 <?php endif; ?>
-            </a>
+            </div>
 
             <?php if (!empty($page["title"]) && empty($brand["name"])): ?>
                 <h1 class="pw-bui-header__title">
